@@ -1,0 +1,27 @@
+@if (isLoading()) {
+<app-loader />
+} @else {
+<app-particles-background />
+
+<!-- Persistent Global Background Glows -->
+<div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+  <div class="absolute top-[-10%] left-[-10%] w-[100%] h-[100%] bg-indigo-500/5 rounded-full blur-[120px]"></div>
+  <div class="absolute bottom-[-10%] right-[-10%] w-[80%] h-[80%] bg-teal-500/5 rounded-full blur-[120px]"></div>
+</div>
+
+<div class="relative h-screen w-full flex flex-col overflow-hidden">
+  <!-- Main Content Area -->
+  <main class="flex-1 overflow-y-auto no-scrollbar">
+    <router-outlet />
+  </main>
+
+  <!-- Persistent Navigation -->
+  @if (showBottomNav()) {
+  <div class="fixed bottom-1 left-0 right-0 z-[100] pointer-events-none">
+    <div class="pointer-events-auto">
+      <app-bottom-nav />
+    </div>
+  </div>
+  }
+</div>
+}

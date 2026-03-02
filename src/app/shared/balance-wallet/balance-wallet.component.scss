@@ -1,0 +1,16 @@
+// Balance wallet specific overrides that are too complex for inline TW
+@keyframes shimmer {
+  0% {
+    transform: translate(-100%, -100%) rotate(0deg);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(100%, 100%) rotate(360deg);
+    opacity: 0;
+  }
+}
