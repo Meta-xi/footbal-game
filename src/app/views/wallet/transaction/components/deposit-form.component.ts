@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, input, viewChild, ElementRef } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { LocalApiService } from '../../../../services/local-api.service';
 import { SuccessOverlayComponent } from './success-overlay.component';
@@ -8,15 +8,20 @@ import { PaymentScreenComponent } from '../payment-screen.component';
 
 @Component({
   selector: 'app-deposit-form',
-  imports: [CommonModule, NgOptimizedImage, SuccessOverlayComponent, CryptoDepositModalComponent, PaymentScreenComponent],
+  imports: [CommonModule, SuccessOverlayComponent, CryptoDepositModalComponent, PaymentScreenComponent],
   template: `
-    <div class="min-h-dvh flex flex-col relative w-full overflow-hidden bg-transparent">
+    <div class="h-full flex flex-col relative w-full overflow-hidden bg-transparent">
       @if (showSuccess()) {
         <app-success-overlay [message]="'¡Depósito de ' + amount() + ' monedas solicitado con éxito!'" />
       }
 
       @if (showPaymentScreen()) {
-        <app-payment-screen [currency]="selectedMethod()" [amount]="amount()" />
+        <app-payment-screen 
+          [currency]="selectedMethod()" 
+          [amount]="amount()" 
+          [orderNumber]="orderNumber()"
+          [qrImage]="qrImage()"
+        />
       }
 
       @if (showCryptoModal()) {
@@ -34,7 +39,7 @@ import { PaymentScreenComponent } from '../payment-screen.component';
         </div>
       }
 
-      <header class="w-full relative z-10 pt-safe-top px-6 flex justify-between items-center py-6 mb-4">
+      <header class="w-full relative z-10 pt-safe-top mt-8 px-6 flex justify-between items-center py-6 mb-4">
         <button (click)="goBack()" class="w-12 h-12 lg-icon-btn active:scale-90 transition-transform">
           <svg class="w-6 h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
         </button>
@@ -64,9 +69,9 @@ import { PaymentScreenComponent } from '../payment-screen.component';
              />
            </div>
            
-           <div class="flex flex-wrap justify-center gap-3">
-             @for (preset of [30000, 50000, 100000, 200000]; track preset) {
-               <button (click)="setAmount(preset)" class="px-5 py-3 lg-btn-outline !rounded-2xl text-[11px] font-black text-white/60 hover:text-white transition-all active:scale-95">
+           <div class="grid grid-cols-3 gap-3 w-full">
+             @for (preset of [30000, 50000, 100000, 200000, 300000, 500000]; track preset) {
+               <button (click)="setAmount(preset)" class="px-2 py-3 lg-btn-outline !border-white/10 !rounded-2xl text-[10px] font-black text-white/50 hover:text-white hover:bg-white/5 transition-all outline-none">
                  {{ preset | number }}
                </button>
              }
@@ -88,9 +93,6 @@ import { PaymentScreenComponent } from '../payment-screen.component';
       <footer class="fixed bottom-0 left-0 right-0 p-8 z-50 bg-gradient-to-t from-[#010208] via-[#010208]/80 to-transparent flex flex-col gap-4">
         <button class="lg-btn-primary w-full py-5 text-sm shadow-indigo-500/20" (click)="onDeposit()">
           Confirmar Depósito
-        </button>
-        <button class="lg-btn-outline w-full py-5 text-[10px]" (click)="goBack()">
-          Cancelar
         </button>
       </footer>
     </div>
@@ -118,6 +120,8 @@ export class DepositFormComponent {
   showCryptoModal = signal(false);
   showPaymentScreen = signal(false);
   cryptoAddress = signal('');
+  orderNumber = signal('');
+  qrImage = signal('qr/deposit.PNG');
 
   selectedMethod = computed(() => this.currency() || 'NEQUI');
 
@@ -147,6 +151,8 @@ export class DepositFormComponent {
       this.cryptoAddress.set('0x71C7656EC7ab88b098defB751B7401B5f6d8976F'); // Simulated
       this.showCryptoModal.set(true);
     } else {
+      this.orderNumber.set('FIFA-' + Math.floor(Math.random() * 900000 + 100000));
+      this.qrImage.set('qr/deposit.PNG');
       this.showPaymentScreen.set(true);
     }
   }

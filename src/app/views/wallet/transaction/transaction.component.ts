@@ -9,24 +9,7 @@ import { WithdrawFormComponent } from './components/withdraw-form.component';
   selector: 'app-transaction',
   imports: [CommonModule, DepositFormComponent, WithdrawFormComponent],
   template: `
-    <section class="min-h-dvh flex flex-col relative w-full overflow-hidden bg-transparent">
-      <!-- Header -->
-      <div class="pt-safe-top px-4 flex items-center gap-3 py-4 z-10 relative">
-        <button
-          class="lg-bubble w-11 h-11 flex items-center justify-center"
-          (click)="goBack()"
-          type="button"
-          aria-label="Volver"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-        </button>
-        <h1 class="text-white font-semibold text-xl flex-1">{{ pageTitle() }}</h1>
-        <span class="liquid-glass-card px-3 py-1.5 text-white/80 text-sm font-medium rounded-full">
-          {{ currency() }}
-        </span>
-      </div>
+    <section class="flex flex-col relative w-full h-full overflow-hidden bg-transparent">
 
       <div class="relative z-10 flex-1 flex flex-col no-scrollbar overflow-y-auto">
         @if (isDeposit()) {

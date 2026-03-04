@@ -28,7 +28,7 @@ export class App {
 
   protected showBottomNav = computed(() => {
     const url = this.currentUrl();
-    const publicRoutes = ['/welcome', '/login'];
+    const publicRoutes = ['/welcome', '/login', '/transaccion'];
     return !publicRoutes.some((route) => url.startsWith(route));
   });
 

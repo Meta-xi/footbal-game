@@ -86,4 +86,9 @@ export class BottomNavComponent {
     const index = this.navItems.findIndex(item => url.startsWith(item.route));
     return index >= 0 ? index : 0;
   });
+
+  isHidden = computed(() => {
+    const url = this.currentUrl();
+    return url.startsWith('/transaccion');
+  });
 }

@@ -726,7 +726,7 @@
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    z-index: 40;
+    z-index: 200;
     transition: opacity var(--lg-duration-base) ease;
   }
 
@@ -744,7 +744,8 @@
     box-shadow:
       inset 0 1px 1px var(--lg-glass-inner-hi),
       0 -24px 72px rgba(0, 0, 0, 0.6);
-    z-index: 41;
+    z-index: 201;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     transition: transform var(--lg-duration-slow) cubic-bezier(0.32, 0.72, 0, 1);
   }
 

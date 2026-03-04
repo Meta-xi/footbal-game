@@ -140,25 +140,113 @@ interface Deposit {
         <div class="w-full flex flex-col gap-4">
           @switch (sheetContent()) {
             @case ('colombia') {
-              <div class="grid grid-cols-1 gap-4">
-                <article (click)="onSheetItemClick({title: 'Nequi', desc: '', icon: ''})"
-                  class="lg-module-card p-6 flex items-center gap-5 active:scale-[0.98] transition-all bg-white/5 border-white/10 rounded-[32px]">
-                  <img ngSrc="wallet/col/nequi.png" alt="Nequi" width="48" height="48" class="object-contain">
-                  <div>
-                    <h3 class="text-[11px] font-black text-white uppercase tracking-widest">Nequi</h3>
-                    <p class="text-[8px] font-black text-teal-400 uppercase tracking-widest mt-1">Instant sync</p>
-                  </div>
-                </article>
+              <div class="flex flex-col gap-4">
+                <p class="text-[10px] text-white/50 font-black uppercase tracking-widest px-2 mb-1">Deposita dentro de alguno de estos métodos</p>
+                <div class="grid grid-cols-1 gap-3">
+                  <article (click)="onSheetItemClick({title: 'Nequi', desc: '', icon: ''})"
+                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-teal-500/30">
+                    <div class="flex items-center gap-4">
+                      <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
+                        <img ngSrc="wallet/col/nequi.png" alt="Nequi" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
+                      </div>
+                      <div>
+                        <h3 class="text-[12px] font-black text-white tracking-widest uppercase mb-1">Nequi</h3>
+                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Recarga con Nequi desde 2500</p>
+                      </div>
+                    </div>
+                    <div class="w-6 h-6 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity">
+                      <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </article>
+
+                  <article (click)="onSheetItemClick({title: 'Daviplata', desc: '', icon: ''})"
+                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-red-500/30">
+                    <div class="flex items-center gap-4">
+                      <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
+                        <img ngSrc="wallet/col/daviplata.png" alt="Daviplata" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
+                      </div>
+                      <div>
+                        <h3 class="text-[12px] font-black text-white tracking-widest uppercase mb-1">Daviplata</h3>
+                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Recarga con Daviplata desde 2500</p>
+                      </div>
+                    </div>
+                    <div class="w-6 h-6 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity">
+                      <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            }
+            @case ('peru') {
+              <div class="flex flex-col gap-4">
+                <p class="text-[10px] text-white/50 font-black uppercase tracking-widest px-2 mb-1">Explora otras formas de depósito.</p>
+                <div class="grid grid-cols-1 gap-3">
+                  <article (click)="onSheetItemClick({title: 'Plin', desc: '', icon: ''})"
+                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-cyan-500/30">
+                    <div class="flex items-center gap-4">
+                      <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
+                        <img ngSrc="wallet/peru/plin.png" alt="Plin" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
+                      </div>
+                      <div>
+                        <h3 class="text-[12px] font-black text-white tracking-widest uppercase mb-1">Plin</h3>
+                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Deposita desde 30Soles</p>
+                      </div>
+                    </div>
+                    <div class="w-6 h-6 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity">
+                      <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </article>
+
+                  <article (click)="onSheetItemClick({title: 'Yape', desc: '', icon: ''})"
+                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-purple-500/30">
+                    <div class="flex items-center gap-4">
+                      <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
+                        <img ngSrc="wallet/peru/yape.png" alt="Yape" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
+                      </div>
+                      <div>
+                        <h3 class="text-[12px] font-black text-white tracking-widest uppercase mb-1">Yape</h3>
+                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Deposita desde 30Soles</p>
+                      </div>
+                    </div>
+                    <div class="w-6 h-6 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity">
+                      <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </article>
+                </div>
               </div>
             }
             @case ('cryptos') {
-              <div class="grid grid-cols-2 gap-4">
-                @for (coin of ['USDT', 'TRX', 'BNB', 'BTC']; track coin) {
-                   <article (click)="onSheetItemClick({title: coin, desc: '', icon: ''})" class="lg-module-card p-8 flex flex-col items-center text-center gap-4 bg-white/5 border-white/10 rounded-[32px] active:scale-95 transition-all">
-                     <img [ngSrc]="'wallet/cryptos/' + coin.toLowerCase() + '.png'" [alt]="coin" width="32" height="32" class="drop-shadow-lg opacity-80">
-                     <span class="text-[9px] font-black text-white uppercase tracking-[0.3em]">{{ coin }}</span>
-                   </article>
-                }
+              <div class="flex flex-col gap-4">
+                <p class="text-[10px] text-white/50 font-black uppercase tracking-widest px-2 mb-1">Selecciona la moneda</p>
+                <div class="grid grid-cols-1 gap-3">
+                  @for (coin of ['USDT', 'TRX', 'BNB', 'BTC']; track coin) {
+                    <article (click)="onSheetItemClick({title: coin, desc: '', icon: ''})"
+                      class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-amber-500/30">
+                      <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
+                          <img [ngSrc]="'wallet/cryptos/' + coin.toLowerCase() + '.png'" [alt]="coin" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
+                        </div>
+                        <div>
+                          <h3 class="text-[12px] font-black text-white tracking-widest uppercase mb-1">{{ coin }}</h3>
+                          <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Red soportada nativa</p>
+                        </div>
+                      </div>
+                      <div class="w-6 h-6 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </article>
+                  }
+                </div>
               </div>
             }
           }

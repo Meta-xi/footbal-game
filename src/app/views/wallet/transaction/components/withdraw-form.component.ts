@@ -1,14 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, input, viewChild, ElementRef } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { LocalApiService } from '../../../../services/local-api.service';
 import { SuccessOverlayComponent } from './success-overlay.component';
+import { BalanceComponent } from '../../../../shared/balance/balance.component';
 
 @Component({
   selector: 'app-withdraw-form',
-  imports: [CommonModule, NgOptimizedImage, SuccessOverlayComponent],
+  imports: [CommonModule, SuccessOverlayComponent, BalanceComponent],
   template: `
-    <div class="min-h-dvh flex flex-col relative w-full overflow-hidden bg-transparent">
+    <div class="h-full flex flex-col relative w-full overflow-hidden bg-transparent">
       @if (showSuccess()) {
         <app-success-overlay 
           [message]="'¡Retiro de ' + amount().toLocaleString() + ' monedas realizado con éxito!'"
@@ -21,7 +22,7 @@ import { SuccessOverlayComponent } from './success-overlay.component';
         </div>
       }
 
-      <header class="w-full relative z-10 pt-safe-top px-6 flex justify-between items-center py-6 mb-4">
+      <header class="w-full relative z-10 pt-safe-top mt-8 px-6 flex justify-between items-center py-6 mb-4">
         <button (click)="goBack()" class="w-12 h-12 lg-icon-btn active:scale-90 transition-transform">
           <svg class="w-6 h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
         </button>
@@ -40,17 +41,7 @@ import { SuccessOverlayComponent } from './success-overlay.component';
 
       <main class="flex-1 w-full relative z-10 flex flex-col overflow-y-auto no-scrollbar pb-40 px-6 gap-8 animate-slide-up">
         <!-- Balance Display -->
-        <div class="lg-module-card p-6 border-amber-500/10 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-xl bg-white/[0.025] flex items-center justify-center">
-              <img ngSrc="balance-coin/coin.png" alt="Coin" width="24" height="24" />
-            </div>
-            <div class="flex flex-col">
-              <span class="text-[9px] font-black text-amber-500/40 uppercase tracking-widest">Saldo Disponible</span>
-              <span class="text-xl font-black text-white tracking-tight text-glow-amber">{{ balance() | number }}</span>
-            </div>
-          </div>
-        </div>
+        <app-balance />
 
         <!-- Amount Input -->
         <div class="lg-card-panel p-8 flex flex-col items-center gap-6">
@@ -68,9 +59,9 @@ import { SuccessOverlayComponent } from './success-overlay.component';
            </div>
 
            <!-- Presets -->
-           <div class="flex flex-wrap justify-center gap-3 w-full">
+           <div class="grid grid-cols-3 gap-3 w-full">
             @for (preset of presetAmounts(); track $index) {
-              <button (click)="setAmount(preset)" class="px-5 py-3 lg-btn-outline !rounded-2xl text-[11px] font-black text-white/60 hover:text-white transition-all active:scale-95">
+              <button (click)="setAmount(preset)" class="px-2 py-3 lg-btn-outline !border-white/10 !rounded-2xl text-[10px] font-black text-white/50 hover:text-white hover:bg-white/5 transition-all outline-none">
                 {{ preset | number }}
               </button>
             }
@@ -78,12 +69,12 @@ import { SuccessOverlayComponent } from './success-overlay.component';
         </div>
 
         <!-- Destination Account -->
-        <div class="lg-card-panel p-8 flex flex-col gap-4">
-           <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Datos de Destino</span>
+        <div class="lg-card-panel p-6 flex flex-col gap-4">
+           <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Datos de Destino</span>
            <div class="relative w-full">
              <input #accountInput
               type="text" 
-              class="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-5 text-sm font-bold text-white outline-none focus:border-indigo-500/40 transition-all tracking-wide"
+              class="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 text-[11px] font-bold text-white outline-none focus:border-indigo-500/40 transition-all tracking-wide"
               [value]="selectedAccount()"
               (input)="onAccountChange($event.target.value)"
               placeholder="Cuenta o Billetera"
@@ -99,9 +90,6 @@ import { SuccessOverlayComponent } from './success-overlay.component';
       <footer class="fixed bottom-0 left-0 right-0 p-8 z-50 bg-gradient-to-t from-[#010208] via-[#010208]/80 to-transparent flex flex-col gap-4">
         <button class="lg-btn-primary w-full py-5 text-sm shadow-indigo-500/20" (click)="processWithdraw()" [disabled]="isProcessing()">
           {{ isProcessing() ? 'Transmitiendo...' : 'Ejecutar Retiro' }}
-        </button>
-        <button class="lg-btn-outline w-full py-5 text-[10px]" (click)="goBack()" [disabled]="isProcessing()">
-          Cancelar
         </button>
       </footer>
     </div>
@@ -147,12 +135,12 @@ export class WithdrawFormComponent {
 
   presetAmounts = computed(() => {
     const curr = this.currency();
-    if (curr === 'USDT') return [10, 15, 25];
-    if (curr === 'TRX') return [50, 120, 230];
-    if (curr === 'BNB') return [0.02, 0.045, 0.08];
-    if (curr === 'BTC') return [0.0002, 0.0004, 0.0008];
-    if (curr === 'Plin' || curr === 'Yape') return [30, 80, 120];
-    return [30000, 60000, 100000];
+    if (curr === 'USDT') return [10, 15, 25, 50, 100, 200];
+    if (curr === 'TRX') return [50, 120, 230, 500, 1000, 2000];
+    if (curr === 'BNB') return [0.02, 0.045, 0.08, 0.15, 0.3, 0.5];
+    if (curr === 'BTC') return [0.0002, 0.0004, 0.0008, 0.0015, 0.003, 0.005];
+    if (curr === 'Plin' || curr === 'Yape') return [30, 50, 80, 100, 150, 200];
+    return [30000, 50000, 80000, 100000, 200000, 500000];
   });
 
   onAmountChange(event: Event) { this.amount.set(Number((event.target as HTMLInputElement).value)); }
