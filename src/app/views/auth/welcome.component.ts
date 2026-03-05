@@ -1,93 +1,107 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-welcome',
   standalone: true,
   template: `
-    <section class="h-dvh w-full relative overflow-hidden flex flex-col pt-safe-top bg-transparent">
-      <!-- iOS 26 Liquid Glass Background -->
-      <div class="absolute inset-0 z-0 bg-transparent pointer-events-none overflow-hidden">
-        <div class="absolute top-[-20%] left-[-10%] w-[120%] h-[120%] bg-gradient-to-b from-teal-500/10 via-transparent to-black/80 blur-[120px]"></div>
-        <div class="absolute top-[20%] right-[-10%] w-[60%] h-[60%] bg-teal-400/5 rounded-full blur-[100px] animate-pulse"></div>
-        <div class="absolute bottom-[-10%] left-[20%] w-[50%] h-[50%] bg-indigo-500/5 rounded-full blur-[100px]"></div>
+    <div class="welcome-container min-h-screen w-full flex flex-col relative overflow-hidden">
+      <!-- Background Image -->
+      <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('backgrounds/main.jpeg');">
+        <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/75 to-black/85"></div>
       </div>
 
-      <!-- Header -->
-      <header class="relative z-20 px-8 py-8 flex justify-between items-center w-full">
-        <div class="flex flex-col">
-          <span class="text-3xl font-black text-white tracking-tighter text-glow lowercase">volo</span>
+      <!-- Content -->
+      <div class="relative z-10 flex flex-col items-center justify-between flex-1 p-3 md:p-4">
+        
+        <!-- Top Section - Welcome Text -->
+        <div class="w-full text-center mt-4 md:mt-6 animate-fade-in-down">
+          <h1 class="text-3xl md:text-4xl font-black text-white mb-1 tracking-tight leading-tight">
+            ¡Juega y Gana!
+          </h1>
+          <p class="text-xs text-cyan-300 font-semibold mb-1">
+            Compra jugadores y genera ganancias
+          </p>
+          <p class="text-[9px] text-slate-400">
+            Líder en inversión de jugadores
+          </p>
         </div>
-        <div class="w-10 h-10 lg-icon-btn flex items-center justify-center">
-            <svg class="w-5 h-5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-        </div>
-      </header>
 
-      <!-- Main Content -->
-      <main class="relative z-20 flex-1 flex flex-col px-8 pt-6">
-        <!-- Hero Section -->
-        <div class="relative mb-12 flex flex-col items-center">
-          <div class="absolute inset-0 bg-teal-500/10 blur-[80px] rounded-full scale-150 lg-aura-glow"></div>
-          <div class="relative w-32 h-32 mb-8 group active:scale-95 transition-all duration-500">
-             <div class="absolute inset-0 bg-white/5 rounded-[40px] border border-white/10 rotate-3 group-hover:rotate-6 transition-transform"></div>
-             <div class="absolute inset-0 bg-teal-500/5 rounded-[40px] -rotate-3 group-hover:-rotate-6 transition-transform"></div>
-             <div class="relative w-full h-full bg-white/10 backdrop-blur-2xl rounded-[40px] border border-white/20 flex items-center justify-center overflow-hidden">
-                <div class="w-16 h-16 bg-gradient-to-tr from-teal-400 to-indigo-500 rounded-full blur-2xl opacity-40 animate-pulse"></div>
-                <svg class="w-12 h-12 text-white drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-             </div>
-          </div>
+        <!-- Middle Section - Featured Content -->
+        <div class="flex flex-col items-center gap-2.5 md:gap-3.5 animate-fade-in-up animation-delay-200 w-full max-w-md px-1">
           
-          <div class="text-center space-y-3">
-            <h1 class="text-6xl font-black text-white tracking-tighter leading-none text-glow">VOLO</h1>
-            <p class="text-white/40 text-sm font-black uppercase tracking-[0.2em]">Next-Gen Assets</p>
+          <!-- Promo Card - Liquid Glass Compact -->
+          <div class="w-full liquid-glass-card p-3 md:p-4 rounded-2xl">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <h2 class="text-sm md:text-lg font-bold text-white mb-0.5">
+                  Bono de Bienvenida
+                </h2>
+                <p class="text-xs text-cyan-300 font-semibold mb-2">
+                  Obtén recompensas al registrarte
+                </p>
+                <div class="flex items-center gap-1.5 text-slate-300 text-[10px]">
+                  <svg class="w-3.5 h-3.5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="font-semibold">+500 Monedas</span>
+                </div>
+              </div>
+              <div class="text-3xl md:text-4xl">🎁</div>
+            </div>
+          </div>
+
+          <!-- Benefits Grid - Compact Liquid Glass Cards -->
+          <div class="w-full grid grid-cols-2 gap-2 md:gap-3">
+            <div class="lg-module-card p-2 md:p-3 text-center hover:scale-[1.02] active:scale-95">
+              <div class="text-2xl md:text-3xl mb-1 md:mb-2">💎</div>
+              <p class="text-[10px] md:text-xs font-semibold text-white">Jugadores VIP</p>
+              <p class="text-[8px] md:text-[9px] text-blue-300 mt-0.5">Más rentables</p>
+            </div>
+            <div class="lg-module-card p-2 md:p-3 text-center hover:scale-[1.02] active:scale-95">
+              <div class="text-2xl md:text-3xl mb-1 md:mb-2">⚡</div>
+              <p class="text-[10px] md:text-xs font-semibold text-white">Boosts de Poder</p>
+              <p class="text-[8px] md:text-[9px] text-purple-300 mt-0.5">Incrementa ganancias</p>
+            </div>
+            <div class="lg-module-card p-2 md:p-3 text-center hover:scale-[1.02] active:scale-95">
+              <div class="text-2xl md:text-3xl mb-1 md:mb-2">🤝</div>
+              <p class="text-[10px] md:text-xs font-semibold text-white">Programa de Referidos</p>
+              <p class="text-[8px] md:text-[9px] text-emerald-300 mt-0.5">Gana comisión</p>
+            </div>
+            <div class="lg-module-card p-2 md:p-3 text-center hover:scale-[1.02] active:scale-95">
+              <div class="text-2xl md:text-3xl mb-1 md:mb-2">🏆</div>
+              <p class="text-[10px] md:text-xs font-semibold text-white">Rankings Globales</p>
+              <p class="text-[8px] md:text-[9px] text-orange-300 mt-0.5">Compite por premios</p>
+            </div>
           </div>
         </div>
 
-        <div class="space-y-4 mb-12">
-          <button (click)="goToRegister()" class="lg-btn-primary w-full py-5 text-sm shadow-teal-500/20 active:scale-95 transition-all">
-             GET STARTED
+        <!-- Bottom Section - CTA Buttons - Compact Glass Style -->
+        <div class="w-full flex flex-col gap-2 animate-fade-in-up animation-delay-400 max-w-md mb-2 md:mb-4 px-1">
+          <button
+            (click)="goToRegister()"
+            class="w-full py-2.5 md:py-3 lg-btn-primary text-sm md:text-base"
+          >
+            Registrate y Juega
           </button>
 
-          <button (click)="goToLogin()" class="lg-btn-outline w-full py-5 flex items-center justify-center gap-3 active:scale-95 transition-all text-white font-black uppercase text-xs tracking-widest border-white/5 bg-white/5">
-             Log In
+          <button
+            (click)="goToLogin()"
+            class="w-full py-2.5 md:py-3 lg-btn-outline text-sm md:text-base"
+          >
+            Tengo una cuenta
+          </button>
+
+          <button
+            (click)="goToGuest()"
+            class="w-full py-2.5 md:py-3 lg-btn-ghost text-sm md:text-base"
+          >
+            Entrar como invitado
           </button>
         </div>
-
-        <div class="grid grid-cols-1 gap-4 opacity-80">
-           <div class="lg-module-card p-4 flex items-center gap-4">
-             <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-                <div class="w-4 h-4 rounded-full border-2 border-teal-500/50"></div>
-             </div>
-             <div class="space-y-0.5">
-               <h3 class="text-[10px] font-black text-white uppercase tracking-wider">Secure Banking</h3>
-               <p class="text-[9px] text-white/30 font-bold uppercase tracking-widest">End-to-End Encryption</p>
-             </div>
-           </div>
-        </div>
-      </main>
-
-      <!-- Bottom Nav Bar (Decorative Like Image) -->
-      <footer class="relative z-20 px-6 pb-10">
-        <div class="grid grid-cols-4 gap-3 p-2 bg-white/5 backdrop-blur-2xl rounded-[32px] border border-white/10">
-          <div class="h-14 lg-module-card bg-transparent border-none flex items-center justify-center opacity-40">
-             <div class="w-5 h-5 border-2 border-white/20 rounded"></div>
-          </div>
-          <div class="h-14 lg-module-card bg-transparent border-none flex items-center justify-center opacity-40">
-             <div class="w-5 h-5 border-2 border-white/20 rounded rotate-45"></div>
-          </div>
-          <div (click)="goToGuest()" class="h-14 lg-module-card bg-white/10 flex items-center justify-center cursor-pointer active:scale-90 transition-transform">
-             <div class="w-6 h-6 bg-teal-500/40 rounded-full border border-teal-500 animate-pulse"></div>
-          </div>
-          <div class="h-14 lg-module-card bg-transparent border-none flex items-center justify-center opacity-40">
-             <div class="w-5 h-5 border-2 border-white/20 rounded-full"></div>
-          </div>
-        </div>
-      </footer>
-    </section>
+      </div>
+    </div>
   `,
   styles: [`
     :host { display: block; }
@@ -96,17 +110,30 @@ import { Router } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class WelcomeComponent {
+  private authService = inject(AuthService);
   private router = inject(Router);
+
+  identifier = '';
+  password = signal('');
+  referralCode = signal('');
+  acceptTerms = signal(false);
+  isLoading = signal(false);
+  showPassword = signal(false);
+  error = signal<string | null>(null);
+
+  goToRegister() {
+    this.router.navigate(['/register']);
+  }
 
   goToLogin() {
     this.router.navigate(['/login']);
   }
 
-  goToRegister() {
-    this.router.navigate(['/login'], { queryParams: { tab: 'register' } });
+  goToGuest() {
+    this.router.navigate(['/guest']);
   }
 
-  goToGuest() {
-    this.router.navigate(['/main']);
+  goBack() {
+    this.router.navigate(['/welcome']);
   }
 }
