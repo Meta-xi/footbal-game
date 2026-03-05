@@ -95,7 +95,7 @@ export class TapAreaComponent {
   readonly tapValue = this.localApi.tapValue;
   readonly activeMultiplier = this.localApi.activeMultiplier;
 
-  readonly ballImageSrc = computed(() => `levels-tap/ball-lv${this.level()}.png`);
+  readonly ballImageSrc = computed(() => `levels-tap/ball-lv${this.level()}.webp`);
 
   constructor() {
     afterNextRender(() => this.checkScreenHeight());

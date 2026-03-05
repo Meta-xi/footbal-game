@@ -69,11 +69,11 @@ export class BottomNavComponent {
   private router = inject(Router);
 
   navItems = [
-    { id: 'Social', route: '/social', icon: 'navegation-icons/friends.svg' },
-    { id: 'Retos', route: '/mociones', icon: 'navegation-icons/mociones.svg' },
-    { id: 'Jugar', route: '/main', icon: 'navegation-icons/home.png' },
-    { id: 'Fichajes', route: '/mining', icon: 'navegation-icons/inversion.svg' },
-    { id: 'Banco', route: '/wallet', icon: 'navegation-icons/cartera.svg' }
+    { id: 'Social', route: '/social', icon: 'navegation-icons/friends.webp' },
+    { id: 'Retos', route: '/mociones', icon: 'navegation-icons/mociones.webp' },
+    { id: 'Jugar', route: '/main', icon: 'navegation-icons/home.webp' },
+    { id: 'Fichajes', route: '/mining', icon: 'navegation-icons/inversion.webp' },
+    { id: 'Banco', route: '/wallet', icon: 'navegation-icons/cartera.webp' }
   ];
 
   private currentUrl = toSignal(this.router.events.pipe(
