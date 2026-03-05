@@ -7,7 +7,7 @@ import { NgOptimizedImage, CommonModule } from '@angular/common';
   imports: [NgOptimizedImage, CommonModule],
   template: `
     @if (product(); as player) {
-      <article class="group liquid-glass-card rounded-3xl p-3 flex flex-col gap-3 border border-white/10 hover:border-teal-500/30 active:scale-[0.98] transition-all duration-300 cursor-pointer">
+       <article class="group liquid-glass-card rounded-2xl p-2 flex flex-col gap-2 border border-white/10 hover:border-teal-500/30 active:scale-[0.98] transition-all duration-300 cursor-pointer">
         
         <!-- Imagen del jugador -->
         <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-white/5">
@@ -33,7 +33,7 @@ import { NgOptimizedImage, CommonModule } from '@angular/common';
 
         <!-- Botón -->
         <button (click)="onBuy($event)" 
-                class="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-[9px] font-black text-white uppercase tracking-wider active:scale-95 transition-all">
+                class="w-full py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 text-[8px] font-bold text-white uppercase tracking-wider active:scale-95 transition-all">
           Fichar
         </button>
       </article>

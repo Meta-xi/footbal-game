@@ -7,7 +7,7 @@ import { NgOptimizedImage, CommonModule } from '@angular/common';
   imports: [NgOptimizedImage, CommonModule],
   template: `
     @if (product(); as player) {
-      <article class="group liquid-glass-card rounded-3xl p-3 flex flex-col gap-3 border border-white/10 hover:border-amber-500/40 active:scale-[0.98] transition-all duration-300 cursor-pointer">
+       <article class="group liquid-glass-card rounded-2xl p-2 flex flex-col gap-2 border border-white/10 hover:border-amber-500/40 active:scale-[0.98] transition-all duration-300 cursor-pointer">
         
         <!-- Badge VIP -->
         <div class="absolute top-3 right-3 z-10">
@@ -40,7 +40,7 @@ import { NgOptimizedImage, CommonModule } from '@angular/common';
 
         <!-- Botón -->
         <button (click)="onBuy($event)" 
-                class="w-full py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-[9px] font-bold text-amber-400 uppercase tracking-wider active:scale-95 transition-all">
+                class="w-full py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-[8px] font-bold text-amber-400 uppercase tracking-wider active:scale-95 transition-all">
           Fichar VIP
         </button>
       </article>
