@@ -235,7 +235,7 @@ interface BoostDisplay {
         aria-label="Confirmar mejora"
       >
         <img
-          ngSrc="balance-coin/coin.png"
+           ngSrc="balance-coin/coin.webp"
           alt="moneda"
           width="20"
           height="20"
