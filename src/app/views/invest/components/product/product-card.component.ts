@@ -17,8 +17,7 @@ import { NgOptimizedImage, CommonModule } from '@angular/common';
         </div>
 
         <!-- Info del jugador -->
-        <div class="flex flex-col gap-1">
-          <span class="text-[7px] font-bold text-teal-400/60 uppercase tracking-widest">Candidato</span>
+        <div class="flex justify-between gap-1">
           <h3 class="text-[10px] font-black text-white tracking-tight truncate">{{ player.name }}</h3>
           
           <!-- Earnings -->
