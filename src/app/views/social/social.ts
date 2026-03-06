@@ -21,12 +21,12 @@ import { GlassTabBarComponent, GlassTab } from '../../shared/ui';
         </div>
 
         <!-- Master Invitation Card (iOS 26 Liquid Reference) -->
-        <article class="relative rounded-xs group active:scale-[0.98] transition-all duration-300">
-           <div class="lg-panel p-3.5 flex items-center justify-between">
+        <article class="relative group active:scale-[0.98] transition-all duration-300">
+           <div class="lg-panel rounded-xl px-4 py-2 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden relative shadow-inner">
                 <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
-                <img ngSrc="icons/money-box.png" alt="reward" width="24" height="24" 
+                <img ngSrc="icons/money-box.png" alt="reward" width="32" height="32"
                     class="relative z-10 opacity-90 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg">
               </div>
               <div class="space-y-0.5">
