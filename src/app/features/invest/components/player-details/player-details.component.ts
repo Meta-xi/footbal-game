@@ -7,94 +7,75 @@ import type { Player } from '../../../../models/player.model';
   standalone: true,
   imports: [CommonModule, NgOptimizedImage],
   template: `
-      <div class="fixed inset-0 z-[150] bg-black/60 backdrop-blur-sm animate-fade-in" (click)="onClose()"></div>
-      
-      <div class="fixed inset-0 z-[160] flex items-end justify-center" role="dialog" aria-modal="true" aria-labelledby="player-title" [attr.tabindex]="-1" #modalWrapper>
-        <div class="w-full bg-white/5 backdrop-blur-xl border-t border-white/10 shadow-2xl relative overflow-hidden max-h-[95vh]">
-          <!-- Handle indicator -->
-          <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mt-3 mb-1"></div>
+    <div class="fixed inset-0 z-[150] bg-black/70 backdrop-blur-md animate-fade-in" (click)="onClose()"></div>
+    
+    <div class="fixed inset-0 z-[160] flex items-end justify-center" role="dialog" aria-modal="true" aria-labelledby="player-title" [attr.tabindex]="-1" #modalWrapper>
+      <div class="w-full bg-gradient-to-b from-white/[0.08] via-white/[0.05] to-white/[0.02] backdrop-blur-2xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] relative overflow-hidden max-h-[85vh] rounded-t-2xl">
+        <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mt-2 mb-1"></div>
 
-          <!-- Header -->
-          <div class="flex items-center justify-between px-6 pt-3 pb-2 flex-shrink-0">
-            <h2 id="player-title" class="m-0 p-0 text-xl font-bold text-white drop-shadow-sm">{{ player().name }}</h2>
-            <button #closeBtn (click)="onClose()" class="w-8 h-8 flex items-center justify-center rounded-full border border-white/20 text-white/80 hover:bg-white/10 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50" aria-label="Cerrar">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+        <div class="flex items-center justify-between px-4 pt-2 pb-2">
+          <h2 id="player-title" class="text-lg font-black text-white tracking-tight">{{ player().name }}</h2>
+          <button #closeBtn (click)="onClose()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 transition-all" aria-label="Cerrar">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+
+        <div class="flex flex-col px-4 pb-3 overflow-y-auto max-h-[80vh]">
+          <div class="flex items-center gap-3 mb-3 -mx-1">
+            <div class="w-20 h-20 flex-shrink-0">
+              <img [ngSrc]="imageUrlWebp()" [alt]="player().name" width="80" height="80" class="w-full h-full object-contain">
+            </div>
+            <div class="flex-1 flex flex-col gap-1">
+              <div class="flex justify-between items-center bg-white/5 rounded-lg px-2 py-1.5 text-[10px]">
+                <span class="text-white/40">Edad</span>
+                <span class="text-white font-bold">{{ player().age || 'N/A' }}</span>
+              </div>
+              <div class="flex justify-between items-center bg-white/5 rounded-lg px-2 py-1.5 text-[10px]">
+                <span class="text-white/40">Altura</span>
+                <span class="text-white font-bold">{{ player().height || 'N/A' }}cm</span>
+              </div>
+              <div class="flex justify-between items-center bg-white/5 rounded-lg px-2 py-1.5 text-[10px]">
+                <span class="text-white/40">Nivel</span>
+                <span class="text-amber-400 font-bold">Lv.{{ player().level || 1 }}</span>
+              </div>
+            </div>
           </div>
 
-          <div class="flex flex-col px-6 pb-6 mt-2 overflow-y-auto">
-            <!-- Top Section: 50% Image, 50% Stats -->
-            <div class="flex flex-row items-center gap-4 mb-4 flex-shrink-0">
-              <!-- Player Image (50%) -->
-              <div class="w-1/2 flex justify-center">
-                <img [ngSrc]="imageUrlWebp()" [alt]="player().name" width="130" height="180" class="object-contain drop-shadow-2xl max-h-[180px]">
-              </div>
-
-              <!-- Basic Parameters (50%) -->
-              <div class="w-1/2 flex flex-col gap-2">
-                <div class="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/5">
-                  <span class="text-white/70 text-xs font-medium">Edad:</span>
-                  <span class="text-white font-bold text-sm">{{ player().age || 'N/A' }}</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/5">
-                  <span class="text-white/70 text-xs font-medium">Altura:</span>
-                  <span class="text-white font-bold text-sm">{{ player().height || 'N/A' }} cm</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/5">
-                  <span class="text-white/70 text-xs font-medium">Lesiones:</span>
-                  <span class="text-white font-bold text-sm">{{ player().injuries || 0 }}</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/5">
-                  <span class="text-white/70 text-xs font-medium">Goles:</span>
-                  <span class="text-white font-bold text-sm">{{ totalGoals() | number }}</span>
-                </div>
-              </div>
+          <div class="flex flex-col gap-2 mb-3">
+            <div class="flex justify-between items-center bg-amber-500/10 rounded-lg px-3 py-2 border border-amber-500/20">
+              <span class="text-amber-400/70 text-[10px] font-bold uppercase">Valor</span>
+              <span class="text-white font-black">{{ player().price | number }} <span class="text-[9px] text-amber-400/60">COP</span></span>
             </div>
-
-            <!-- Instruction -->
-            <p class="text-center text-sm text-white/90 font-medium mb-6 flex-shrink-0">Contrata este jugador para aumentar tu equipo.</p>
-
-            <!-- Stats List -->
-            <div class="flex flex-col gap-2 mb-6 flex-shrink-0">
-              <div class="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/5">
-                <span class="text-white/70 text-sm font-medium">Valor:</span>
-                <span class="text-amber-300 font-bold text-sm">{{ player().price | number }} COP</span>
-              </div>
-              <div class="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/5">
-                <span class="text-white/70 text-sm font-medium">Ganancias por hora:</span>
-                <span class="text-white font-bold text-sm">{{ player().earning | number }} COP</span>
-              </div>
-              <div class="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/5">
-                <span class="text-white/70 text-sm font-medium">Ganancias por día:</span>
-                <span class="text-white font-bold text-sm">{{ (player().earning * 24) | number }} COP</span>
-              </div>
-              <div class="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/5">
-                <span class="text-white/70 text-sm font-medium">Ganancias totales:</span>
-                <span class="text-white font-bold text-sm">{{ (player().earning * 24 * player().contract_days) | number }} COP</span>
-              </div>
-              <div class="flex justify-between items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/5">
-                <span class="text-white/70 text-sm font-medium">Tiempo del contrato:</span>
-                <span class="text-white font-bold text-sm">{{ player().contract_days }} Días</span>
-              </div>
+            <div class="flex justify-between items-center bg-emerald-500/10 rounded-lg px-3 py-2 border border-emerald-500/20">
+              <span class="text-emerald-400/70 text-[10px] font-bold uppercase">/Hora</span>
+              <span class="text-white font-bold">+{{ player().earning | number }} <span class="text-[9px] text-emerald-400/60">COP</span></span>
             </div>
-
-            <!-- Action buttons -->
-            <div class="grid grid-cols-2 gap-3 mt-auto flex-shrink-0">
-              <button (click)="onClose()" class="py-3 px-4 text-sm font-bold text-white/90 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-white/50">Cancelar</button>
-              <button (click)="onConfirm()" class="py-3 px-4 text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl hover:from-blue-600 hover:to-purple-600 active:scale-95 transition-all shadow-lg shadow-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-400">Confirmar</button>
+            <div class="flex justify-between items-center bg-blue-500/10 rounded-lg px-3 py-2 border border-blue-500/20">
+              <span class="text-blue-400/70 text-[10px] font-bold uppercase">/Día</span>
+              <span class="text-white font-bold">+{{ (player().earning * 24) | number }}</span>
             </div>
+            <div class="flex justify-between items-center bg-purple-500/10 rounded-lg px-3 py-2 border border-purple-500/20">
+              <span class="text-purple-400/70 text-[10px] font-bold uppercase">Total</span>
+              <span class="text-white font-bold">+{{ (player().earning * 24 * player().contract_days) | number }}</span>
+            </div>
+            <div class="flex justify-between items-center bg-cyan-500/10 rounded-lg px-3 py-2 border border-cyan-500/20">
+              <span class="text-cyan-400/70 text-[10px] font-bold uppercase">Contrato</span>
+              <span class="text-white font-bold">{{ player().contract_days }} <span class="text-[9px] text-cyan-400/60">días</span></span>
+            </div>
+          </div>
+
+          <div class="flex gap-2 mt-1">
+            <button (click)="onClose()" class="flex-1 py-2.5 text-xs font-bold text-white/70 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all">Cancelar</button>
+            <button (click)="onConfirm()" class="flex-1 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-teal-500 to-emerald-500 rounded-xl hover:opacity-90 transition-all">Confirmar</button>
           </div>
         </div>
       </div>
-    `,
+    </div>
+  `,
   styles: [`
     :host { display: block; }
-    .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-    .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.2, 1, 0.3, 1) forwards; }
+    .animate-fade-in { animation: fadeIn 0.2s ease-out; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
