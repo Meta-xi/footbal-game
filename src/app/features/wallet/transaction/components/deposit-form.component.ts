@@ -47,11 +47,11 @@ import { PaymentScreenComponent } from '../payment-screen.component';
           <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-1">Recarga</span>
           <h1 class="text-2xl font-black text-white tracking-tight text-glow uppercase">Depósito</h1>
         </div>
-        <div class="w-12 h-12 lg-module-card flex items-center justify-center overflow-hidden">
-           @if (methodLogo()) {
-             <img [src]="methodLogo()!" alt="logo" width="32" height="32" class="object-contain" />
-           }
-        </div>
+        @if (methodLogo()) {
+          <img [src]="methodLogo()!" alt="logo" width="48" height="48" class="object-contain drop-shadow-lg" />
+        } @else {
+          <div class="w-12 h-12"></div>
+        }
       </header>
 
       <main class="flex-1 w-full relative z-10 flex flex-col overflow-y-auto no-scrollbar pb-32 px-6 gap-8 animate-slide-up">
