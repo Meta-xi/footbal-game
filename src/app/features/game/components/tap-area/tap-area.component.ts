@@ -43,8 +43,15 @@ interface FloatingNumber {
         <!-- Core specular base highlight -->
         <div class="absolute bottom-[-5%] left-1/2 -translate-x-1/2 w-[50%] h-[8%] rounded-[100%] bg-indigo-400/20 blur-[8px] pointer-events-none transition-transform duration-75 group-active:scale-[0.85] group-active:bg-indigo-300/40"></div>
 
-        <!-- Aura Layer -->
-        <div class="absolute inset-[-20%] rounded-full bg-indigo-500/15 blur-[60px] pointer-events-none"></div>
+        <!-- Dynamic Aura & Glow Layers -->
+        <!-- Outer breathing glow -->
+        <div class="absolute inset-[-25%] rounded-full bg-indigo-500/20 blur-[60px] pointer-events-none animate-pulse-glow"></div>
+        <!-- Inner rotating energy (Fuchsia) -->
+        <div class="absolute inset-[-5%] rounded-full bg-fuchsia-400/20 blur-[40px] pointer-events-none mix-blend-screen animate-spin-slow" style="border-radius: 40% 60% 60% 40% / 40% 50% 50% 60%;"></div>
+        <!-- Inner rotating energy (Cyan/Indigo) -->
+        <div class="absolute inset-[5%] rounded-full bg-cyan-400/20 blur-[35px] pointer-events-none mix-blend-screen animate-spin-slow" style="animation-direction: reverse; animation-duration: 8s; border-radius: 50% 50% 40% 60% / 60% 40% 60% 40%;"></div>
+        <!-- Core highlight behind ball -->
+        <div class="absolute inset-[15%] rounded-full bg-white/10 blur-[20px] pointer-events-none animate-pulse-glow" style="animation-delay: 1s;"></div>
 
         <img #ballImage [ngSrc]="ballImageSrc()" alt="Tap Ball"
           class="relative z-10 w-full h-full object-contain drop-shadow-[0_55px_45px_rgba(0,0,0,0.7)] cursor-pointer select-none origin-center"
@@ -59,6 +66,10 @@ interface FloatingNumber {
     @keyframes float-up { 0% { opacity: 0; transform: translate(-50%, -10px) scale(0.6); } 20% { opacity: 1; transform: translate(-50%, -40px) scale(1.4); } 80% { opacity: 0.8; transform: translate(-50%, -120px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -160px) scale(0.9); } }
     .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
     @keyframes shake { 10%, 90% { transform: translate(-50%, -50%) translateX(-1px); } 20%, 80% { transform: translate(-50%, -50%) translateX(2px); } 30%, 50%, 70% { transform: translate(-50%, -50%) translateX(-4px); } 40%, 60% { transform: translate(-50%, -50%) translateX(4px); } }
+    .animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
+    .animate-spin-slow { animation: spin-slow 15s linear infinite; }
+    @keyframes pulse-glow { 0%, 100% { opacity: 0.5; transform: scale(0.95); } 50% { opacity: 0.8; transform: scale(1.05); } }
+    @keyframes spin-slow { 100% { transform: rotate(360deg); } }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(window:resize)': 'onResize()' }
@@ -75,6 +86,8 @@ export class TapAreaComponent {
   private floatingNumberIdCounter = 0;
   noEnergyMessage = signal('');
   isSmallScreen = signal(false);
+
+  private audioCtx: AudioContext | null = null;
 
   readonly coins = this.tapSvc.coins;
   readonly level = this.tapSvc.level;
@@ -96,6 +109,8 @@ export class TapAreaComponent {
       }
       return;
     }
+
+    this.playPopSound();
 
     this.energySvc.decrementEnergy(1);
     const earnedCoins = Math.floor(this.tapValue() * this.activeMultiplier());
@@ -137,4 +152,34 @@ export class TapAreaComponent {
 
   onResize() { this.checkScreenHeight(); }
   checkScreenHeight() { this.isSmallScreen.set(window.innerHeight < 640); }
+
+  private playPopSound() {
+    try {
+      if (!this.audioCtx) {
+        this.audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume();
+      }
+
+      const oscillator = this.audioCtx.createOscillator();
+      const gainNode = this.audioCtx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioCtx.destination);
+
+      // "Pop" sound profile (subtle)
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(400, this.audioCtx.currentTime); // Lower starting frequency
+      oscillator.frequency.exponentialRampToValueAtTime(100, this.audioCtx.currentTime + 0.05); // Faster, deeper drop
+
+      gainNode.gain.setValueAtTime(0.05, this.audioCtx.currentTime); // Lower initial volume (5%)
+      gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.05); // Faster fade out
+
+      oscillator.start(this.audioCtx.currentTime);
+      oscillator.stop(this.audioCtx.currentTime + 0.05); // Shorter duration
+    } catch (e) {
+      // Ignore if Web Audio API is not supported
+    }
+  }
 }
