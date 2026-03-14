@@ -54,7 +54,9 @@ interface Deposit {
             <div class="flex flex-col gap-4 animate-slide-up">
               @for (item of deposits(); track item.title) {
                 <article (click)="onSheetItemClick(item)"
-                  class="lg-module-card p-3 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-teal-500/30">
+                  class="lg-module-card p-3 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl border-white/10 rounded-2xl"
+                  [style.background]="getDepositGradient(item.title)"
+                  [style.border-color]="getDepositBorderColor(item.title)">
                   <div class="flex items-center gap-3">
                     <div class="w-14 h-14 flex-shrink-0 rounded-xl overflow-hidden">
                       <img [ngSrc]="getDepositIcon(item.title)" alt="{{ item.title }}" width="80" height="80" class="w-full h-full object-contain scale-125 group-hover:scale-150 transition-all">
@@ -76,7 +78,9 @@ interface Deposit {
             <div class="flex flex-col gap-4 animate-slide-up">
               @for (item of deposits(); track item.title) {
                 <article (click)="onSheetItemClick(item)"
-                  class="lg-module-card p-3 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-teal-500/30">
+                  class="lg-module-card p-3 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl border-white/10 rounded-2xl"
+                  [style.background]="getDepositGradient(item.title)"
+                  [style.border-color]="getDepositBorderColor(item.title)">
                   <div class="flex items-center gap-3">
                     <div class="w-14 h-14 flex-shrink-0 rounded-xl overflow-hidden">
                       <img [ngSrc]="getDepositIcon(item.title)" alt="{{ item.title }}" width="80" height="80" class="w-full h-full object-contain scale-125 group-hover:scale-150 transition-all">
@@ -143,7 +147,8 @@ interface Deposit {
                 <p class="text-[10px] text-white/50 font-black uppercase tracking-widest px-2 mb-1">Deposita dentro de alguno de estos métodos</p>
                 <div class="grid grid-cols-1 gap-3">
                   <article (click)="onSheetItemClick({title: 'Nequi', desc: '', icon: ''})"
-                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-teal-500/30">
+                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl rounded-2xl"
+                    style="background: linear-gradient(to right, rgba(20,184,166,0.20) 0%, rgba(20,184,166,0.18) 25%, rgba(20,184,166,0.08) 55%, transparent 75%); border-color: rgba(20,184,166,0.30);">
                     <div class="flex items-center gap-4">
                       <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
                         <img ngSrc="wallet/colombia/nequi.png" alt="Nequi" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
@@ -161,7 +166,8 @@ interface Deposit {
                   </article>
 
                   <article (click)="onSheetItemClick({title: 'Daviplata', desc: '', icon: ''})"
-                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-red-500/30">
+                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl rounded-2xl"
+                    style="background: linear-gradient(to right, rgba(239,68,68,0.20) 0%, rgba(239,68,68,0.18) 25%, rgba(239,68,68,0.08) 55%, transparent 75%); border-color: rgba(239,68,68,0.30);">
                     <div class="flex items-center gap-4">
                       <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
                         <img ngSrc="wallet/colombia/daviplata.png" alt="Daviplata" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
@@ -185,7 +191,8 @@ interface Deposit {
                 <p class="text-[10px] text-white/50 font-black uppercase tracking-widest px-2 mb-1">Explora otras formas de depósito.</p>
                 <div class="grid grid-cols-1 gap-3">
                   <article (click)="onSheetItemClick({title: 'Plin', desc: '', icon: ''})"
-                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-cyan-500/30">
+                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl rounded-2xl"
+                    style="background: linear-gradient(to right, rgba(6,182,212,0.20) 0%, rgba(6,182,212,0.18) 25%, rgba(6,182,212,0.08) 55%, transparent 75%); border-color: rgba(6,182,212,0.30);">
                     <div class="flex items-center gap-4">
                       <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
                         <img ngSrc="wallet/peru/plin.png" alt="Plin" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
@@ -203,7 +210,8 @@ interface Deposit {
                   </article>
 
                   <article (click)="onSheetItemClick({title: 'Yape', desc: '', icon: ''})"
-                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-purple-500/30">
+                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl rounded-2xl"
+                    style="background: linear-gradient(to right, rgba(168,85,247,0.20) 0%, rgba(168,85,247,0.18) 25%, rgba(168,85,247,0.08) 55%, transparent 75%); border-color: rgba(168,85,247,0.30);">
                     <div class="flex items-center gap-4">
                       <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
                         <img ngSrc="wallet/peru/yape.png" alt="Yape" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
@@ -228,7 +236,35 @@ interface Deposit {
                 <div class="grid grid-cols-1 gap-3">
                   @for (coin of ['USDT', 'TRX', 'BNB', 'BTC']; track coin) {
                     <article (click)="onSheetItemClick({title: coin, desc: '', icon: ''})"
-                      class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer bg-white/5 backdrop-blur-2xl border-white/10 rounded-2xl hover:border-amber-500/30">
+                      class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl rounded-2xl"
+                      style="background: linear-gradient(to right, rgba(245,158,11,0.20) 0%, rgba(245,158,11,0.18) 25%, rgba(245,158,11,0.08) 55%, transparent 75%); border-color: rgba(245,158,11,0.30);">
+                      <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
+                          <img [ngSrc]="'wallet/crypto/' + coin.toLowerCase() + '.png'" [alt]="coin" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
+                        </div>
+                        <div>
+                          <h3 class="text-[12px] font-black text-white tracking-widest uppercase mb-1">{{ coin }}</h3>
+                          <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Red soportada nativa</p>
+                        </div>
+                      </div>
+                      <div class="w-6 h-6 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </article>
+                  }
+                </div>
+              </div>
+            }
+            @case ('cryptos-withdraw') {
+              <div class="flex flex-col gap-4">
+                <p class="text-[10px] text-white/50 font-black uppercase tracking-widest px-2 mb-1">Selecciona la moneda a retirar</p>
+                <div class="grid grid-cols-1 gap-3">
+                  @for (coin of ['USDT', 'TRX', 'BNB', 'BTC']; track coin) {
+                    <article (click)="onSheetItemClick({title: coin, desc: '', icon: ''})"
+                      class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl rounded-2xl"
+                      style="background: linear-gradient(to right, rgba(245,158,11,0.20) 0%, rgba(245,158,11,0.18) 25%, rgba(245,158,11,0.08) 55%, transparent 75%); border-color: rgba(245,158,11,0.30);">
                       <div class="flex items-center gap-4">
                         <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
                           <img [ngSrc]="'wallet/crypto/' + coin.toLowerCase() + '.png'" [alt]="coin" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
@@ -296,6 +332,24 @@ export class WalletComponent {
       'Perú': 'wallet/main/peru.png',
     };
     return icons[title] || 'wallet/main/wallet-main.png';
+  }
+
+  getDepositGradient(title: string): string {
+    const gradients: Record<string, string> = {
+      'Colombia': 'linear-gradient(to right, rgba(20,184,166,0.20) 0%, rgba(20,184,166,0.18) 25%, rgba(20,184,166,0.08) 55%, transparent 75%)',
+      'Cryptos': 'linear-gradient(to right, rgba(245,158,11,0.20) 0%, rgba(245,158,11,0.18) 25%, rgba(245,158,11,0.08) 55%, transparent 75%)',
+      'Perú': 'linear-gradient(to right, rgba(239,68,68,0.20) 0%, rgba(239,68,68,0.18) 25%, rgba(239,68,68,0.08) 55%, transparent 75%)',
+    };
+    return gradients[title] ?? 'rgba(255,255,255,0.05)';
+  }
+
+  getDepositBorderColor(title: string): string {
+    const colors: Record<string, string> = {
+      'Colombia': 'rgba(20,184,166,0.30)',
+      'Cryptos': 'rgba(245,158,11,0.30)',
+      'Perú': 'rgba(239,68,68,0.30)',
+    };
+    return colors[title] ?? 'rgba(255,255,255,0.10)';
   }
 
   readonly transactions = this.localApi.transactions;
