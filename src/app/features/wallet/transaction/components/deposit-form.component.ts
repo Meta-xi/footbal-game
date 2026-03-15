@@ -70,9 +70,9 @@ import { PaymentScreenComponent } from '../payment-screen.component';
            </div>
            
            <div class="grid grid-cols-3 gap-3 w-full">
-             @for (preset of [30000, 50000, 100000, 200000, 300000, 500000]; track preset) {
+             @for (preset of presetValues(); track preset) {
                <button (click)="setAmount(preset)" class="px-2 py-3 lg-btn-outline !border-white/10 !rounded-2xl text-[10px] font-black text-white/50 hover:text-white hover:bg-white/5 transition-all outline-none">
-                 {{ preset | number }}
+                 {{ preset | number: (['BTC', 'BNB'].includes(selectedMethod()) ? '1.1-6' : '1.0-2') }}
                </button>
              }
            </div>
@@ -132,6 +132,22 @@ import { PaymentScreenComponent } from '../payment-screen.component';
               <span class="absolute top-3 right-3 w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(20,184,166,0.9)]"></span>
             </div>
           }
+
+          <!-- Security Labels -->
+          <div class="flex items-center justify-between px-1 mt-1">
+            <div class="flex items-center gap-1.5">
+              <span class="w-1 h-1 rounded-full bg-emerald-400/50"></span>
+              <span class="text-[7px] font-black text-white/30 uppercase tracking-[0.2em]">Depósito Seguro</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-1 h-1 rounded-full bg-emerald-400/50"></span>
+              <span class="text-[7px] font-black text-white/30 uppercase tracking-[0.2em]">Rápido</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-1 h-1 rounded-full bg-emerald-400/50"></span>
+              <span class="text-[7px] font-black text-white/30 uppercase tracking-[0.2em]">Cifrado de extremo a extremo</span>
+            </div>
+          </div>
         </div>
       </main>
 
@@ -215,6 +231,17 @@ export class DepositFormComponent {
       { id: `${m}-2`, label: `${m} 2` },
       { id: `${m}-3`, label: `${m} 3` },
     ];
+  });
+
+  presetValues = computed(() => {
+    const m = this.selectedMethod();
+    switch (m) {
+      case 'USDT': return [5, 15, 30, 80, 350, 500];
+      case 'TRX': return [20, 50, 100, 300, 600, 900];
+      case 'BNB': return [0.0095, 0.015, 0.03, 0.05, 0.08, 0.1];
+      case 'BTC': return [0.00015, 0.0003, 0.0008, 0.0015, 0.002, 0.005];
+      default: return [30000, 50000, 100000, 200000, 300000, 500000];
+    }
   });
   transactionMessage = signal('');
   showSuccess = signal(false);
