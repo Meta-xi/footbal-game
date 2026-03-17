@@ -21,5 +21,10 @@ export const GAME_ROUTES: Routes = [
         loadComponent: () =>
             import('../mini-games/ticket-roulette/ticket-roulette.component').then((c) => c.TicketRouletteComponent),
     },
+    {
+        path: 'ruleta',
+        loadComponent: () =>
+            import('../mini-games/ruleta/ruleta.component').then((c) => c.RuletaComponent),
+    },
 ];
 
