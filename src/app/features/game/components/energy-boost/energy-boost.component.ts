@@ -10,7 +10,8 @@ import { EnergyService } from '../../../../core/services/energy.service';
     <section class="flex flex-row items-center justify-between w-full z-20 relative p-1 mt-2 px-2">
 
       <!-- Energy bar -->
-      <article class="frost-glass-pill flex items-center justify-center gap-2 p-1 pr-3 min-h-[56px] min-w-[130px]">
+      <article class="frost-glass-pill flex items-center justify-center gap-2 p-1 pr-3 min-h-[56px] min-w-[130px] border-emerald-500/30"
+               style="background: linear-gradient(to right, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0.18) 25%, rgba(16,185,129,0.08) 55%, transparent 75%), rgba(255, 255, 255, 0.08);">
         <div class="glow-bubble shrink-0">
           <!-- inner specular highlight -->
           <div class="inner-hi glow pointer-events-none"></div>
@@ -18,7 +19,7 @@ import { EnergyService } from '../../../../core/services/energy.service';
         </div>
         <div class="flex flex-col min-w-0 pb-0.5">
           <span class="text-[9px] font-bold text-white/50 capitalize tracking-wide leading-none mb-1">Energía</span>
-          <p class="text-[14px] font-black text-white tracking-wide leading-none">
+          <p class="text-[14px] font-black text-white tracking-wide leading-none text-glow-emerald">
             {{ energy() }}<span class="text-[10px] text-white/40 font-semibold ml-0.5">/ {{ maxEnergy() }}</span>
           </p>
         </div>
@@ -26,14 +27,15 @@ import { EnergyService } from '../../../../core/services/energy.service';
 
       <!-- Boost button -->
       <button type="button" (click)="goToBoost()"
-        class="frost-glass-pill boost-btn shrink-0 flex items-center justify-center gap-2 p-1 pr-3 outline-none min-h-[56px] min-w-[130px]"
+        class="frost-glass-pill boost-btn shrink-0 flex items-center justify-center gap-2 p-1 pr-3 outline-none min-h-[56px] min-w-[130px] border-yellow-500/30"
+        style="background: linear-gradient(to right, rgba(250,204,21,0.20) 0%, rgba(250,204,21,0.18) 25%, rgba(250,204,21,0.08) 55%, transparent 75%), rgba(255, 255, 255, 0.08);"
         aria-label="Ir a impulsos">
         <div class="glow-bubble">
           <!-- inner specular highlight -->
           <div class="inner-hi glow pointer-events-none"></div>
           <img ngSrc="game/energy/rocket.png" alt="" class="w-[34px] h-[34px] object-contain relative z-10 brightness-110 drop-shadow-md" width="64" height="64" />
         </div>
-        <span class="text-[14px] font-black text-white tracking-wide leading-none pt-1">Boost</span>
+        <span class="text-[14px] font-black text-white tracking-wide leading-none pt-1 text-glow-yellow">Boost</span>
       </button>
 
     </section>

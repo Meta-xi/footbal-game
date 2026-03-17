@@ -36,10 +36,11 @@ import { PlayersService } from '../../core/services/players.service';
             <!-- Hero Section -->
             <div class="flex flex-col items-center py-0 -mb-1.5 mt-2">
                 <div class="relative w-32 h-32 group">
-                    <!-- Deep Aura Glow -->
-                    <div class="absolute inset-[-20px] bg-teal-500/20 rounded-full blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-1000 animate-pulse"></div>
+                    <!-- Deep Aura Glow with Cyan Theme -->
+                    <div class="absolute inset-[-20px] rounded-full blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-1000 animate-pulse"
+                         style="background: linear-gradient(to right, rgba(34,211,238,0.20) 0%, rgba(34,211,238,0.18) 25%, rgba(34,211,238,0.08) 55%, transparent 75%);"></div>
                     <img ngSrc="shared/navigation/inversion.webp" alt="invest icon" width="128" height="128"
-                        class="relative z-10 w-full h-full object-contain filter drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] lg-float">
+                        class="relative z-10 w-full h-full object-contain filter drop-shadow-[0_0_30px_rgba(34,211,238,0.3)] lg-float">
                 </div>
             </div>
 
@@ -56,7 +57,7 @@ import { PlayersService } from '../../core/services/players.service';
                   @if (isLoading()) {
                     <div class="flex flex-col items-center py-24 gap-6">
                         <div class="w-12 h-12 border-4 border-white/5 border-t-teal-500 rounded-full animate-spin"></div>
-                        <p class="text-white/20 font-black text-[10px] uppercase tracking-[0.4em]">Scouting Talentos...</p>
+                        <p class="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] text-glow-cyan">Scouting Talentos...</p>
                     </div>
                   } @else if (player().length > 0) {
                     <div class="grid grid-cols-2 gap-4">
@@ -73,7 +74,7 @@ import { PlayersService } from '../../core/services/players.service';
                   @if (isLoading()) {
                     <div class="flex flex-col items-center py-24 gap-6">
                         <div class="w-12 h-12 border-4 border-white/5 border-t-amber-400 rounded-full animate-spin"></div>
-                        <p class="text-white/20 font-black text-[10px] uppercase tracking-[0.4em]">Acceso VIP...</p>
+                        <p class="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] text-glow-amber">Acceso VIP...</p>
                     </div>
                   } @else if (vipPlayers().length > 0) {
                     <div class="grid grid-cols-2 gap-4">
@@ -95,11 +96,12 @@ import { PlayersService } from '../../core/services/players.service';
                   } @else if (myPlayers().length > 0) {
                     @if (myVipPlayers().length > 0) {
                       <div class="mb-12">
-                          <h4 class="text-[10px] font-black text-amber-400/50 uppercase tracking-[0.4em] mb-8 flex items-center gap-4">
-                              <span class="h-px flex-1 bg-amber-400/10"></span>
-                              ESTRELLAS
-                              <span class="h-px flex-1 bg-amber-400/10"></span>
-                          </h4>
+                      <h4 class="text-[10px] font-black uppercase tracking-[0.4em] mb-8 flex items-center gap-4 text-glow-amber"
+                          style="background: linear-gradient(to right, rgba(245,158,11,0.20) 0%, rgba(245,158,11,0.18) 25%, rgba(245,158,11,0.08) 55%, transparent 75%); -webkit-background-clip: text; background-clip: text; color: rgba(251,191,36,0.5);">
+                          <span class="h-px flex-1 bg-amber-400/20"></span>
+                          ESTRELLAS
+                          <span class="h-px flex-1 bg-amber-400/20"></span>
+                      </h4>
                           <div class="grid grid-cols-2 gap-4">
                               @for (myPlayer of myVipPlayers(); track myPlayer.id) {
                                 <app-product-card-vertical [product]="myPlayer" />
@@ -142,22 +144,25 @@ import { PlayersService } from '../../core/services/players.service';
 
         @if (purchaseMessage()) {
             <div class="fixed bottom-32 left-6 right-6 z-[100] px-6 py-5 lg-module-card flex items-center justify-center animate-fade-in shadow-2xl"
-                [class.bg-emerald-500/10]="purchaseSuccess()" [class.bg-red-500/10]="!purchaseSuccess()"
-                [class.border-emerald-400/20]="purchaseSuccess()" [class.border-red-400/20]="!purchaseSuccess()">
-                <p class="text-white font-black text-[10px] uppercase tracking-[0.3em] text-glow text-center">{{ purchaseMessage() }}</p>
+                [class.border-emerald-500/30]="purchaseSuccess()" [class.border-red-500/30]="!purchaseSuccess()"
+                [style]="purchaseSuccess() ? 'background: linear-gradient(to right, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0.18) 25%, rgba(16,185,129,0.08) 55%, transparent 75%);' : 'background: linear-gradient(to right, rgba(239,68,68,0.20) 0%, rgba(239,68,68,0.18) 25%, rgba(239,68,68,0.08) 55%, transparent 75%);'">
+                <p class="text-white font-black text-[10px] uppercase tracking-[0.3em] text-center"
+                   [class.text-glow-emerald]="purchaseSuccess()"
+                   [class.text-glow-rose]="!purchaseSuccess()">{{ purchaseMessage() }}</p>
             </div>
         }
 
         @if (showPurchaseAnimation()) {
           <div class="fixed inset-0 z-[200] flex items-center justify-center p-8 bg-black/60 backdrop-blur-2xl animate-fade-in">
-              <div class="w-full max-w-sm lg-panel p-12 flex flex-col items-center text-center">
-                  <div class="w-24 h-24 rounded-full bg-teal-500/10 border border-teal-400/20 flex items-center justify-center mb-10 shadow-[0_0_50px_rgba(20,184,166,0.1)]">
-                      <svg class="w-12 h-12 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
+              <div class="w-full max-w-sm lg-panel p-12 flex flex-col items-center text-center border-emerald-500/30"
+                   style="background: linear-gradient(to right, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0.18) 25%, rgba(16,185,129,0.08) 55%, transparent 75%);">
+                  <div class="w-24 h-24 rounded-full bg-emerald-500/10 border border-emerald-400/30 flex items-center justify-center mb-10 shadow-[0_0_50px_rgba(16,185,129,0.2)]">
+                      <svg class="w-12 h-12 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                   </div>
-                  <h3 class="text-3xl font-black text-white tracking-tighter mb-4 text-glow uppercase">Fichaje Logrado</h3>
-                  <p class="text-xl font-black text-teal-400 mb-2 uppercase tracking-tight">{{ purchasedPlayerName() }}</p>
+                  <h3 class="text-3xl font-black text-white tracking-tighter mb-4 text-glow-emerald uppercase">Fichaje Logrado</h3>
+                  <p class="text-xl font-black text-emerald-400 mb-2 uppercase tracking-tight text-glow-emerald">{{ purchasedPlayerName() }}</p>
                   <p class="text-[9px] font-black text-white/20 uppercase tracking-[0.5em] mt-10">Transferencia Exitosa</p>
               </div>
           </div>

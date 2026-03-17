@@ -31,7 +31,8 @@ interface DailyReward {
           </div>
         </div>
 
-        <nav class="relative bg-white/5 backdrop-blur-3xl rounded-full p-1.5 flex items-center border border-white/5 shadow-2xl">
+        <nav class="relative bg-white/5 backdrop-blur-3xl rounded-full p-1.5 flex items-center border border-cyan-500/30 shadow-2xl"
+             style="background: linear-gradient(to right, rgba(34,211,238,0.20) 0%, rgba(34,211,238,0.18) 25%, rgba(34,211,238,0.08) 55%, transparent 75%), rgba(255,255,255,0.05);">
           <!-- Glass Sliding Indicator Container -->
           <div class="absolute inset-1.5 z-0 pointer-events-none">
             <div class="h-full bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.2)] transition-all duration-500 cubic-bezier(0.2, 1, 0.3, 1)"
@@ -117,9 +118,9 @@ interface DailyReward {
                         <div class="w-14 h-14 rounded-2xl bg-black/20 border border-white/10 flex items-center justify-center group-hover:border-white/20 transition-colors">
                           <img [ngSrc]="mission.icon" [alt]="mission.title" width="28" height="28" class="object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all">
                         </div>
-                        <div class="flex flex-col">
+                         <div class="flex flex-col">
                           <h3 class="text-sm font-bold text-white tracking-tight">{{ mission.title }}</h3>
-                          <span class="text-xs font-bold text-emerald-400 mt-1">+{{ mission.reward | number }} <span class="text-[10px] text-emerald-500/60">COP</span></span>
+                          <span class="text-xs font-bold text-emerald-400 mt-1 text-glow-emerald">+{{ mission.reward | number }} <span class="text-[10px] text-emerald-500/60">COP</span></span>
                         </div>
                       </div>
                       <div class="w-8 h-8 flex items-center justify-center text-white/40 group-hover:text-white transition-colors">
@@ -151,15 +152,15 @@ interface DailyReward {
                       <span class="text-[8px] font-black text-white/20 uppercase tracking-widest">Completadas</span>
                       <span class="block text-lg font-black text-white tracking-tighter text-glow mt-1">{{ completedMissions().length }}</span>
                     </div>
-                    <div class="lg-module-card p-3">
+                    <div class="lg-module-card p-3 border-emerald-500/30" style="background: linear-gradient(to right, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0.18) 25%, rgba(16,185,129,0.08) 55%, transparent 75%);">
                       <span class="text-[8px] font-black text-white/20 uppercase tracking-widest">Totales</span>
-                      <span class="block text-lg font-black text-emerald-400 tracking-tighter text-glow mt-1">16</span>
+                      <span class="block text-lg font-black text-emerald-400 tracking-tighter text-glow-emerald mt-1">16</span>
                     </div>
                     <div class="lg-module-card p-3">
                       <span class="text-[8px] font-black text-white/20 uppercase tracking-widest">Fallidas</span>
                       <span class="block text-lg font-black text-white tracking-tighter text-glow mt-1">{{ failedMissions().length }}</span>
                     </div>
-                    <div class="lg-module-card p-3">
+                    <div class="lg-module-card p-3 border-rose-500/30" style="background: linear-gradient(to right, rgba(244,63,94,0.20) 0%, rgba(244,63,94,0.18) 25%, rgba(244,63,94,0.08) 55%, transparent 75%);">
                       <span class="text-[8px] font-black text-white/20 uppercase tracking-widest">Dinero Perdido</span>
                       <span class="block text-lg font-black text-rose-400 tracking-tighter text-glow mt-1">0</span>
                     </div>

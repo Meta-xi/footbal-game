@@ -11,7 +11,7 @@ import { NgOptimizedImage, CommonModule } from '@angular/common';
         
         <!-- Badge VIP -->
         <div class="absolute top-3 right-3 z-10">
-          <span class="px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-[6px] font-bold text-amber-400 uppercase tracking-wider">
+          <span class="px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-[6px] font-bold text-amber-400 text-glow-amber uppercase tracking-wider">
             VIP
           </span>
         </div>
@@ -25,7 +25,7 @@ import { NgOptimizedImage, CommonModule } from '@angular/common';
 
         <!-- Info del jugador -->
         <div class="flex flex-col gap-1">
-          <span class="text-[7px] font-bold text-amber-400/60 uppercase tracking-widest">Élite</span>
+          <span class="text-[7px] font-bold text-amber-400/60 text-glow-amber uppercase tracking-widest">Élite</span>
           <h3 class="text-[10px] font-black text-white tracking-tight truncate">{{ player.name }}</h3>
           
           <!-- Earnings -->
@@ -33,14 +33,14 @@ import { NgOptimizedImage, CommonModule } from '@angular/common';
             <div class="w-3.5 h-3.5 rounded-full bg-amber-500/20 flex items-center justify-center">
                <img ngSrc="shared/balance/coin.webp" alt="coin" width="10" height="10" class="object-contain">
             </div>
-            <span class="text-[8px] font-bold text-white/80">+{{ player.earning || 0 }}</span>
+            <span class="text-[8px] font-bold text-white/80 text-glow-amber">+{{ player.earning || 0 }}</span>
             <span class="text-[6px] text-white/40 font-medium">/hora</span>
           </div>
         </div>
 
         <!-- Botón -->
         <button (click)="onBuy($event)" 
-                class="w-full py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-[8px] font-black text-amber-400 uppercase tracking-wider active:scale-95 transition-all">
+                class="w-full py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-[8px] font-black text-amber-400 text-glow-amber uppercase tracking-wider active:scale-95 transition-all">
           Fichar VIP
         </button>
       </article>

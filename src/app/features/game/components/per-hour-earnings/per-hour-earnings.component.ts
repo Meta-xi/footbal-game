@@ -7,13 +7,13 @@ import { LocalApiService } from '../../../../core/services/local-api.service';
   standalone: true,
   imports: [NgOptimizedImage, CommonModule],
   template: `
-    <div class="flex items-center gap-1.5 py-1.5 px-3.5 rounded-full liquid-glass-card bg-white/[0.03] border-white/5 transition-all active:scale-95 cursor-default h-[44px]">
-      <div class="w-[22px] h-[22px] flex items-center justify-center drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]">
+    <div class="flex items-center gap-1.5 py-1.5 px-3.5 rounded-full liquid-glass-card border-emerald-500/30 shadow-lg transition-all active:scale-95 cursor-default h-[44px]" style="background: linear-gradient(to right, rgba(16,185,129,0.20) 0%, rgba(16,185,129,0.18) 25%, rgba(16,185,129,0.08) 55%, transparent 75%);">
+      <div class="w-[22px] h-[22px] flex items-center justify-center drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
          <img ngSrc="shared/balance/coin.webp" alt="COP" width="26" height="26" class="object-contain" />
       </div>
       <div class="flex flex-col">
         <span class="text-[9px] font-black text-white/50 uppercase tracking-widest leading-none mb-[2px]">Earnings</span>
-        <span class="text-[12px] font-black text-white tracking-tight uppercase leading-none">
+        <span class="text-[12px] font-black text-emerald-400 tracking-tight uppercase leading-none text-glow-emerald">
           {{ formattedEarning() }}<span class="text-[8px] text-white/40 ml-0.5">/H</span>
         </span>
       </div>

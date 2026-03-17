@@ -6,6 +6,7 @@ interface Ticket {
   id: number;
   value: string;
   colorClass: string;
+  icon: string;
 }
 
 @Component({
@@ -21,10 +22,10 @@ interface Ticket {
          </svg>
        </button>
 
-<div class="header glass !py-2 !px-4 !mb-4 !inline-flex items-center gap-3">
-        <img ngSrc="mini-games/tickets/tickets.webp" alt="Jugadores" class="w-12 h-12 object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 drop-shadow-md transition-all" width="48" height="48">
-        <h1>Tickets: <span> {{ ticketsCount() }}</span></h1>
-      </div>
+<div class="header glass !py-2 !px-4 !mb-4 !inline-flex items-center gap-3 border-cyan-500/30 shadow-lg" style="background: linear-gradient(to right, rgba(34,211,238,0.20) 0%, rgba(34,211,238,0.18) 25%, rgba(34,211,238,0.08) 55%, transparent 75%);">
+         <img ngSrc="mini-games/tickets/tickets.webp" alt="Jugadores" class="w-12 h-12 object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 drop-shadow-md transition-all" width="48" height="48">
+         <h1>Tickets: <span class="text-glow-cyan"> {{ ticketsCount() }}</span></h1>
+       </div>
 
       <div class="glass-board shadow-glow">
         
@@ -42,7 +43,7 @@ interface Ticket {
               <div class="ticket-wrapper">
                 <div class="ticket effect-3d" [class.ticket-teal]="ticket.colorClass === 'ticket-teal'" [class.ticket-blue]="ticket.colorClass === 'ticket-blue'" [class.ticket-pink]="ticket.colorClass === 'ticket-pink'" [class.ticket-gold]="ticket.colorClass === 'ticket-gold'">
                   <div class="ticket-inner">
-                    <span class="icon">💎</span>
+                    <span class="icon">{{ ticket.icon }}</span>
                     <span class="value">{{ ticket.value }}</span>
                   </div>
                 </div>
@@ -84,10 +85,9 @@ interface Ticket {
        letter-spacing: 1.5px;
        font-weight: 400;
      }
-    .header span {
-      color: #00ffcc;
+     .header span {
+      color: #22d3ee;
       font-weight: 700;
-      text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
     }
 
      .game-wrapper {
@@ -300,13 +300,13 @@ export class TicketRouletteComponent {
   visibleTickets = 5;
 
   baseTickets: Ticket[] = [
-    { id: 1, value: "500 USD", colorClass: 'ticket-teal' },
-    { id: 2, value: "10,000 COP", colorClass: 'ticket-blue' },
-    { id: 3, value: "100 COP", colorClass: 'ticket-blue' },
-    { id: 4, value: "20 COP", colorClass: 'ticket-pink' },
-    { id: 5, value: "10 COP", colorClass: 'ticket-gold' },
-    { id: 6, value: "50,000 COP", colorClass: 'ticket-pink' },
-    { id: 7, value: "5 Energía  ", colorClass: 'ticket-teal' },
+    { id: 1, value: "500 USD", colorClass: 'ticket-teal', icon: '💵' },
+    { id: 2, value: "10,000 COP", colorClass: 'ticket-blue', icon: '🪙' },
+    { id: 3, value: "100 COP", colorClass: 'ticket-blue', icon: '🪙' },
+    { id: 4, value: "20 COP", colorClass: 'ticket-pink', icon: '🪙' },
+    { id: 5, value: "10 COP", colorClass: 'ticket-gold', icon: '🪙' },
+    { id: 6, value: "50,000 COP", colorClass: 'ticket-pink', icon: '🪙' },
+    { id: 7, value: "5 Energía  ", colorClass: 'ticket-teal', icon: '⚡' },
   ];
 
   reelTickets = signal<Ticket[]>([]);

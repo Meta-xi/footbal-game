@@ -18,7 +18,8 @@ import { map, filter } from 'rxjs';
       <div class="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/5 to-transparent opacity-40"></div>
 
       <div class="absolute inset-1.5 z-0 pointer-events-none">
-        <div class="h-full w-[20%] bg-white/10 backdrop-blur-md rounded-[20px] border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.2)] transition-all duration-800 cubic-bezier(0.2, 1, 0.3, 1)"
+        <div class="h-full w-[20%] bg-white/10 backdrop-blur-md rounded-[20px] border border-cyan-500/30 shadow-[0_4px_15px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.2)] transition-all duration-800 cubic-bezier(0.2, 1, 0.3, 1)"
+          style="background: linear-gradient(to right, rgba(34,211,238,0.20) 0%, rgba(34,211,238,0.18) 25%, rgba(34,211,238,0.08) 55%, transparent 75%), rgba(255,255,255,0.1);"
           [style.transform]="'translateX(' + (activeIndex() * 100) + '%)'">
           <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-50 rounded-[20px]"></div>
         </div>
@@ -29,7 +30,7 @@ import { map, filter } from 'rxjs';
           class="nav-btn group relative z-10" [attr.aria-label]="nav.id">
           <div class="nav-content">
             <img [ngSrc]="nav.icon" alt="" width="20" height="20" class="nav-icon group-[.active]:opacity-100 opacity-30 group-hover:opacity-60 transition-all duration-500">
-            <span class="nav-label group-[.active]:text-white group-[.active]:font-black text-white/30 text-[8px] font-bold uppercase tracking-[0.15em] transition-all duration-500">{{ nav.id }}</span>
+            <span class="nav-label group-[.active]:text-white group-[.active]:font-black text-white/30 text-[8px] font-bold uppercase tracking-[0.15em] transition-all duration-500 group-[.active]:text-glow-cyan">{{ nav.id }}</span>
           </div>
         </button>
       }
