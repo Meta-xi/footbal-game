@@ -1,17 +1,17 @@
-import { Component, ElementRef, ViewChild, signal } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 
 interface Ticket {
   id: number;
-  value: any;
+  value: string;
   colorClass: string;
 }
 
 @Component({
   selector: 'app-ticket-roulette',
-  standalone: true,
-  imports: [CommonModule,NgOptimizedImage],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgOptimizedImage],
   template: `
      <div class="game-wrapper hide-nav">
        <!-- Botón Atrás -->
@@ -21,9 +21,9 @@ interface Ticket {
          </svg>
        </button>
 
-<div class="header glass !py-2 px-4! !mb-4 inline-flex! items-center gap-3">
+<div class="header glass !py-2 !px-4 !mb-4 !inline-flex items-center gap-3">
         <img ngSrc="mini-games/tickets/tickets.webp" alt="Jugadores" class="w-12 h-12 object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 drop-shadow-md transition-all" width="48" height="48">
-        <h1>Tickets: <span> {{ 5 }}</span></h1>
+        <h1>Tickets: <span> {{ ticketsCount() }}</span></h1>
       </div>
 
       <div class="glass-board shadow-glow">
@@ -40,7 +40,7 @@ interface Ticket {
           >
             @for (ticket of reelTickets(); track $index) {
               <div class="ticket-wrapper">
-                <div class="ticket effect-3d" [ngClass]="ticket.colorClass">
+                <div class="ticket effect-3d" [class.ticket-teal]="ticket.colorClass === 'ticket-teal'" [class.ticket-blue]="ticket.colorClass === 'ticket-blue'" [class.ticket-pink]="ticket.colorClass === 'ticket-pink'" [class.ticket-gold]="ticket.colorClass === 'ticket-gold'">
                   <div class="ticket-inner">
                     <span class="icon">💎</span>
                     <span class="value">{{ ticket.value }}</span>
@@ -293,6 +293,7 @@ export class TicketRouletteComponent {
   isSpinning = signal(false);
   currentOffset = signal(0);
   transitionDuration = signal(0);
+  ticketsCount = signal(5);
 
   // Configuración de la ruleta
   ticketHeight = 100; // 80px alto + 20px gap
@@ -315,7 +316,9 @@ export class TicketRouletteComponent {
   audioTick = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
   audioWin = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
 
-  constructor(private router: Router) {
+  private router = inject(Router);
+
+  constructor() {
     this.audioTick.volume = 0.3; // Volumen suave para el tick
     this.generateReel();
   }
@@ -336,7 +339,7 @@ export class TicketRouletteComponent {
   spin() {
     if (this.isSpinning()) return;
 
-    this.audioClick.play();
+    this.audioClick.play().catch(() => console.log('Esperando interacción para audio...'));
     this.isSpinning.set(true);
 
     const minSpins = 70;
@@ -379,7 +382,7 @@ export class TicketRouletteComponent {
       if (currentIndex !== lastTickIndex && currentIndex > 0) {
         lastTickIndex = currentIndex;
         this.audioTick.currentTime = 0;
-        this.audioTick.play().catch(e => console.log('Esperando interacción para audio...'));
+        this.audioTick.play().catch(() => console.log('Esperando interacción para audio...'));
       }
 
       if (progress < 1) {
@@ -392,7 +395,7 @@ export class TicketRouletteComponent {
 
   finishSpin(winningIndex: number) {
     this.isSpinning.set(false);
-    this.audioWin.play();
+    this.audioWin.play().catch(() => console.log('Esperando interacción para audio...'));
 
     const wonTicket = this.reelTickets()[winningIndex];
     console.log(`¡Ganaste ${wonTicket.value}!`);
