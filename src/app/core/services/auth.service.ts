@@ -1,82 +1,109 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-
-export interface User {
-    id: number;
-    username: string;
-    email: string;
-    avatar?: string;
-}
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
-    providedIn: 'root',
+  providedIn: 'root',
 })
 export class AuthService {
-    private userSignal = signal<User | null>(null);
+  private userSignal = signal<any>(null);
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
-    user = this.userSignal.asReadonly();
-    isAuthenticated = computed(() => this.userSignal() !== null);
+  user = this.userSignal.asReadonly();
+  isAuthenticated = computed(() => this.userSignal() !== null);
+  authToken = signal<string | null>(null);
 
-    constructor(private router: Router) {
-        // Cargar usuario del localStorage si existe
-        this.loadUserFromStorage();
+  constructor() {
+    this.loadAuthFromStorage();
+  }
+
+  private getBaseUrl(): string {
+    return environment.apiBaseUrl;
+  }
+
+  private loadAuthFromStorage(): void {
+    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('auth_token');
+
+    if (storedUser && storedToken) {
+      try {
+        this.userSignal.set(JSON.parse(storedUser));
+        this.authToken.set(storedToken);
+      } catch (error) {
+        console.error('Error loading auth from storage:', error);
+        this.clearAuthStorage();
+      }
     }
+  }
 
-    private loadUserFromStorage() {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            try {
-                this.userSignal.set(JSON.parse(storedUser));
-            } catch (error) {
-                console.error('Error loading user from storage:', error);
-                localStorage.removeItem('user');
-            }
-        }
+  private saveAuthStorage(user: any, token: string): void {
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('auth_token', token);
+    this.userSignal.set(user);
+    this.authToken.set(token);
+  }
+
+  private clearAuthStorage(): void {
+    localStorage.removeItem('user');
+    localStorage.removeItem('auth_token');
+    this.userSignal.set(null);
+    this.authToken.set(null);
+  }
+
+  async login(email: string, password: string): Promise<boolean> {
+    try {
+      const url = `${this.getBaseUrl()}auth/login`;
+      const response: any = await this.http.post(url, { email, password }).toPromise();
+
+      if (response?.success && response.data) {
+        this.saveAuthStorage(response.data.user, response.data.token);
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
     }
+  }
 
-    login(email: string, password: string): Promise<boolean> {
-        return new Promise((resolve) => {
-            // Simulación de login - En producción, hacer llamada HTTP real
-            setTimeout(() => {
-                const user: User = {
-                    id: 1,
-                    username: 'User0001',
-                    email: email,
-                    avatar: 'game/header/user.png',
-                };
+  async register(username: string, password: string, phone?: string | null, refId?: number | string | null): Promise<boolean> {
+    try {
+      const url = `${this.getBaseUrl()}Auth/register`;
+      const body: any = { username, password };
+      if (phone !== undefined) body.phone = phone;
+      if (refId !== undefined) body.refId = refId;
 
-                this.userSignal.set(user);
-                localStorage.setItem('user', JSON.stringify(user));
-                resolve(true);
-            }, 1000);
-        });
+      const response: any = await this.http.post(url, body).toPromise();
+
+      if (response?.success && response.data) {
+        this.saveAuthStorage(response.data.user, response.data.token);
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      return false;
     }
+  }
 
-    register(email: string, password: string, referralCode?: string): Promise<boolean> {
-        return new Promise((resolve) => {
-            // Simulación de registro - En producción, hacer llamada HTTP real
-            setTimeout(() => {
-                const user: User = {
-                    id: Date.now(),
-                    username: `User${Math.floor(Math.random() * 10000)}`,
-                    email: email,
-                    avatar: 'game/header/user.png',
-                };
+  logout(): void {
+    this.clearAuthStorage();
+    this.router.navigate(['/login']);
+  }
 
-                this.userSignal.set(user);
-                localStorage.setItem('user', JSON.stringify(user));
-                resolve(true);
-            }, 1000);
-        });
-    }
+  getUsername(): string {
+    return this.userSignal()?.username || 'Usuario';
+  }
 
-    logout() {
-        this.userSignal.set(null);
-        localStorage.removeItem('user');
-        this.router.navigate(['/login']);
-    }
+  getToken(): string | null {
+    return this.authToken();
+  }
 
-    getUsername(): string {
-        return this.userSignal()?.username || 'Usuario';
-    }
+  isLoggedIn(): boolean {
+    return this.isAuthenticated();
+  }
 }
