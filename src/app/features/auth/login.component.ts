@@ -170,8 +170,12 @@ export class LoginComponent {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      const success = await this.authService.login(this.identifier, this.pass);
-      if (success) this.router.navigate(['/main']);
+      const result = await this.authService.login(this.identifier, this.pass);
+      if (result.success) {
+        this.router.navigate(['/main']);
+      } else {
+        this.error.set(result.error || 'Credenciales inválidas');
+      }
     } catch (err) {
       this.error.set('Credenciales inválidas');
     } finally {
@@ -191,13 +195,17 @@ export class LoginComponent {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      const success = await this.authService.register(
+      const result = await this.authService.register(
         this.identifier,
         this.pass,
         null,
         null
       );
-      if (success) this.router.navigate(['/main']);
+      if (result.success) {
+        this.router.navigate(['/main']);
+      } else {
+        this.error.set(result.error || 'Error en registro');
+      }
     } catch (err) {
       this.error.set('Error en registro');
     } finally {

@@ -17,3 +17,14 @@ export interface UserStats {
   investments: number;
   achievements: number;
 }
+
+export interface AuthResponse {
+  id?: number;
+  isGuest: boolean;
+  token: string;
+  username: string;
+}
+
+export interface ApiMessageResponse {
+  message: string;
+}

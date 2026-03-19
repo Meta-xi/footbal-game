@@ -1,7 +1,8 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { AuthResponse, ApiMessageResponse } from '../../models/user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -39,9 +40,13 @@ export class AuthService {
   }
 
   private saveAuthStorage(user: any, token: string): void {
-    localStorage.setItem('user', JSON.stringify(user));
+    const userData = {
+      ...user,
+      id: user.id || user.Id || null,
+    };
+    localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('auth_token', token);
-    this.userSignal.set(user);
+    this.userSignal.set(userData);
     this.authToken.set(token);
   }
 
@@ -52,41 +57,96 @@ export class AuthService {
     this.authToken.set(null);
   }
 
-  async login(email: string, password: string): Promise<boolean> {
+  async login(username: string, password: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const url = `${this.getBaseUrl()}auth/login`;
-      const response: any = await this.http.post(url, { email, password }).toPromise();
+      const url = `${this.getBaseUrl()}Auth/login`;
+      const response = await this.http.post(url, { username, password }).toPromise() as AuthResponse | string | null;
 
-      if (response?.success && response.data) {
-        this.saveAuthStorage(response.data.user, response.data.token);
-        return true;
+      let user: { id?: number; username: string; isGuest: boolean } = { username, isGuest: false };
+      let token: string;
+
+      if (response && typeof response === 'string') {
+        token = response;
+      } else if (response && typeof response === 'object' && 'token' in response) {
+        const authResp = response as AuthResponse;
+        token = authResp.token;
+        user.id = authResp.id;
+      } else {
+        return { success: false, error: 'Login failed' };
       }
 
-      return false;
-    } catch (error) {
+      this.saveAuthStorage(user, token);
+      return { success: true };
+    } catch (error: unknown) {
+      const httpError = error as HttpErrorResponse;
+      if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
+        return { success: false, error: (httpError.error as ApiMessageResponse).message };
+      }
+      if (httpError?.error && typeof httpError.error === 'string') {
+        return { success: false, error: httpError.error };
+      }
       console.error('Login failed:', error);
-      return false;
+      return { success: false, error: 'Login failed' };
     }
   }
 
-  async register(username: string, password: string, phone?: string | null, refId?: number | string | null): Promise<boolean> {
+  async guest(username: string, refId?: number | string | null): Promise<{ success: boolean; error?: string }> {
+    try {
+      const url = `${this.getBaseUrl()}Auth/guest`;
+      const body: { username: string; refId?: number | string | null } = { username };
+      if (refId !== undefined) body.refId = refId;
+
+      const response = await this.http.post(url, body).toPromise() as AuthResponse | string | null;
+
+      let user: { id?: number; username: string; isGuest: boolean } = { username, isGuest: true };
+      let token: string;
+
+      if (response && typeof response === 'string') {
+        token = response;
+      } else if (response && typeof response === 'object' && 'token' in response) {
+        const authResp = response as AuthResponse;
+        token = authResp.token;
+        user.id = authResp.id;
+      } else {
+        return { success: false, error: 'Guest login failed' };
+      }
+
+      this.saveAuthStorage(user, token);
+      return { success: true };
+    } catch (error: unknown) {
+      const httpError = error as HttpErrorResponse;
+      if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
+        return { success: false, error: (httpError.error as ApiMessageResponse).message };
+      }
+      console.error('Guest login failed:', error);
+      return { success: false, error: 'Guest login failed' };
+    }
+  }
+
+  async register(username: string, password: string, phone?: string | null, refId?: number | string | null): Promise<{ success: boolean; error?: string }> {
     try {
       const url = `${this.getBaseUrl()}Auth/register`;
       const body: any = { username, password };
       if (phone !== undefined) body.phone = phone;
       if (refId !== undefined) body.refId = refId;
 
-      const response: any = await this.http.post(url, body).toPromise();
+      const response = await this.http.post<AuthResponse>(url, body).toPromise();
 
-      if (response?.success && response.data) {
-        this.saveAuthStorage(response.data.user, response.data.token);
-        return true;
+      if (response) {
+        const user: any = { username: response.username, isGuest: response.isGuest };
+        if (response.id) user.id = response.id;
+        this.saveAuthStorage(user, response.token);
+        return { success: true };
       }
 
-      return false;
-    } catch (error) {
+      return { success: false, error: 'Registration failed' };
+    } catch (error: unknown) {
+      const httpError = error as HttpErrorResponse;
+      if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
+        return { success: false, error: (httpError.error as ApiMessageResponse).message };
+      }
       console.error('Registration failed:', error);
-      return false;
+      return { success: false, error: 'Registration failed' };
     }
   }
 
