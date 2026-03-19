@@ -1,8 +1,23 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  computed,
+  inject,
+  signal
+} from '@angular/core';
 import { Router } from '@angular/router';
+import { NgOptimizedImage } from '@angular/common';
+import confetti from 'canvas-confetti';
+
+interface Prize {
+  amount: string;
+  icon: string;
+}
 
 @Component({
   selector: 'app-ruleta',
+  imports: [NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="game-wrapper hide-nav" aria-label="Juego de ruleta aleatoria">
@@ -17,11 +32,11 @@ import { Router } from '@angular/router';
       </button>
 
       <header class="w-full max-w-md px-4 pt-14 pb-3 text-center">
-        <h1 class="mt-3 text-white text-3xl font-black tracking-wider">SUPER LUCKY SPIN</h1>
-        <p class="mt-1 text-sm text-white/70">Gira la ruleta y gana una recompensa aleatoria</p>
+        <h1 class="mt-3 text-white text-4xl font-black tracking-[0.08em] leading-tight">SUPER LUCKY SPIN</h1>
+        <p class="mt-2 text-sm text-white/75">Gira la ruleta y gana una recompensa aleatoria</p>
       </header>
 
-      <div class="roulette-shell lg-panel lg-shimmer lg-accent-ring">
+      <div class="roulette-shell lg-panel lg-shimmer lg-accent-ring" role="group" aria-label="Ruleta de premios">
         <div class="pointer" aria-hidden="true"></div>
 
         <div
@@ -31,6 +46,24 @@ import { Router } from '@angular/router';
           role="img"
         >
           <div class="wheel-face" aria-hidden="true"></div>
+          
+          @for (prize of prizes; track prize.amount; let i = $index) {
+            <div 
+              class="prize-segment"
+              [style.transform]="prizeTransform(i)"
+            >
+              <img 
+                [ngSrc]="prize.icon" 
+                [alt]="prize.amount" 
+                width="40" 
+                height="40"
+                class="prize-icon"
+              />
+              <span class="prize-text">{{ prize.amount }}</span>
+            </div>
+          }
+          
+          <div class="wheel-gloss" aria-hidden="true"></div>
           <div class="wheel-center" aria-hidden="true"></div>
           <div class="wheel-inner-ring" aria-hidden="true"></div>
         </div>
@@ -42,15 +75,10 @@ import { Router } from '@angular/router';
         </div>
       </div>
 
-      <section class="w-full max-w-md px-4 pb-5 pt-4">
-        <div class="lg-card-module p-4 text-center border border-white/10">
-          <p class="text-xs uppercase tracking-[0.18em] text-white/60">Premio actual</p>
-          <p class="mt-1 text-3xl font-black tracking-wider text-amber-200">{{ currentPrize() }}</p>
-        </div>
-
+      <section class="w-full max-w-md px-4 pb-6 pt-2">
         <button
           type="button"
-          class="mt-4 w-full lg-btn-primary py-3.5 text-sm uppercase font-black tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full lg-btn-primary py-3.5 text-sm uppercase font-black tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
           [disabled]="isSpinning()"
           (click)="spin()"
           [attr.aria-busy]="isSpinning()"
@@ -76,20 +104,24 @@ import { Router } from '@angular/router';
       align-items: center;
       justify-content: space-between;
       min-height: 100vh;
-      padding: 0.75rem 0 1rem;
+      padding: 0.75rem 0 1.15rem;
       position: relative;
       overflow: hidden;
+      gap: 0.3rem;
     }
 
     .roulette-shell {
       position: relative;
-      width: min(86vw, 370px);
-      height: min(86vw, 370px);
+      width: min(84vw, 360px);
+      height: min(84vw, 360px);
       border-radius: 50%;
       display: grid;
       place-items: center;
-      padding: 1.05rem;
+      padding: 0.95rem;
       border: 1px solid var(--lg-glass-border-hi);
+      box-shadow:
+        0 24px 48px rgba(0, 0, 0, 0.36),
+        inset 0 2px 0 rgba(255, 255, 255, 0.2);
     }
 
     .wheel {
@@ -97,32 +129,34 @@ import { Router } from '@angular/router';
       height: 100%;
       border-radius: 50%;
       position: relative;
-      transition: transform 5s cubic-bezier(0.12, 0.96, 0.3, 1);
+      transition: transform 4.8s cubic-bezier(0.12, 0.96, 0.3, 1);
       box-shadow:
         0 18px 46px rgba(0, 0, 0, 0.5),
-        inset 0 3px 0 rgba(255, 255, 255, 0.24),
+        inset 0 2px 0 rgba(255, 255, 255, 0.28),
         inset 0 -4px 0 rgba(0, 0, 0, 0.3);
       background: radial-gradient(circle at center, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-      border: 10px solid var(--lg-accent-gold);
+      border: 9px solid color-mix(in srgb, var(--lg-accent-gold) 72%, var(--lg-violet-mid));
     }
 
     .wheel-face {
       position: absolute;
-      inset: 10px;
+      inset: 9px;
       border-radius: 50%;
       background:
         conic-gradient(
           from -90deg,
-          rgba(255, 255, 255, 0.95) 0deg 45deg,
-          color-mix(in srgb, var(--lg-accent-gold) 85%, white) 45deg 90deg,
-          rgba(255, 255, 255, 0.95) 90deg 135deg,
-          color-mix(in srgb, var(--lg-accent-gold) 85%, white) 135deg 180deg,
-          rgba(255, 255, 255, 0.95) 180deg 225deg,
-          color-mix(in srgb, var(--lg-accent-gold) 85%, white) 225deg 270deg,
-          rgba(255, 255, 255, 0.95) 270deg 315deg,
-          color-mix(in srgb, var(--lg-accent-gold) 85%, white) 315deg 360deg
+          color-mix(in srgb, white 92%, var(--lg-accent-cyan)) 0deg 45deg,
+          color-mix(in srgb, var(--lg-accent-gold) 72%, white) 45deg 90deg,
+          color-mix(in srgb, white 92%, var(--lg-accent-cyan)) 90deg 135deg,
+          color-mix(in srgb, var(--lg-accent-gold) 72%, white) 135deg 180deg,
+          color-mix(in srgb, white 92%, var(--lg-accent-cyan)) 180deg 225deg,
+          color-mix(in srgb, var(--lg-accent-gold) 72%, white) 225deg 270deg,
+          color-mix(in srgb, white 92%, var(--lg-accent-cyan)) 270deg 315deg,
+          color-mix(in srgb, var(--lg-accent-gold) 72%, white) 315deg 360deg
         );
-      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+      box-shadow:
+        inset 0 0 0 2px rgba(255, 255, 255, 0.22),
+        inset 0 -10px 18px rgba(0, 0, 0, 0.1);
     }
 
     .wheel-face::before {
@@ -139,18 +173,59 @@ import { Router } from '@angular/router';
       opacity: 0.4;
     }
 
+    .wheel-gloss {
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.35), transparent 52%);
+      pointer-events: none;
+    }
+
     .wheel-inner-ring {
       position: absolute;
-      inset: 36px;
+      inset: 34px;
       border-radius: 50%;
       border: 2px solid rgba(255, 255, 255, 0.32);
       background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 70%);
     }
 
+    .prize-segment {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 28px;
+      gap: 2px;
+      transform-origin: center center;
+      pointer-events: none;
+    }
+
+    .prize-icon {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+      z-index: 2;
+    }
+
+    .prize-text {
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(0, 0, 0, 0.85);
+      text-shadow: 
+        0 1px 0 rgba(255, 255, 255, 0.8),
+        0 1px 3px rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.03em;
+      z-index: 2;
+    }
+
     .wheel-center {
       position: absolute;
-      width: 54px;
-      height: 54px;
+      width: 50px;
+      height: 50px;
       border-radius: 999px;
       background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.5), var(--lg-accent) 40%, var(--lg-violet-mid));
       box-shadow:
@@ -161,16 +236,28 @@ import { Router } from '@angular/router';
 
     .pointer {
       position: absolute;
-      top: -8px;
+      top: -9px;
       left: 50%;
       transform: translateX(-50%);
       width: 0;
       height: 0;
-      border-left: 16px solid transparent;
-      border-right: 16px solid transparent;
-      border-top: 30px solid var(--lg-accent-gold);
+      border-left: 13px solid transparent;
+      border-right: 13px solid transparent;
+      border-top: 24px solid var(--lg-accent-gold);
       filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.45));
       z-index: 6;
+    }
+
+    .pointer::before {
+      content: '';
+      position: absolute;
+      top: -27px;
+      left: -9px;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 35% 28%, #fff, color-mix(in srgb, var(--lg-accent-gold) 78%, var(--lg-accent)) 68%);
+      box-shadow: 0 2px 9px rgba(0, 0, 0, 0.34);
     }
 
     .lights {
@@ -178,17 +265,17 @@ import { Router } from '@angular/router';
       inset: 0;
       border-radius: 50%;
       pointer-events: none;
-      animation: pulseLights 1.8s ease-in-out infinite;
+      animation: pulseLights 2.2s ease-in-out infinite;
     }
 
     .light {
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 10px;
-      height: 10px;
-      margin-left: -5px;
-      margin-top: -5px;
+      width: 8px;
+      height: 8px;
+      margin-left: -4px;
+      margin-top: -4px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.92);
       box-shadow: 0 0 10px color-mix(in srgb, var(--lg-accent-gold) 75%, white);
@@ -221,20 +308,36 @@ import { Router } from '@angular/router';
     }
   `]
 })
-export class RuletaComponent {
+export class RuletaComponent implements OnDestroy {
   private router = inject(Router);
+  private readonly spinStartAudio = this.createAudio('/sounds/button-click-off-click.mp3', 0.55);
+  private readonly spinEndAudio = this.createAudio('/sounds/010707105_prev.mp3', 0.6);
 
-  readonly prizes = ['200', '500', '800', '1000', '1500', '2000', '5000', '10000'];
+  readonly prizes: Prize[] = [
+    { amount: '200', icon: 'game/balls/ball-lv1.webp' },
+    { amount: '500', icon: 'game/balls/ball-lv2.webp' },
+    { amount: '800', icon: 'game/balls/ball-lv3.webp' },
+    { amount: '1000', icon: 'game/balls/ball-lv4.webp' },
+    { amount: '1500', icon: 'game/balls/ball-lv5.webp' },
+    { amount: '2000', icon: 'game/balls/ball-lv6.webp' },
+    { amount: '5000', icon: 'game/balls/ball-lv7.webp' },
+    { amount: '10000', icon: 'game/balls/ball-lv8.webp' }
+  ];
   readonly lights = Array.from({ length: 24 }, (_, index) => index);
   readonly isSpinning = signal(false);
   readonly rotation = signal(0);
   readonly currentPrizeIndex = signal(0);
 
-  readonly currentPrize = computed(() => `${this.prizes[this.currentPrizeIndex()]} COP`);
+  readonly currentPrize = computed(() => `${this.prizes[this.currentPrizeIndex()].amount} COP`);
   readonly liveMessage = computed(() =>
     this.isSpinning() ? 'La ruleta está girando.' : `Resultado: ${this.currentPrize()}.`
   );
   readonly wheelTransform = computed(() => `rotate(${this.rotation()}deg)`);
+
+  ngOnDestroy(): void {
+    this.spinStartAudio.pause();
+    this.spinEndAudio.pause();
+  }
 
   goBack(): void {
     this.router.navigate(['/main']);
@@ -242,7 +345,13 @@ export class RuletaComponent {
 
   lightTransform(index: number): string {
     const angle = (360 / this.lights.length) * index;
-    return `rotate(${angle}deg) translateY(-180px)`;
+    return `rotate(${angle}deg) translateY(-171px)`;
+  }
+
+  prizeTransform(index: number): string {
+    const segmentAngle = 360 / this.prizes.length;
+    const angle = index * segmentAngle + segmentAngle / 2;
+    return `rotate(${angle}deg)`;
   }
 
   spin(): void {
@@ -250,20 +359,64 @@ export class RuletaComponent {
       return;
     }
 
+    this.playAudio(this.spinStartAudio);
     this.isSpinning.set(true);
+    
+    const currentRotationNormalized = this.rotation() % 360;
     const winningIndex = Math.floor(Math.random() * this.prizes.length);
     const segmentAngle = 360 / this.prizes.length;
     const segmentCenter = winningIndex * segmentAngle + segmentAngle / 2;
     const landingAngle = 360 - segmentCenter;
-    const extraTurns = 6 + Math.floor(Math.random() * 3);
-    const targetRotation = this.rotation() + extraTurns * 360 + landingAngle;
+    const extraTurns = 15 + Math.floor(Math.random() * 8);
+    const targetRotation = currentRotationNormalized + extraTurns * 360 + landingAngle;
 
     this.rotation.set(targetRotation);
 
     window.setTimeout(() => {
       this.currentPrizeIndex.set(winningIndex);
       this.isSpinning.set(false);
-      this.rotation.update((value) => value % 360);
-    }, 5100);
+      this.playAudio(this.spinEndAudio);
+      this.triggerConfetti();
+    }, 4900);
+  }
+
+  private triggerConfetti(): void {
+    const colors = ['#ffd060', '#00d4ff', '#22c55e'];
+    
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.5 },
+      colors
+    });
+
+    window.setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors
+      });
+      confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors
+      });
+    }, 250);
+  }
+
+  private createAudio(src: string, volume: number): HTMLAudioElement {
+    const audio = new Audio(src);
+    audio.preload = 'auto';
+    audio.volume = volume;
+    return audio;
+  }
+
+  private playAudio(audio: HTMLAudioElement): void {
+    audio.currentTime = 0;
+    void audio.play().catch(() => undefined);
   }
 }

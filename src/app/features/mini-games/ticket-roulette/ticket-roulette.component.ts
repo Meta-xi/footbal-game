@@ -325,7 +325,7 @@ export class TicketRouletteComponent {
 
   generateReel() {
     let tempReel: Ticket[] = [];
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 50; i++) {
       tempReel = [...tempReel, ...this.baseTickets];
     }
     this.reelTickets.set(tempReel);
@@ -342,8 +342,8 @@ export class TicketRouletteComponent {
     this.audioClick.play().catch(() => console.log('Esperando interacción para audio...'));
     this.isSpinning.set(true);
 
-    const minSpins = 70;
-    const maxSpins = 90;
+    const minSpins = 200;
+    const maxSpins = 280;
     const winningIndex = Math.floor(Math.random() * (maxSpins - minSpins + 1)) + minSpins;
 
     const targetOffset = this.calculateOffset(winningIndex);
