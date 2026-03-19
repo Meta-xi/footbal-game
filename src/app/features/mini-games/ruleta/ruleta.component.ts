@@ -31,7 +31,7 @@ interface Prize {
         </svg>
       </button>
 
-       <header class="w-full max-w-md px-4 pt-6 pb-3 text-center">
+       <header class="w-full max-w-md px-4 pt-6 pb-8 text-center">
          <h1 class="mt-2 text-white text-4xl font-black tracking-[0.08em] leading-tight">SUPER LUCKY SPIN</h1>
          <p class="mt-1.5 text-sm text-white/75">Gira la ruleta y gana una recompensa aleatoria</p>
        </header>
