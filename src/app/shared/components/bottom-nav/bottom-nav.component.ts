@@ -12,7 +12,7 @@ import { map, filter } from 'rxjs';
     <!--
       Liquid Glass bottom navigation pill with a sliding active indicator.
     -->
-    <nav [hidden]="isHidden()" class="mx-4 mb-1 flex flex-row items-center p-1 lg-pill !rounded-[25px] bg-white/[0.03] backdrop-blur-3xl border border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.4)] relative overflow-hidden"
+     <nav [hidden]="isHidden()" class="mx-0 mb-1 flex flex-row items-center px-2 py-1 lg-pill !rounded-[25px] bg-white/[0.03] backdrop-blur-3xl border border-white/[0.1] shadow-[0_20px_50px_rgba(0,0,0,0.4)] relative overflow-hidden"
       aria-label="Navegación principal">
       <!-- Glossy Glare Layer -->
       <div class="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/5 to-transparent opacity-40"></div>
@@ -29,7 +29,7 @@ import { map, filter } from 'rxjs';
         <button [routerLink]="nav.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: nav.id === 'Social'}"
           class="nav-btn group relative z-10" [attr.aria-label]="nav.id">
           <div class="nav-content">
-            <img [ngSrc]="nav.icon" alt="" width="20" height="20" class="nav-icon group-[.active]:opacity-100 opacity-30 group-hover:opacity-60 transition-all duration-500">
+            <img [ngSrc]="nav.icon" alt="" width="28" height="28" class="nav-icon group-[.active]:opacity-100 opacity-30 group-hover:opacity-60 transition-all duration-500">
             <span class="nav-label group-[.active]:text-white group-[.active]:font-black text-white/30 text-[8px] font-bold uppercase tracking-[0.15em] transition-all duration-500 group-[.active]:text-glow-cyan">{{ nav.id }}</span>
           </div>
         </button>

@@ -98,17 +98,17 @@ interface Prize {
       color: #fff;
     }
 
-    .game-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 100vh;
-      padding: 0.75rem 0 1.15rem;
-      position: relative;
-      overflow: hidden;
-      gap: 0.3rem;
-    }
+     .game-wrapper {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       justify-content: space-between;
+       min-height: 100vh;
+       padding: 0.25rem 0 1rem;
+       position: relative;
+       overflow: hidden;
+       gap: 0.15rem;
+     }
 
     .roulette-shell {
       position: relative;
