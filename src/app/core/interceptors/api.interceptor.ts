@@ -12,7 +12,7 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
   const storage = inject(StorageService);
   const encryption = inject(EncryptionService);
 
-  const authToken = storage.get<string>(AUTH_TOKEN_KEY);
+  const authToken = localStorage.getItem(AUTH_TOKEN_KEY);
   const userData = storage.get<{ id?: string | number; username?: string }>(USER_DATA_KEY);
   const userId = userData?.id?.toString() || '';
 
