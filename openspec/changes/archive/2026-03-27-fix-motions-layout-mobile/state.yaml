@@ -1,0 +1,6 @@
+phase: archive
+status: completed
+summary: |
+  Change archived for `fix-motions-layout-mobile`.
+  Note: The `verify` phase was skipped for this change due to repeated agent interruption.
+next: END

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, Signal, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, signal, effect, ViewChild, ViewChildren, ElementRef, QueryList, AfterViewInit, OnDestroy, Renderer2 } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { NgOptimizedImage, DecimalPipe } from '@angular/common';
 import { GlassModalComponent } from '../../shared/ui';
 import { MotionsService } from './motions.service';
@@ -17,17 +18,18 @@ interface DailyReward {
   template: `
     <section class="h-dvh flex flex-col relative w-full overflow-hidden bg-transparent">
       
-      <div class="flex-1 w-full relative z-10 flex flex-col overflow-y-auto no-scrollbar pt-safe-top pb-32 px-5 gap-2 animate-slide-up">
+      <div class="flex-1 w-full relative z-0 flex flex-col overflow-y-auto no-scrollbar pt-safe-top pb-32 px-5 gap-2 animate-slide-up">
         
         <!-- Hero Section -->
-        <div class="flex flex-col items-center py-0 -mb-1.5">
-          <div class="relative w-24 h-32 group">
+        <div class="flex flex-col items-center md:items-end relative py-0 -mb-1.5">
+          <div class="relative w-24 h-32 z-10 group mt-4 mx-auto md:mr-4">
              <!-- Deep Aura Glow -->
-            <div class="absolute inset-[-20px] bg-indigo-500/20 rounded-full blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-1000 animate-pulse"></div>
+            <div class="absolute inset-0 z-0 bg-indigo-500/20 rounded-full blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-1000 animate-pulse"></div>
              @if (!imageError()) {
-               <img ngSrc="motions/main/mociones.webp" alt="Misiones" width="128" height="128" 
-                 (error)="imageError.set(true)"
-                 class="relative z-10 w-full h-full object-contain filter drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] lg-float">
+                <img ngSrc="motions/main/mociones.webp" alt="Misiones" width="128" height="128" 
+                  (error)="imageError.set(true)"
+                  (load)="imageError.set(false)"
+                  class="relative z-10 w-full h-full object-contain filter drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] lg-float">
              } @else {
                <svg class="relative z-10 w-full h-full object-contain filter drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] lg-float text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -35,27 +37,36 @@ interface DailyReward {
                </svg>
              }
           </div>
+
         </div>
 
-        <nav class="relative bg-white/5 backdrop-blur-3xl rounded-full p-1.5 flex items-center border border-cyan-500/30 shadow-2xl accent-cyan-bg-alt">
-          <!-- Glass Sliding Indicator Container -->
-          <div class="absolute inset-1.5 z-0 pointer-events-none">
-            <div class="h-full bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.2)] transition-all duration-500 cubic-bezier(0.2, 1, 0.3, 1)"
-              [style.width.%]="100 / missionTabKeys.length"
-              [style.transform]="'translateX(' + (activeIndex() * 100) + '%)'">
-              <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-50 rounded-full"></div>
+        <nav #tabsNav class="relative bg-white/5 backdrop-blur-3xl rounded-full p-1.5 flex items-center border border-cyan-500/30 shadow-2xl accent-cyan-bg-alt">
+          @if (missionTabKeys.length > 0) {
+            <!-- Glass Sliding Indicator Container (only render when tabs exist) -->
+            <!-- Pixel-based indicator positioning using offsetLeft/offsetWidth (see design.md) -->
+            <div class="absolute inset-1.5 z-0 pointer-events-none">
+              <div class="h-full bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-[0_4px_15px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.2)] transition-all duration-500 cubic-bezier(0.2, 1, 0.3, 1)"
+                [style.width.px]="indicatorWidth()"
+                [style.transform]="'translateX(' + indicatorX() + 'px)'">
+                <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-50 rounded-full"></div>
+              </div>
             </div>
-          </div>
+          }
 
           @for (tab of missionTabKeys; track tab) {
-            <button (click)="setActiveTab(tab)"
-              class="flex-1 h-11 rounded-full flex items-center justify-center group active:scale-95 transition-all duration-300 relative z-10">
+            <!-- Tab button: equal width across all viewports -->
+            <button #tabBtn (click)="setActiveTab(tab)"
+              class="flex-1 h-11 rounded-full flex items-center justify-center group active:scale-95 transition-all duration-300 relative z-10 focus:ring-2 focus:ring-cyan-500/40 focus:outline-none"
+              [class.brightness-110]="activeTab() === tab"
+              [class.drop-shadow-lg]="activeTab() === tab">
               <img [ngSrc]="'social/icons/' + (tab === 'History' ? 'complete.png' : tab === 'Daily' ? 'daily.png' : getTabIcon(tab))" 
                 [alt]="tab" width="22" height="22" 
                 class="transition-all duration-300 pointer-events-none"
                 [class.opacity-30]="activeTab() !== tab"
                 [class.opacity-100]="activeTab() === tab"
-                [class.scale-110]="activeTab() === tab">
+                [class.scale-110]="activeTab() === tab"
+                [class.brightness-125]="activeTab() === tab"
+                [class.drop-shadow-lg]="activeTab() === tab">
             </button>
           }
         </nav>
@@ -172,7 +183,7 @@ interface DailyReward {
                     </div>
                     <div class="lg-module-card p-3 border-rose-500/30 accent-rose">
                       <span class="text-[8px] font-black text-white/20 uppercase tracking-widest">Dinero Perdido</span>
-                      <span class="block text-lg font-black text-rose-400 tracking-tighter text-glow mt-1">0</span>
+                      <span class="block text-lg font-black text-rose-400 tracking-tighter text-glow-rose mt-1">{{ totalLost() | number }} COP</span>
                     </div>
                   </div>
 
@@ -220,7 +231,7 @@ interface DailyReward {
               </div>
 
               <!-- Close Button -->
-              <button (click)="closeModal()" 
+              <button (click)="closeModal()" aria-label="Cerrar misión"
                 class="lg-icon-btn w-7 h-7 text-white/40 hover:text-white transition-all active:scale-90 flex-shrink-0 border-white/10">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
@@ -243,6 +254,60 @@ interface DailyReward {
             </div>
           </div>
         }
+      </app-glass-modal>
+
+      <!-- History Modal -->
+      <app-glass-modal
+        [isOpen]="showHistoryModal()"
+        (closed)="closeHistoryModal()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="history-modal-title"
+      >
+        <div class="relative w-full max-w-[320px] flex flex-col p-2 group">
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-4 z-10">
+            <h3 id="history-modal-title" class="text-sm font-bold text-white tracking-tight">Historial Completo de Misiones</h3>
+            <button (click)="closeHistoryModal()" aria-label="Cerrar historial de misiones"
+              class="lg-icon-btn w-7 h-7 text-white/40 hover:text-white transition-all active:scale-90 flex-shrink-0 border-white/10">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+          </div>
+          
+          <!-- Scrollable list -->
+          <div class="overflow-y-auto no-scrollbar max-h-[60vh] flex flex-col gap-2">
+            @if (missionHistory().length === 0) {
+              <div class="flex flex-col items-center justify-center py-8 text-center">
+                <p class="text-sm font-medium text-white/50">No hay misiones en el historial</p>
+              </div>
+            } @else {
+              @for (mission of missionHistory(); track mission.id) {
+                <div class="lg-card-card p-3 flex gap-3 items-start" tabindex="0" role="listitem" [attr.aria-label]="mission.title + (mission.completed ? ' - Completada' : ' - Fallida')">
+                  <!-- Icon -->
+                  <div class="relative flex-shrink-0 w-10 h-10">
+                    <div class="relative z-10 w-full h-full lg-bubble flex items-center justify-center p-2 backdrop-blur-3xl bg-white/[0.03]">
+                      <img [ngSrc]="mission.icon" [alt]="mission.title" width="20" height="20" class="object-contain drop-shadow-lg">
+                    </div>
+                  </div>
+                  <!-- Content -->
+                  <div class="flex flex-col flex-1 min-w-0">
+                    <h4 class="text-xs font-bold text-white tracking-tight truncate">{{ mission.title }}</h4>
+                    <p class="text-[10px] text-white/40 leading-snug line-clamp-2 mt-0.5">{{ mission.description }}</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs font-bold" [class]="mission.completed ? 'text-emerald-400 text-glow-emerald' : 'text-rose-400 text-glow-rose'">
+                        {{ mission.completed ? '+' : '-' }}{{ mission.reward | number }} COP
+                      </span>
+                      <span class="lg-status-badge !py-0.5 !px-2 !text-[8px]" [class]="mission.completed ? 'border-emerald-500/30 accent-emerald' : 'border-rose-500/30 accent-rose'">
+                        <span class="lg-dot" [class]="mission.completed ? 'lg-dot-active' : 'lg-dot-error'"></span>
+                        {{ mission.completed ? 'Completada' : 'Fallida' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
       </app-glass-modal>
 
       <!-- Toast Notification (Professional Glass) -->
@@ -292,7 +357,7 @@ interface DailyReward {
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MotionsComponent {
+export class MotionsComponent implements AfterViewInit, OnDestroy {
   readonly missionTabKeys: string[];
   
   // Signals from service (assigned in constructor)
@@ -304,11 +369,22 @@ export class MotionsComponent {
   readonly whatsappMissions!: Signal<Mission[]>;
   readonly completedMissions!: Signal<Mission[]>;
   readonly failedMissions!: Signal<Mission[]>;
+  readonly totalLost!: Signal<number>;
+  readonly missionHistory!: Signal<Mission[]>;
   readonly dailyRewards!: Signal<DailyReward[]>;
   readonly toastData!: Signal<{ message: string, type: 'success' | 'error' | 'info' } | null>;
   readonly loading!: Signal<boolean>;
   readonly error!: Signal<string | null>;
   readonly imageError = signal(false);
+  readonly indicatorWidth = signal(0);
+  readonly indicatorX = signal(0);
+
+  @ViewChild('tabsNav', { read: ElementRef }) navEl!: ElementRef<HTMLElement>;
+  @ViewChildren('tabBtn') buttonRefs!: QueryList<ElementRef<HTMLElement>>;
+
+  private resizeObserver?: ResizeObserver;
+  private scrollListener?: () => void;
+  private buttonChangesSubscription?: Subscription;
 
   constructor(private readonly motionsService: MotionsService) {
     this.missionTabKeys = this.motionsService.getMissionTabKeys();
@@ -320,20 +396,107 @@ export class MotionsComponent {
     this.whatsappMissions = this.motionsService.whatsappMissions$;
     this.completedMissions = this.motionsService.completedMissions$;
     this.failedMissions = this.motionsService.failedMissions$;
+    this.totalLost = this.motionsService.totalLost$;
+    this.missionHistory = this.motionsService.missionHistory$;
     this.dailyRewards = this.motionsService.dailyRewards$;
     this.toastData = this.motionsService.toastData$;
     this.loading = this.motionsService.loading$;
     this.error = this.motionsService.error$;
-  }
 
-  ngOnInit() {
-    this.motionsService.fetchMissions();
+    // Effect must be in constructor for valid injection context (NG0203 fix)
     effect(() => {
       const errorMsg = this.error();
       if (errorMsg) {
         this.motionsService.showToast(errorMsg, 'error');
       }
     });
+
+    // Update indicator position when activeIndex changes
+    effect(() => {
+      const idx = this.activeIndex();
+      // Wait for view init before updating indicator
+      if (this.navEl) {
+        this.updateIndicatorPosition();
+        this.scrollToActiveTab();
+      }
+    });
+  }
+
+  ngOnInit() {
+    this.motionsService.fetchMissions();
+  }
+
+  ngAfterViewInit() {
+    this.setupIndicator();
+  }
+
+  ngOnDestroy() {
+    this.destroyIndicator();
+  }
+
+  private setupIndicator() {
+    const nav = this.navEl?.nativeElement;
+    if (!nav) return;
+
+    // Initial position update
+    this.updateIndicatorPosition();
+
+    // Listen to scroll events
+    this.scrollListener = () => this.updateIndicatorPosition();
+    nav.addEventListener('scroll', this.scrollListener, { passive: true });
+
+    // Observe size changes of nav and buttons
+    this.resizeObserver = new ResizeObserver(() => this.updateIndicatorPosition());
+    this.resizeObserver.observe(nav);
+    // Also observe each button for width changes
+    this.buttonChangesSubscription = this.buttonRefs?.changes.subscribe(() => {
+      this.buttonRefs.forEach(ref => this.resizeObserver?.observe(ref.nativeElement));
+    });
+    // Observe initial buttons
+    this.buttonRefs?.forEach(ref => this.resizeObserver?.observe(ref.nativeElement));
+  }
+
+  private destroyIndicator() {
+    const nav = this.navEl?.nativeElement;
+    if (nav && this.scrollListener) {
+      nav.removeEventListener('scroll', this.scrollListener);
+    }
+    this.resizeObserver?.disconnect();
+    this.buttonChangesSubscription?.unsubscribe();
+  }
+
+  // Equal column width calculation for indicator (no offset measurements needed)
+  private updateIndicatorPosition() {
+    const nav = this.navEl?.nativeElement;
+    const buttons = this.buttonRefs?.toArray().map(ref => ref.nativeElement);
+    if (!nav || !buttons || buttons.length === 0) return;
+
+    const activeIdx = this.activeIndex();
+    // Equal column width: subtract padding (inset-1.5 * 2 = 12px) from nav width
+    const columnWidth = (nav.clientWidth - 12) / buttons.length;
+    const width = columnWidth;
+    const x = columnWidth * activeIdx;
+
+    this.indicatorWidth.set(width);
+    this.indicatorX.set(x);
+  }
+
+  // Guarded scroll: no-op when nav has no overflow (tabs fit without scrolling)
+  private scrollToActiveTab() {
+    const nav = this.navEl?.nativeElement;
+    const buttons = this.buttonRefs?.toArray().map(ref => ref.nativeElement);
+    if (!nav || !buttons || buttons.length === 0) return;
+
+    // No-op when no overflow
+    if (nav.scrollWidth <= nav.clientWidth) return;
+
+    const activeIdx = this.activeIndex();
+    const activeButton = buttons[activeIdx];
+    if (!activeButton) return;
+
+    // Center the active tab in the scroll viewport
+    const targetScrollLeft = activeButton.offsetLeft - (nav.clientWidth - activeButton.offsetWidth) / 2;
+    nav.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
   }
 
   // Delegated methods to service
@@ -350,6 +513,10 @@ export class MotionsComponent {
 
   claimDailyReward(reward: DailyReward) {
     this.motionsService.claimDailyReward(reward);
+  }
+
+  trackByMissionId(index: number, mission: Mission): string {
+    return mission.id;
   }
 
   // Confetti trigger (UI effect only - stays in component)

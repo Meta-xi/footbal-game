@@ -1,0 +1,7 @@
+phase: archive
+status: completed
+summary: |
+  Archiving completed change artifacts for tab layout and active tab styling fixes in /mociones.
+  Verification concluded with PASS_WITH_WARNINGS. Reviewer phase was skipped because the reviewer agent
+  was unavailable in the runtime; this is noted in the archive summary.
+next: END

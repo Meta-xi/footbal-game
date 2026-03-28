@@ -1,0 +1,5 @@
+phase: explore
+status: completed
+completed_at: "2026-03-27T05:48:21Z"
+summary: "Exploration found tasks referencing 'motions' in tasks.md (TASK-036 done, TASK-053 pending, TASK-062 pending)."
+next: sdd-propose

@@ -1,0 +1,5 @@
+phase: archived
+status: completed
+summary: |
+  Archived change folder for fix-motions-tab-layout-active-style. Verification was PASS_WITH_WARNINGS; reviewer skipped due to runtime unavailability.
+next: END

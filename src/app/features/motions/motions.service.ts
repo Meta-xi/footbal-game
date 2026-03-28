@@ -32,7 +32,7 @@ export class MotionsService {
   ]);
 
   // UI state
-  private readonly missionTabKeys = ['Daily', 'Whatsapp', 'Facebook', 'Tiktok', 'Telegram', 'Youtube', 'History'];
+  private readonly missionTabKeys = ['Daily', 'Whatsapp', 'Facebook', 'TikTok', 'Telegram', 'Youtube', 'History'];
   private readonly activeTab = signal<string>('Daily');
   private readonly selectedMission = signal<Mission | null>(null);
   private readonly showHistoryModal = signal<boolean>(false);
@@ -46,6 +46,11 @@ export class MotionsService {
   readonly whatsappMissions$ = computed(() => this.missions().filter(m => m.category === 'whatsapp'));
   readonly completedMissions$ = computed(() => this.missions().filter(m => m.completed));
   readonly failedMissions$ = computed(() => this.missions().filter(m => !m.completed));
+  readonly totalLost$ = computed(() => {
+    const failed = this.failedMissions$();
+    return failed.reduce((sum, m) => sum + (Number(m.reward) || 0), 0);
+  });
+  readonly missionHistory$ = computed(() => [...this.completedMissions$(), ...this.failedMissions$()]);
   readonly dailyRewards$ = this.dailyRewards.asReadonly();
   readonly activeTab$ = this.activeTab.asReadonly();
   readonly selectedMission$ = this.selectedMission.asReadonly();
@@ -192,7 +197,7 @@ export class MotionsService {
     const icons: Record<string, string> = {
       Whatsapp: 'Whatsapp_37229.png',
       Facebook: 'facebook_icon-icons.com_53612.png',
-      Tiktok: 'tiktok_logo_icon_189233.png',
+      TikTok: 'tiktok_logo_icon_189233.png',
       Telegram: 'telegram_icon-icons.com_72055.png',
       Youtube: 'YouTube_23392.png'
     };
