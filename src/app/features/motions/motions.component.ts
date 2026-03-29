@@ -196,8 +196,29 @@ interface DailyReward {
                 </div>
               }
               @default {
-                <div class="p-20 flex flex-col items-center justify-center text-center opacity-20">
-                  <p class="text-xs font-bold uppercase tracking-[0.2em] text-white">En proceso...</p>
+                <div class="flex flex-col gap-2 p-2">
+                  @for (mission of missions(); track mission.id) {
+                    <article (click)="openMission(mission)"
+                      class="bg-white/5 p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer rounded-2xl border border-transparent hover:border-white/10"
+                      [class.opacity-40]="mission.completed">
+                      <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-black/20 border border-white/10 flex items-center justify-center group-hover:border-white/20 transition-colors">
+                          <img [ngSrc]="mission.icon" [alt]="mission.title" width="28" height="28" class="object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all">
+                        </div>
+                        <div class="flex flex-col">
+                          <h3 class="text-sm font-bold text-white tracking-tight">{{ mission.title }}</h3>
+                          <span class="text-xs font-bold text-emerald-400 mt-1 text-glow-emerald">+{{ mission.reward | number }} <span class="text-[10px] text-emerald-500/60">COP</span></span>
+                        </div>
+                      </div>
+                      <div class="w-8 h-8 flex items-center justify-center text-white/40 group-hover:text-white transition-colors">
+                        @if (mission.completed) {
+                          <span class="text-emerald-400">✓</span>
+                        } @else {
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M14 5l7 7-7 7" /></svg>
+                        }
+                      </div>
+                    </article>
+                  }
                 </div>
               }
             }
