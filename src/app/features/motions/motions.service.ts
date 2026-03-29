@@ -1,8 +1,29 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { BackendMission, Mission } from '../../models/mision.model';
-import { GlassTab } from '../../shared/ui';
+import { GlassTab } from '../../shared/ui'; // Added this import
+import { environment } from '../../../environments/environment';
+import { MotionEvent } from './types/motion-event';
+
+// Interface for completed missions from backend
+export interface CompletedMissionBackend {
+  id: number;
+  userId: number;
+  misionesId: number;
+  mision?: string | null;
+  created: string;
+}
+
+export interface CompletedMission {
+  id: number;
+  userId: number;
+  misionesId: number;
+  mision?: string | null;
+  created: Date;
+}
+
+
 
 interface DailyReward {
   day: number;
@@ -20,6 +41,8 @@ export class MotionsService {
   private readonly error = signal<string | null>(null);
   private readonly completedMissions = signal<Mission[]>([]);
   private readonly failedMissions = signal<Mission[]>([]);
+  private readonly completedMissionRecords = signal<CompletedMission[]>([]);
+  private readonly loadingCompletedMissions = signal<boolean>(false);
 
   // Daily rewards
   private readonly dailyRewards = signal<DailyReward[]>([
@@ -32,8 +55,8 @@ export class MotionsService {
     { day: 7, state: 'upcoming', icon: 'motions/daily/comingsoon.webp' },
   ]);
 
-  // UI state
-  private readonly missionTabKeys = ['Daily', 'Whatsapp', 'Facebook', 'TikTok', 'Telegram', 'Youtube', 'History'];
+  // UI state (matching API categories: 0-whatsapp, 1-facebook, 2-tiktok, 3-youtube, 4-daily, 5-referral)
+  private readonly missionTabKeys = ['Whatsapp', 'Facebook', 'TikTok', 'Youtube', 'Daily', 'Referral', 'History'];
   private readonly activeTab = signal<string>('Daily');
   private readonly selectedMission = signal<Mission | null>(null);
   private readonly showHistoryModal = signal<boolean>(false);
@@ -45,6 +68,14 @@ export class MotionsService {
     { id: 'completadas', label: 'Completadas' },
     { id: 'fallidas', label: 'Fallidas' }
   ];
+
+  // Events for UI effects (component listens via effect)
+  private readonly _lastEvent = signal<MotionEvent | null>(null);
+  readonly lastEvent = this._lastEvent.asReadonly();
+
+  private emitEvent(e: MotionEvent) {
+    this._lastEvent.set(e);
+  }
 
   // Computed signals
   readonly activeIndex = computed(() => this.missionTabKeys.indexOf(this.activeTab()));
@@ -70,17 +101,24 @@ export class MotionsService {
   readonly selectedMission$ = this.selectedMission.asReadonly();
   readonly showHistoryModal$ = this.showHistoryModal.asReadonly();
   readonly toastData$ = this.toastData.asReadonly();
+  readonly completedMissionRecords$ = this.completedMissionRecords.asReadonly();
+  readonly loadingCompletedMissions$ = this.loadingCompletedMissions.asReadonly();
 
   // Backend integration
   private readonly httpClient = inject(HttpClient);
 
-  async fetchMissions(): Promise<void> {
+  async fetchMissions(categoryId?: number | null): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
     try {
+      let params = new HttpParams();
+      if (categoryId !== null && categoryId !== undefined && categoryId !== 6) {
+        params = params.set('Category', categoryId.toString());
+      }
       const response = await firstValueFrom(
         this.httpClient.get<BackendMission[]>(
-          'https://webdevelopment.neti.es/Misions/GetMisionsInfo'
+          `${environment.apiBaseUrl}Misions/GetMisionsInfo`,
+          { params }
         )
       );
       if (!Array.isArray(response)) {
@@ -104,6 +142,45 @@ export class MotionsService {
     }
   }
 
+  async fetchCompletedMissions(): Promise<void> {
+    this.loadingCompletedMissions.set(true);
+    this.error.set(null);
+    try {
+      const response = await firstValueFrom(
+        this.httpClient.get<CompletedMissionBackend[]>(
+          `${environment.apiBaseUrl}Misions/GetCompletedMisions`
+        )
+      );
+      if (!Array.isArray(response)) {
+        throw new Error('Invalid response format');
+      }
+      const completedMissions = response.map(b => this.mapCompletedMissionRecord(b));
+      this.completedMissionRecords.set(completedMissions);
+    } catch (err) {
+      console.error('Failed to fetch completed missions:', err);
+      if (err instanceof HttpErrorResponse) {
+        if (err.status === 400) {
+          this.error.set('Solicitud incorrecta. Verifica los datos.');
+          this.showToast('Error: Solicitud incorrecta.', 'error');
+        } else if (err.status === 401) {
+          this.error.set('No autorizado. Inicia sesión nuevamente.');
+          this.showToast('Error: No autorizado.', 'error');
+        } else if (err.status >= 500) {
+          this.error.set('Servidor no disponible. Intenta más tarde.');
+          this.showToast('Error del servidor. Intenta más tarde.', 'error');
+        } else {
+          this.error.set('Error al cargar misiones completadas. Intenta de nuevo.');
+          this.showToast('Error al cargar misiones completadas.', 'error');
+        }
+      } else {
+        this.error.set('Error al cargar misiones completadas. Intenta de nuevo.');
+        this.showToast('Error al cargar misiones completadas.', 'error');
+      }
+    } finally {
+      this.loadingCompletedMissions.set(false);
+    }
+  }
+
   private mapBackendMissionToMission(b: BackendMission): Mission {
     const categoryStr = this.mapCategoryToString(b.category);
     return {
@@ -118,25 +195,33 @@ export class MotionsService {
     };
   }
 
+  private mapCompletedMissionRecord(b: CompletedMissionBackend): CompletedMission {
+    return {
+      id: b.id,
+      userId: b.userId,
+      misionesId: b.misionesId,
+      mision: b.mision,
+      created: new Date(b.created)
+    };
+  }
+
   private getIconForCategory(category: string | number | null): string {
     const icons: Record<string, string> = {
       whatsapp: 'social/icons/Whatsapp_37229.png',
       facebook: 'social/icons/facebook_icon-icons.com_53612.png',
       tiktok: 'social/icons/tiktok_logo_icon_189233.png',
-      telegram: 'social/icons/telegram_icon-icons.com_72055.png',
       youtube: 'social/icons/YouTube_23392.png',
-      daily: 'social/icons/Whatsapp_37229.png',
-      referral: 'social/icons/Whatsapp_37229.png'
+      daily: 'social/icons/daily.png',
+      referral: 'social/icons/referral.png'
     };
-    // Map numeric categories to social icons
+    // Map numeric categories to social icons (0-whatsapp, 1-facebook, 2-tiktok, 3-youtube, 4-daily, 5-referral)
     const numericIcons: Record<number, string> = {
-      1: 'social/icons/Whatsapp_37229.png',
-      2: 'social/icons/facebook_icon-icons.com_53612.png',
-      3: 'social/icons/tiktok_logo_icon_189233.png',
-      4: 'social/icons/Whatsapp_37229.png',
-      5: 'social/icons/Whatsapp_37229.png',
-      6: 'social/icons/telegram_icon-icons.com_72055.png',
-      7: 'social/icons/YouTube_23392.png'
+      0: 'social/icons/Whatsapp_37229.png',
+      1: 'social/icons/facebook_icon-icons.com_53612.png',
+      2: 'social/icons/tiktok_logo_icon_189233.png',
+      3: 'social/icons/YouTube_23392.png',
+      4: 'social/icons/daily.png',
+      5: 'social/icons/referral.png'
     };
     
     if (category === null) return 'social/icons/Whatsapp_37229.png';
@@ -151,13 +236,12 @@ export class MotionsService {
     if (category === null) return '';
     if (typeof category === 'number') {
       const mapping: Record<number, string> = {
-        1: 'whatsapp',
-        2: 'facebook',
-        3: 'tiktok',
+        0: 'whatsapp',
+        1: 'facebook',
+        2: 'tiktok',
+        3: 'youtube',
         4: 'daily',
-        5: 'referral',
-        6: 'telegram',
-        7: 'youtube'
+        5: 'referral'
       };
       return mapping[category] || `category_${category}`;
     }
@@ -171,8 +255,9 @@ export class MotionsService {
   }
 
   // Methods to update state
-  setActiveTab(tab: string) {
+  setActiveTab(tab: string): number {
     this.activeTab.set(tab);
+    return this.missionTabKeys.indexOf(tab);
   }
 
   setSelectedMission(mission: Mission | null) {
@@ -199,7 +284,8 @@ export class MotionsService {
     const m = this.selectedMission();
     if (m) {
       this.closeModal();
-      // TODO: Implement actual navigation to mission
+      // Simulate mission claim (in real app, this would navigate or call API)
+      this.claimMission(Number(m.id));
     }
   }
 
@@ -216,22 +302,22 @@ export class MotionsService {
       Whatsapp: 'Whatsapp_37229.png',
       Facebook: 'facebook_icon-icons.com_53612.png',
       TikTok: 'tiktok_logo_icon_189233.png',
-      Telegram: 'telegram_icon-icons.com_72055.png',
-      Youtube: 'YouTube_23392.png'
+      Youtube: 'YouTube_23392.png',
+      Daily: 'daily.png',
+      Referral: 'referral.png'
     };
     return icons[tab] || '';
   }
 
   claimDailyReward(reward: DailyReward) {
     if (reward.state === 'upcoming') {
-      this.playErrorSound();
+      this.emitEvent({ type: 'missionFailed', error: 'Reward not available yet' });
       this.showToast('¡Aún no! Esta recompensa estará disponible pronto.', 'error');
     } else if (reward.state === 'claimed') {
-      this.playErrorSound();
+      this.emitEvent({ type: 'missionFailed', error: 'Reward already claimed' });
       this.showToast('¡Ya reclamaste este premio! Vuelve mañana.', 'error');
     } else if (reward.state === 'available') {
-      this.triggerConfetti();
-      this.playClaimSound();
+      this.emitEvent({ type: 'dailyRewardCollected', amount: 0 }); // amount not tracked
       this.dailyRewards.update(rewards => rewards.map(r =>
         r.day === reward.day ? { ...r, state: 'claimed', icon: 'motions/daily/reclamed.webp' } : r
       ));
@@ -239,91 +325,42 @@ export class MotionsService {
     }
   }
 
-  // Sound effects (these might be better kept in component, but including for completeness)
-  private playClaimSound() {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const playNote = (freq: number, startTime: number, type: OscillatorType = 'sine', duration: number = 0.5) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, startTime);
-
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(0.15, startTime + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(startTime);
-      osc.stop(startTime + duration);
-    };
-
-    const now = ctx.currentTime;
-    // Magical chime chord (C Maj 7 Arpeggio)
-    playNote(523.25, now, 'sine', 0.6);       // C5
-    playNote(659.25, now + 0.1, 'sine', 0.6); // E5
-    playNote(783.99, now + 0.2, 'sine', 0.6); // G5
-    playNote(987.77, now + 0.3, 'sine', 0.6); // B5
-    playNote(1046.50, now + 0.4, 'triangle', 0.8); // C6 Sparkle
+  // Claim a mission (simulate success)
+  claimMission(missionId: number) {
+    const missions = this.missions();
+    const mission = missions.find(m => m.id === String(missionId));
+    if (!mission) {
+      this.emitEvent({ type: 'missionFailed', missionId, error: 'Mission not found' });
+      this.showToast('Misión no encontrada.', 'error');
+      return;
+    }
+    if (mission.completed) {
+      this.emitEvent({ type: 'missionFailed', missionId, error: 'Mission already completed' });
+      this.showToast('Esta misión ya fue completada.', 'error');
+      return;
+    }
+    // Mark mission as completed
+    this.missions.update(list => list.map(m => 
+      m.id === String(missionId) ? { ...m, completed: true } : m
+    ));
+    this.emitEvent({ type: 'missionClaimed', missionId, amount: Number(mission.reward) });
+    this.showToast(`¡Misión completada! Recompensa: +${mission.reward} COP`, 'success');
   }
 
-  private playErrorSound() {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(300, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.15);
-
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.2);
+  // Fail a mission (simulate error)
+  failMission(missionId: number, error: string) {
+    this.emitEvent({ type: 'missionFailed', missionId, error });
+    this.showToast(`Error en misión: ${error}`, 'error');
   }
+
+
+
+
 
   showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
     this.toastData.set({ message, type });
     setTimeout(() => this.toastData.set(null), 3000);
   }
 
-  triggerConfetti() {
-    const duration = 2000;
-    const end = Date.now() + duration;
 
-    const frame = () => {
-      // Note: In a real service, we might not want to directly call confetti here
-      // This is kept for parity with the original component
-      (<any>window).confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.8 },
-        colors: ['#FFD700', '#FFA500', '#FF4500', '#10B981', '#3B82F6']
-      });
-      (<any>window).confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.8 },
-        colors: ['#FFD700', '#FFA500', '#FF4500', '#10B981', '#3B82F6']
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
-  }
 }

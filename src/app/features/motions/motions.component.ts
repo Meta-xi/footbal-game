@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, Signal, signal, effect, ViewChild, ViewChildren, ElementRef, QueryList, AfterViewInit, OnDestroy, Renderer2 } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, signal, effect, ElementRef, QueryList, AfterViewInit, OnDestroy, Renderer2, inject, viewChild, viewChildren } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NgOptimizedImage, DecimalPipe } from '@angular/common';
 import { GlassModalComponent, GlassTabBarComponent, GlassTab } from '../../shared/ui';
 import { MotionsService } from './motions.service';
-import confetti from 'canvas-confetti';
+import { AudioService } from '../../services/audio.service';
+import { ConfettiService } from '../../services/confetti.service';
 import { Mission } from '../../models/mision.model';
 
 interface DailyReward {
@@ -398,14 +399,18 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
   readonly indicatorWidth = signal(0);
   readonly indicatorX = signal(0);
 
-  @ViewChild('tabsNav', { read: ElementRef }) navEl!: ElementRef<HTMLElement>;
-  @ViewChildren('tabBtn') buttonRefs!: QueryList<ElementRef<HTMLElement>>;
+  private readonly navEl = viewChild.required<ElementRef<HTMLElement>>('tabsNav');
+  private readonly buttonRefs = viewChildren<ElementRef<HTMLElement>>('tabBtn');
 
   private resizeObserver?: ResizeObserver;
   private scrollListener?: () => void;
-  private buttonChangesSubscription?: Subscription;
+  private buttonChangesEffect?: import('@angular/core').EffectRef;
 
-  constructor(private readonly motionsService: MotionsService) {
+  private readonly motionsService = inject(MotionsService);
+  private readonly audioService = inject(AudioService);
+  private readonly confettiService = inject(ConfettiService);
+
+  constructor() {
     this.missionTabKeys = this.motionsService.getMissionTabKeys();
     this.activeTab = this.motionsService.activeTab$;
     this.activeIndex = this.motionsService.activeIndex;
@@ -437,15 +442,36 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
     effect(() => {
       const idx = this.activeIndex();
       // Wait for view init before updating indicator
-      if (this.navEl) {
+      if (this.navEl()) {
         this.updateIndicatorPosition();
         this.scrollToActiveTab();
+      }
+    });
+
+    effect(() => {
+      const event = this.motionsService.lastEvent();
+      if (!event) return;
+      
+      switch (event.type) {
+        case 'missionClaimed':
+          this.audioService.playSuccess();
+          this.confettiService.fire('win');
+          break;
+        case 'missionFailed':
+          this.audioService.playError();
+          break;
+        case 'dailyRewardCollected':
+          this.audioService.playSuccess();
+          this.confettiService.fire('daily');
+          break;
       }
     });
   }
 
   ngOnInit() {
-    this.motionsService.fetchMissions();
+    const activeTab = this.activeTab();
+    const categoryId = activeTab === 'History' ? null : this.missionTabKeys.indexOf(activeTab);
+    this.motionsService.fetchMissions(categoryId);
   }
 
   ngAfterViewInit() {
@@ -457,7 +483,7 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
   }
 
   private setupIndicator() {
-    const nav = this.navEl?.nativeElement;
+    const nav = this.navEl()?.nativeElement;
     if (!nav) return;
 
     // Initial position update
@@ -470,27 +496,32 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
     // Observe size changes of nav and buttons
     this.resizeObserver = new ResizeObserver(() => this.updateIndicatorPosition());
     this.resizeObserver.observe(nav);
-    // Also observe each button for width changes
-    this.buttonChangesSubscription = this.buttonRefs?.changes.subscribe(() => {
-      this.buttonRefs.forEach(ref => this.resizeObserver?.observe(ref.nativeElement));
+
+    // Observe buttons changes via signal
+    this.buttonChangesEffect = effect(() => {
+      const buttons = this.buttonRefs();
+      // Disconnect previous button observations
+      this.resizeObserver?.disconnect();
+      // Re-observe nav (already observed above, but after disconnect we need to re-observe)
+      this.resizeObserver?.observe(nav);
+      // Observe each button for width changes
+      buttons.forEach(ref => this.resizeObserver?.observe(ref.nativeElement));
     });
-    // Observe initial buttons
-    this.buttonRefs?.forEach(ref => this.resizeObserver?.observe(ref.nativeElement));
   }
 
   private destroyIndicator() {
-    const nav = this.navEl?.nativeElement;
+    const nav = this.navEl()?.nativeElement;
     if (nav && this.scrollListener) {
       nav.removeEventListener('scroll', this.scrollListener);
     }
     this.resizeObserver?.disconnect();
-    this.buttonChangesSubscription?.unsubscribe();
+    this.buttonChangesEffect?.destroy();
   }
 
   // Equal column width calculation for indicator (no offset measurements needed)
   private updateIndicatorPosition() {
-    const nav = this.navEl?.nativeElement;
-    const buttons = this.buttonRefs?.toArray().map(ref => ref.nativeElement);
+    const nav = this.navEl()?.nativeElement;
+    const buttons = this.buttonRefs()?.map(ref => ref.nativeElement);
     if (!nav || !buttons || buttons.length === 0) return;
 
     const activeIdx = this.activeIndex();
@@ -505,8 +536,8 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
 
   // Guarded scroll: no-op when nav has no overflow (tabs fit without scrolling)
   private scrollToActiveTab() {
-    const nav = this.navEl?.nativeElement;
-    const buttons = this.buttonRefs?.toArray().map(ref => ref.nativeElement);
+    const nav = this.navEl()?.nativeElement;
+    const buttons = this.buttonRefs()?.map(ref => ref.nativeElement);
     if (!nav || !buttons || buttons.length === 0) return;
 
     // No-op when no overflow
@@ -527,7 +558,11 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
   goToMission() { this.motionsService.goToMission(); }
   openHistoryModal() { this.motionsService.openHistoryModal(); }
   closeHistoryModal() { this.motionsService.closeHistoryModal(); }
-  setActiveTab(tab: string) { this.motionsService.setActiveTab(tab); }
+  setActiveTab(tab: string) {
+    this.motionsService.setActiveTab(tab);
+    const categoryId = tab === 'History' ? null : this.missionTabKeys.indexOf(tab);
+    this.motionsService.fetchMissions(categoryId);
+  }
   setSelectedHistoryTab(tab: string) { this.motionsService.setActiveHistoryTab(tab); }
 
   getTabIcon(tab: string): string {
@@ -542,31 +577,5 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
     return mission.id;
   }
 
-  // Confetti trigger (UI effect only - stays in component)
-  private triggerConfetti() {
-    const duration = 2000;
-    const end = Date.now() + duration;
 
-    const frame = () => {
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.8 },
-        colors: ['#FFD700', '#FFA500', '#FF4500', '#10B981', '#3B82F6']
-      });
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.8 },
-        colors: ['#FFD700', '#FFA500', '#FF4500', '#10B981', '#3B82F6']
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
-  }
 }
