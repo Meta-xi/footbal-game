@@ -255,7 +255,9 @@ export class BoxComponent {
   boxes: Box[] = [];
   gameState: 'idle' | 'playing' | 'won' | 'lost' = 'idle';
 
-  constructor(private router: Router) {
+  private readonly router = inject(Router);
+
+  constructor() {
     this.initBoxes();
   }
 

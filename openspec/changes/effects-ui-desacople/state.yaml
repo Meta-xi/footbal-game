@@ -1,0 +1,24 @@
+change: effects-ui-desacople
+version: 1.0
+status: in_progress
+phases:
+  explore: completed
+  propose: completed
+  spec: completed
+  design: completed
+  tasks: completed
+  apply: in_progress
+  verify: pending
+  archive: pending
+artifacts:
+  spec: sdd/effects-ui-desacople/spec
+  design: sdd/effects-ui-desacople/design
+  tasks: sdd/effects-ui-desacople/tasks
+next_phase: verify
+notes:
+  - Infrastructure tasks (motion-event.ts, audio.service.ts, confetti.service.ts) already created
+  - MotionsService needs event emissions for missionClaimed/missionFailed
+  - MotionsComponent needs inject() and effect() refactoring
+  - Additional modernization tasks: replace @ViewChild with query signals, replace constructor injection
+  - LSP error detected: OutputRefSubscription missing properties from Subscription in motions.component.ts (likely needs fix)
+  - Apply phase delegated to sdd-apply agent (obvious-violet-swift) at 2026-03-29 13:35

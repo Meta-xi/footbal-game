@@ -6,6 +6,22 @@ export interface BackendMission {
   created: string;
 }
 
+export interface CompletedMissionBackend {
+  id: number;
+  userId: number;
+  misionesId: number;
+  mision: string;
+  created: string;
+}
+
+export interface CompletedMission {
+  id: string;
+  userId: string;
+  missionId: string;
+  mission: string;
+  created: Date;
+}
+
 export interface Mission {
   id: string;
   title: string;

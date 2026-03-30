@@ -585,14 +585,22 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
   openMission(m: Mission) { this.motionsService.openMission(m); }
   closeModal() { this.motionsService.closeModal(); }
   goToMission() { this.motionsService.goToMission(); }
-  openHistoryModal() { this.motionsService.openHistoryModal(); }
+  openHistoryModal() {
+    this.motionsService.openHistoryModal();
+    this.motionsService.fetchCompletedMissions();
+  }
   closeHistoryModal() { this.motionsService.closeHistoryModal(); }
   setActiveTab(tab: string) {
     this.motionsService.setActiveTab(tab);
     const categoryId = tab === 'History' ? null : this.missionTabKeys.indexOf(tab);
     this.motionsService.fetchMissions(categoryId);
   }
-  setSelectedHistoryTab(tab: string) { this.motionsService.setActiveHistoryTab(tab); }
+  setSelectedHistoryTab(tab: string) {
+    this.motionsService.setActiveHistoryTab(tab);
+    if (tab === 'completadas') {
+      this.motionsService.fetchCompletedMissions();
+    }
+  }
 
   getTabIcon(tab: string): string {
     return this.motionsService.getTabIcon(tab);
