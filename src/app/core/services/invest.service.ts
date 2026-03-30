@@ -4,6 +4,10 @@ import { environment } from '../../../environments/environment';
 import { InvestApiPlayer } from '../../models/invest.model';
 import { withRetry } from '../utils/retry.util';
 
+interface ApiMessageResponse {
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -63,8 +67,31 @@ export class InvestService {
     return this.pendingGetPlayers;
   }
 
-  // TODO: Implement when API is ready
-  async buyPlayer(playerId: number): Promise<{ success: boolean; error?: string; message?: string }> {
-    return { success: false, error: 'Not implemented yet' };
+  async buyPlayer(articleId: number, timestamp: number, token: string, uid: number): Promise<{ success: boolean; error?: string; message?: string }> {
+    try {
+      const url = `${this.getBaseUrl()}Invest/addInvestment`;
+      const response = await withRetry(
+        () => this.http.post<ApiMessageResponse>(url, { articleId, timestamp, token, uid }).toPromise(),
+        { maxAttempts: 3, baseDelayMs: 500 }
+      );
+
+      if (response) {
+        return { success: true, message: response.message };
+      }
+
+      return { success: false, error: 'Failed to buy player' };
+    } catch (error: unknown) {
+      const httpError = error as HttpErrorResponse;
+      if (httpError?.status === 400) {
+        return { success: false, error: 'Bad request' };
+      }
+      if (httpError?.status === 401) {
+        return { success: false, error: 'Unauthorized' };
+      }
+      if (httpError?.status === 404) {
+        return { success: false, error: 'Not found' };
+      }
+      return { success: false, error: 'Failed to buy player' };
+    }
   }
 }
