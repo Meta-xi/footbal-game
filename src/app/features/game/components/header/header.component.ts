@@ -20,7 +20,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
           <article class="flex items-center group cursor-pointer active:scale-95 transition-all" (click)="toggleLevelMenu()">
             <div class="relative flex-shrink-0 ml-1">
               <div class="w-[44px] h-[44px] rounded-full liquid-glass-card bg-white/[0.03] border-white/5 overflow-hidden flex items-center justify-center">
-                <img ngSrc="game/header/user.png" alt="User" width="24" height="24" class="opacity-80 group-hover:scale-110 transition-transform" />
+                <img ngSrc="game/header/user.png" alt="User" fill class="opacity-80 group-hover:scale-110 transition-transform object-cover" />
               </div>
               <!-- Level Badge -->
               <div class="absolute -bottom-0.5 -right-0.5 w-[20px] h-[20px] border border-indigo-500/30 rounded-full flex items-center justify-center text-[9px] font-black text-white shadow-xl text-glow-violet accent-violet">
@@ -35,7 +35,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
         } @else {
           <article class="flex items-center group cursor-pointer active:scale-95 transition-all" (click)="toggleLevelMenu()">
             <div class="w-[44px] h-[44px] rounded-full liquid-glass-card bg-white/[0.03] border-white/5 flex items-center justify-center flex-shrink-0 ml-1">
-              <img ngSrc="game/header/user.png" alt="Guest" width="22" height="22" class="opacity-70" />
+              <img ngSrc="game/header/user.png" alt="Guest" fill class="opacity-70 object-cover" />
             </div>
             <div class="flex flex-col ml-3 mr-2">
               <span class="text-[9px] font-black text-white/60 uppercase tracking-widest mb-[2px] leading-none">Invitado</span>

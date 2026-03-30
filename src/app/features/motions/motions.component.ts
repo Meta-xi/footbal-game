@@ -495,6 +495,17 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
           break;
       }
     });
+
+    // Observe button changes via signal - must be in constructor for injection context (NG0203)
+    this.buttonChangesEffect = effect(() => {
+      const buttons = this.buttonRefs();
+      const nav = this.navEl();
+      if (!nav || !this.resizeObserver) return;
+      // Re-observe nav after any disconnect
+      this.resizeObserver?.observe(nav.nativeElement);
+      // Observe each button for width changes
+      buttons.forEach(ref => this.resizeObserver?.observe(ref.nativeElement));
+    });
   }
 
   ngOnInit() {
@@ -526,16 +537,7 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
     this.resizeObserver = new ResizeObserver(() => this.updateIndicatorPosition());
     this.resizeObserver.observe(nav);
 
-    // Observe buttons changes via signal
-    this.buttonChangesEffect = effect(() => {
-      const buttons = this.buttonRefs();
-      // Disconnect previous button observations
-      this.resizeObserver?.disconnect();
-      // Re-observe nav (already observed above, but after disconnect we need to re-observe)
-      this.resizeObserver?.observe(nav);
-      // Observe each button for width changes
-      buttons.forEach(ref => this.resizeObserver?.observe(ref.nativeElement));
-    });
+    // Button changes are observed via effect in constructor (injection context)
   }
 
   private destroyIndicator() {

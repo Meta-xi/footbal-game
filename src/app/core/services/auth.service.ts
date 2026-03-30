@@ -208,7 +208,8 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return this.authToken();
+    // Use signal first, fallback to localStorage
+    return this.authToken() ?? localStorage.getItem('auth_token');
   }
 
   isLoggedIn(): boolean {

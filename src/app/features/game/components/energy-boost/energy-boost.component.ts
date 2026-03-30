@@ -14,7 +14,7 @@ import { EnergyService } from '../../../../core/services/energy.service';
         <div class="glow-bubble shrink-0">
           <!-- inner specular highlight -->
           <div class="inner-hi glow pointer-events-none"></div>
-          <img ngSrc="game/energy/thunder.png" alt="Energía" class="w-[52px] h-[52px] object-contain relative z-10 brightness-110 drop-shadow-md" width="104" height="104" />
+          <img ngSrc="game/energy/thunder.png" alt="Energía" fill class="w-[52px] h-[52px] object-contain relative z-10 brightness-110 drop-shadow-md" />
         </div>
         <div class="flex flex-col min-w-0 pb-0.5">
           <span class="text-[9px] font-bold text-white/50 capitalize tracking-wide leading-none mb-1">Energía</span>

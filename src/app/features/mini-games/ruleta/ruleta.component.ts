@@ -58,6 +58,7 @@ interface Prize {
                 [alt]="prize.amount" 
                 width="40" 
                 height="40"
+                sizes="40px"
                 class="prize-icon"
               />
               <span class="prize-text">{{ prize.amount }}</span>
