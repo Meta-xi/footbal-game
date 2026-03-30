@@ -38,6 +38,13 @@ export interface SkillsLevelReport {
   tapPowerLVL: number;
 }
 
+export interface SkillLevelInfo {
+  [level: string]: {
+    lvl: number;
+    price: number;
+  };
+}
+
 export interface UserStatusResponse {
   actualInversion: ActualInversion[];
   createdAt: string;
@@ -129,6 +136,54 @@ export class UserInfoService {
       }
       console.error('GetUserStatus failed:', error);
       return { success: false, error: 'Failed to get user status' };
+    }
+  }
+
+  async getSkillInfo(skillId: number): Promise<{ success: boolean; error?: string; data?: SkillLevelInfo }> {
+    try {
+      const url = `${this.getBaseUrl()}Game/getSkillInfo`;
+      const body = { skillId };
+      const response = await this.http.post<SkillLevelInfo>(url, body).toPromise();
+
+      if (response) {
+        return { success: true, data: response };
+      }
+
+      return { success: false, error: 'Failed to get skill info' };
+    } catch (error: unknown) {
+      const httpError = error as HttpErrorResponse;
+      if (httpError?.status === 401) {
+        return { success: false, error: 'Unauthorized' };
+      }
+      if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
+        return { success: false, error: (httpError.error as ApiMessageResponse).message };
+      }
+      console.error('GetSkillInfo failed:', error);
+      return { success: false, error: 'Failed to get skill info' };
+    }
+  }
+
+  async purchaseSkill(skillId: number): Promise<{ success: boolean; error?: string; message?: string }> {
+    try {
+      const url = `${this.getBaseUrl()}Game/purchaseSkill`;
+      const body = { skillId };
+      const response = await this.http.post<{ success: boolean; message?: string }>(url, body).toPromise();
+
+      if (response) {
+        return { success: response.success, message: response.message };
+      }
+
+      return { success: false, error: 'Failed to purchase skill' };
+    } catch (error: unknown) {
+      const httpError = error as HttpErrorResponse;
+      if (httpError?.status === 401) {
+        return { success: false, error: 'Unauthorized' };
+      }
+      if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
+        return { success: false, error: (httpError.error as ApiMessageResponse).message };
+      }
+      console.error('PurchaseSkill failed:', error);
+      return { success: false, error: 'Failed to purchase skill' };
     }
   }
 }

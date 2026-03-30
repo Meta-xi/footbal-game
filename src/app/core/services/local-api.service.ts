@@ -63,72 +63,6 @@ const DEFAULT_ENERGY: EnergyState = {
     lastUpdated: new Date().toISOString(),
 };
 
-const DEFAULT_BOOSTS: Boost[] = [
-    {
-        id: 1,
-        name: 'Energy Plus',
-        description: '+50 energía instantánea',
-        cost: 100,
-        baseCost: 100,
-        level: 1,
-        amount: 50,
-        baseAmount: 50,
-        duration: null,
-        type: 'instant',
-        icon: 'game/energy/thunder.png',
-    },
-    {
-        id: 2,
-        name: '2x Multiplier',
-        description: 'Ganancias x2 por 60 minutos',
-        cost: 500,
-        baseCost: 500,
-        level: 1,
-        multiplier: 2,
-        duration: 3600,
-        type: 'timed',
-        icon: 'shared/icons/fire.png',
-    },
-    {
-        id: 3,
-        name: 'Energy Recovery',
-        description: 'Recuperación +50% por 30 minutos',
-        cost: 300,
-        baseCost: 300,
-        level: 1,
-        recoveryMultiplier: 1.5,
-        duration: 1800,
-        type: 'timed',
-        icon: 'game/energy/rocket.png',
-    },
-    {
-        id: 4,
-        name: 'Max Energy',
-        description: '+100 energía máxima permanente',
-        cost: 1000,
-        baseCost: 1000,
-        level: 1,
-        amount: 100,
-        baseAmount: 100,
-        duration: null,
-        type: 'permanent',
-        icon: 'game/energy/aumento.png',
-    },
-    {
-        id: 5,
-        name: 'Tap Power',
-        description: '+1 valor por toque permanente',
-        cost: 500,
-        baseCost: 500,
-        level: 1,
-        amount: 1,
-        baseAmount: 1,
-        duration: null,
-        type: 'permanent',
-        icon: 'game/energy/touch.png',
-    },
-];
-
 const DEFAULT_TAP_CONFIG: TapConfig = {
     baseValue: 1,
     currentMultiplier: 1,
@@ -384,7 +318,6 @@ export class LocalApiService {
         this.storage.set(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
         this.storage.set(STORAGE_KEYS.STATS, DEFAULT_STATS);
         this.storage.set(STORAGE_KEYS.ENERGY, DEFAULT_ENERGY);
-        this.storage.set(STORAGE_KEYS.BOOSTS, DEFAULT_BOOSTS);
         this.storage.set(STORAGE_KEYS.ACTIVE_BOOSTS, []);
         this.storage.set(STORAGE_KEYS.TAP_CONFIG, DEFAULT_TAP_CONFIG);
         this.storage.set(STORAGE_KEYS.PER_HOUR_EARNINGS, DEFAULT_PER_HOUR_EARNINGS);

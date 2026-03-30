@@ -1,11 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, OnInit } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { LocalApiService } from '../../../../../core/services/local-api.service';
 import { UserStatusService } from '../../../../../core/services/user-status.service';
-import { Boost } from '../../../../../models/game.model';
+import { UserInfoService, SkillLevelInfo } from '../../../../../core/services/user-info.service';
 import { BalanceComponent } from '../../../../../shared/components/balance/balance.component';
 import { GlassSheetComponent } from '../../../../../shared/ui/glass-sheet/glass-sheet.component';
+
+// Las 3 skills siempre son las mismas
+const SKILLS = [
+    { id: 1, name: 'Energy Plus', description: '+50 energía instantánea', type: 'instant', icon: 'game/energy/thunder.png' },
+    { id: 4, name: 'Max Energy', description: '+100 energía máxima permanente', type: 'permanent', icon: 'game/energy/aumento.png' },
+    { id: 5, name: 'Tap Power', description: '+1 valor por toque permanente', type: 'permanent', icon: 'game/energy/touch.png' },
+];
 
 interface BoostDisplay {
     id: number;
@@ -247,45 +253,83 @@ interface BoostDisplay {
 </section>
 `,
 })
-export class BoostComponent {
+export class BoostComponent implements OnInit {
 
-    private localApi = inject(LocalApiService);
     private router = inject(Router);
     private userStatusService = inject(UserStatusService);
+    private userInfoService = inject(UserInfoService);
 
-    balanceAmount = this.localApi.balance;
-    currentEnergy = this.localApi.currentEnergy;
-    maxEnergy = this.localApi.maxEnergy;
-    tapValue = this.localApi.tapValue;
+    // Balance desde el servidor
+    balanceAmount = computed(() => this.userStatusService.userStatus()?.wallet?.principalBalance ?? 0);
 
     skillsLevelReport = this.userStatusService.skillsLevelReport;
+    
+    // Precios de las skills desde el servidor
+    skillPrices = signal<Record<number, SkillLevelInfo>>({});
+
+    // Mapping de boostId a skillId
+    private readonly boostToSkillId: Record<number, number> = {
+        1: 1,  // Energy Plus → skillId 1
+        4: 2,  // Max Energy → skillId 2
+        5: 3,  // Tap Power → skillId 3
+    };
+
+    async ngOnInit(): Promise<void> {
+        // Cargar precios de las 3 skills
+        await this.loadSkillPrices();
+    }
+
+    private async loadSkillPrices(): Promise<void> {
+        const prices: Record<number, SkillLevelInfo> = {};
+        
+        for (const skillId of [1, 2, 3]) {
+            const result = await this.userInfoService.getSkillInfo(skillId);
+            if (result.success && result.data) {
+                prices[skillId] = result.data;
+            }
+        }
+        
+        this.skillPrices.set(prices);
+    }
 
     private getSkillLevel(boostId: number): number {
         const report = this.skillsLevelReport();
         if (!report) return 0;
         
-        switch (boostId) {
+        // Mapping corregido: boostId → skillId
+        const skillId = this.boostToSkillId[boostId];
+        switch (skillId) {
             case 1: return report.energyPlusLVL;
-            case 4: return report.maxEnergyLVL;
-            case 5: return report.tapPowerLVL;
+            case 2: return report.maxEnergyLVL;
+            case 3: return report.tapPowerLVL;
             default: return 0;
         }
     }
 
+    private getNextLevelPrice(boostId: number): number {
+        const skillId = this.boostToSkillId[boostId];
+        const prices = this.skillPrices()[skillId];
+        const currentLevel = this.getSkillLevel(boostId);
+        const nextLevel = currentLevel + 1;
+        
+        if (!prices || !prices[nextLevel]) return 0;
+        
+        return prices[nextLevel].price;
+    }
+
     boosts = computed(() => {
-        const apiBoosts = this.localApi.boosts();
-        return apiBoosts
-            .filter(b => b.type === 'permanent' || b.type === 'instant')
-            .map(b => ({
-                id: b.id,
-                title: b.name,
-                desc: b.description,
-                cost: b.cost.toString(),
-                level: `Lv${this.getSkillLevel(b.id)}`,
-                amount: b.amount,
-                type: b.type,
-                icon: b.icon ?? 'game/energy/thunder.png',
-            }));
+        return SKILLS.map(skill => {
+            const nextPrice = this.getNextLevelPrice(skill.id);
+            return {
+                id: skill.id,
+                title: skill.name,
+                desc: skill.description,
+                cost: nextPrice > 0 ? nextPrice.toString() : '0',
+                level: `Lv${this.getSkillLevel(skill.id)}`,
+                type: skill.type,
+                icon: skill.icon,
+            };
+        });
     });
 
     selectedBoost = signal<BoostDisplay | null>(null);
@@ -331,15 +375,25 @@ export class BoostComponent {
         const boost = this.selectedBoost();
         if (!boost) return;
 
-        const result = this.localApi.purchaseBoost(boost.id);
-        this.purchaseMessage.set(result.message);
-        this.purchaseSuccess.set(result.success);
+        // Obtener el skillId对应的购买方式
+        const skillId = this.boostToSkillId[boost.id];
+        
+        // Llamar al servidor para comprar
+        this.userInfoService.purchaseSkill(skillId).then(result => {
+            const message = result.message ?? (result.success ? '¡Compra exitosa!' : result.error) ?? 'Error desconocido';
+            this.purchaseMessage.set(message);
+            this.purchaseSuccess.set(result.success);
 
-        if (result.success) {
-            setTimeout(() => {
-                this.closeSheet();
-            }, 1500);
-        }
+            if (result.success) {
+                // Recargar datos del usuario después de la compra
+                this.userStatusService.loadUserStatus();
+                this.loadSkillPrices();
+                
+                setTimeout(() => {
+                    this.closeSheet();
+                }, 1500);
+            }
+        });
     }
 
     currentLevel = computed(() => {
@@ -355,16 +409,19 @@ export class BoostComponent {
     nextLevelAmount = computed(() => {
         const item = this.selectedBoost();
         if (!item) return 0;
+        
+        const skillId = this.boostToSkillId[item.id];
         const currentLvl = this.currentLevel();
-        if (item.id === 1) {
+        
+        if (skillId === 1) {
             // Energy Plus: +50 base * 1.2^level
             return Math.floor(50 * Math.pow(1.2, currentLvl));
-        } else if (item.id === 4) {
+        } else if (skillId === 2) {
             // Max Energy: +100 base * 1.2^level
             return Math.floor(100 * Math.pow(1.2, currentLvl));
-        } else if (item.id === 5) {
+        } else if (skillId === 3) {
             // Tap Power: current level value
-            return currentLvl;
+            return currentLvl + 1;
         }
         return item.amount ?? 0;
     });
@@ -372,12 +429,15 @@ export class BoostComponent {
     nextLevelDescription = computed(() => {
         const item = this.selectedBoost();
         if (!item) return '';
+        
+        const skillId = this.boostToSkillId[item.id];
         const amount = this.nextLevelAmount();
-        if (item.id === 1) {
+        
+        if (skillId === 1) {
             return `+${amount} energía instantánea`;
-        } else if (item.id === 4) {
+        } else if (skillId === 2) {
             return `+${amount} energía máxima permanente`;
-        } else if (item.id === 5) {
+        } else if (skillId === 3) {
             return `+${amount} valor por toque permanente`;
         }
         return item.desc;
