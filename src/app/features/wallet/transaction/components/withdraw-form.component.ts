@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, input, viewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LocalApiService } from '../../../../core/services/local-api.service';
+import { UserStatusService } from '../../../../core/services/user-status.service';
 import { SuccessOverlayComponent } from './success-overlay.component';
 import { BalanceComponent } from '../../../../shared/components/balance/balance.component';
 
@@ -108,7 +108,7 @@ import { BalanceComponent } from '../../../../shared/components/balance/balance.
 })
 export class WithdrawFormComponent {
   private router = inject(Router);
-  private localApi = inject(LocalApiService);
+  private userStatusService = inject(UserStatusService);
 
   amountInputField = viewChild<ElementRef<HTMLInputElement>>('amountInputField');
 
@@ -120,7 +120,7 @@ export class WithdrawFormComponent {
   transactionMessage = signal('');
   amount = signal(0);
   selectedAccount = signal('');
-  readonly balance = this.localApi.balance;
+  readonly balance = computed(() => this.userStatusService.wallet()?.principalBalance ?? 0);
 
   isCrypto = computed(() => ['USDT', 'BTC', 'TRX', 'BNB'].includes(this.currency()));
   currencyLogo = computed(() => {
@@ -186,12 +186,13 @@ export class WithdrawFormComponent {
 
     this.isProcessing.set(true);
     setTimeout(() => {
-      this.localApi.updateBalance?.(-amount);
-      this.localApi.addTransaction?.({
-        type: 'withdrawal', amount, currency: 'coins', status: 'completed',
-        method: this.selectedAccount() || this.currency(),
-        description: `Retiro de ${amount} monedas`,
-      });
+      // TODO: Implement API call for withdrawal
+      // this.localApi.updateBalance?.(-amount);
+      // this.localApi.addTransaction?.({
+      //   type: 'withdrawal', amount, currency: 'coins', status: 'completed',
+      //   method: this.selectedAccount() || this.currency(),
+      //   description: `Retiro de ${amount} monedas`,
+      // });
       this.isProcessing.set(false);
       this.showSuccess.set(true);
       setTimeout(() => this.router.navigate(['/wallet']), 1500);

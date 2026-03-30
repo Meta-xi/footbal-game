@@ -125,22 +125,23 @@ export class TapAreaComponent {
   }
 
   tap(event: MouseEvent) {
-    const currentEnergy = this.energySvc.energy();
-    if (currentEnergy <= 0) {
-      if (!this.noEnergyMessage()) {
-        this.noEnergyMessage.set('Energía Insuficiente');
-        setTimeout(() => this.noEnergyMessage.set(''), 2000);
-      }
-      return;
-    }
+    // RESTRICCIÓN DE ENERGÍA DESHABILITADA TEMPORALMENTE
+    // const currentEnergy = this.energySvc.energy();
+    // if (currentEnergy <= 0) {
+    //   if (!this.noEnergyMessage()) {
+    //     this.noEnergyMessage.set('Energía Insuficiente');
+    //     setTimeout(() => this.noEnergyMessage.set(''), 2000);
+    //   }
+    //   return;
+    // }
 
     this.playPopSound();
 
-    this.energySvc.decrementEnergy(1);
+    // RESTRICCIÓN DE ENERGÍA DESHABILITADA TEMPORALMENTE
+    // this.energySvc.decrementEnergy(1);
     const earnedCoins = Math.floor(this.tapValue() * this.activeMultiplier());
     this.tapSvc.addTap(1);
     this.tapSvc.addCoins(earnedCoins);
-    this.localApi.addExperience(1);
 
     // Ball interaction (fluid 3D spring effect)
     if (this.ballImage) {

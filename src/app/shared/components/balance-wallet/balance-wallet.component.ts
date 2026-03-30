@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { NgOptimizedImage, CommonModule } from '@angular/common';
-import { LocalApiService } from '../../../core/services/local-api.service';
+import { UserStatusService } from '../../../core/services/user-status.service';
 
 @Component({
   selector: 'app-balance-wallet',
@@ -37,9 +37,9 @@ import { LocalApiService } from '../../../core/services/local-api.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BalanceWalletComponent {
-  private localApi = inject(LocalApiService);
+  private userStatusService = inject(UserStatusService);
 
-  protected readonly copBalance = computed(() => this.localApi.balance());
+  protected readonly copBalance = computed(() => this.userStatusService.wallet()?.principalBalance ?? 0);
   protected readonly usdtBalance = computed(() => Math.floor(this.copBalance() / 4000));
 
   protected readonly formattedCop = computed(() => this.copBalance().toLocaleString('es-CO'));

@@ -314,25 +314,15 @@ export class PlayersService {
 
     // Task 3.4: Offline check
     if (this.connectivity.offline) {
-      // Offline — use local purchase only
-      const localResult = this.localApi.purchasePlayer(player.id);
-      if (localResult.success) {
-        this._ownedPlayers.set(this.localApi.ownedPlayers());
-        this.errorHandler.showSuccessToast(`¡${player.name} comprado! (sin conexión)`);
-      } else {
-        this.errorHandler.showErrorToast({ status: 0 }, 'buy');
-      }
-      return localResult;
+      // Offline — cannot purchase, show error
+      this.errorHandler.showErrorToast({ status: 0, error: { message: 'Sin conexión' } }, 'buy');
+      return { success: false, message: 'Sin conexión' };
     }
 
     // Try API first
     const apiResult = await this.investService.buyPlayer(player.id);
 
     if (apiResult.success) {
-      // Update local state to reflect purchase
-      this.localApi.purchasePlayer(player.id);
-      this._ownedPlayers.set(this.localApi.ownedPlayers());
-
       // Task 3.2: Success toast
       this.errorHandler.showSuccessToast(apiResult.message ?? `¡${player.name} comprado!`);
 
@@ -342,18 +332,9 @@ export class PlayersService {
       return { success: true, message: apiResult.message ?? `¡${player.name} comprado!` };
     }
 
-    // API failed — fall back to local purchase
-    const localResult = this.localApi.purchasePlayer(player.id);
-
-    if (localResult.success) {
-      this._ownedPlayers.set(this.localApi.ownedPlayers());
-      this.errorHandler.showSuccessToast(`¡${player.name} comprado!`);
-    } else {
-      // Task 3.2: Error toast
-      this.errorHandler.showErrorToast({ status: 0, error: { message: apiResult.error } }, 'buy');
-    }
-
-    return localResult;
+    // API failed
+    this.errorHandler.showErrorToast({ status: 0, error: { message: apiResult.error } }, 'buy');
+    return { success: false, message: apiResult.error ?? 'Error al comprar jugador' };
   }
 
   /**

@@ -37,11 +37,11 @@ import { GlassModalComponent } from '../../../../shared/ui';
           <div class="grid grid-cols-2 gap-2 mb-3">
             <div class="liquid-glass-card p-3.5 bg-white/[0.03] border-white/5">
               <span class="text-[8px] font-black text-white/20 uppercase tracking-widest block mb-1">Total Taps</span>
-              <span class="text-lg font-black text-white tracking-tight">{{ levelInfo().currentTaps | number }}</span>
+              <span class="text-lg font-black text-white tracking-tight">{{ levelInfo().currentTooks | number }}</span>
             </div>
             <div class="liquid-glass-card p-3.5 bg-white/[0.03] border-white/5">
               <span class="text-[8px] font-black text-white/20 uppercase tracking-widest block mb-1">Meta Siguiente</span>
-              <span class="text-lg font-black text-white tracking-tight">{{ levelInfo().tapsForNextLevel | number }}</span>
+              <span class="text-lg font-black text-white tracking-tight">{{ levelInfo().tooksForNextLevel | number }}</span>
             </div>
           </div>
 
@@ -50,12 +50,12 @@ import { GlassModalComponent } from '../../../../shared/ui';
             <div class="liquid-glass-card p-4 bg-white/[0.02] border-indigo-500/30 flex flex-col gap-3 accent-violet">
                <div class="flex justify-between items-center">
                   <span class="text-[10px] font-black text-white/40 uppercase tracking-widest">Progreso de Carrera</span>
-                  <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest text-glow-violet">{{ ((levelInfo().currentTaps / levelInfo().tapsForNextLevel) * 100) | number:'1.0-0' }}%</span>
+                  <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest text-glow-violet">{{ ((levelInfo().currentTooks / levelInfo().tooksForNextLevel) * 100) | number:'1.0-0' }}%</span>
                </div>
                <div class="relative h-2 bg-white/5 rounded-full overflow-hidden">
-                  <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-1000" [style.width.%]="(levelInfo().currentTaps / levelInfo().tapsForNextLevel) * 100"></div>
+                  <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-1000" [style.width.%]="(levelInfo().currentTooks / levelInfo().tooksForNextLevel) * 100"></div>
                </div>
-               <p class="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] text-center italic">Faltan {{ (levelInfo().tapsForNextLevel - levelInfo().currentTaps) | number }} toques para ascender</p>
+               <p class="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] text-center italic">Faltan {{ (levelInfo().tooksForNextLevel - levelInfo().currentTooks) | number }} toques para ascender</p>
             </div>
           } @else {
             <div class="liquid-glass-card p-8 bg-gradient-to-br from-amber-500/10 to-transparent border-amber-500/20 text-center flex flex-col items-center gap-3">

@@ -1,11 +1,14 @@
 import { Injectable, inject, computed } from '@angular/core';
 import { LocalApiService } from './local-api.service';
-import type { Boost, EnergyState } from '../../models';
+import { UserStatusService } from './user-status.service';
+import { UserInfoService } from './user-info.service';
+import type { Boost } from '../../models';
 
-export type { Boost, EnergyState };
+export type { Boost };
 
 export interface EnergyData {
-  energy: EnergyState;
+  currentEnergy: number;
+  maxEnergy: number;
   boosts: Boost[];
 }
 
@@ -14,53 +17,60 @@ export interface EnergyData {
 })
 export class EnergyService {
   private localApi = inject(LocalApiService);
+  private userStatusService = inject(UserStatusService);
+  private userInfo = inject(UserInfoService);
 
-  // Signals conectados a LocalApiService
+  // Signals conectados a LocalApiService/UserStatusService
   readonly energy = this.localApi.currentEnergy;
   readonly maxEnergy = this.localApi.maxEnergy;
   readonly boosts = this.localApi.boosts;
   readonly activeBoosts = this.localApi.activeBoosts;
 
-  readonly energyData = computed(() => {
-    const energy = this.localApi.energy();
-    const boosts = this.localApi.boosts();
-    if (!energy) return null;
-    return { energy, boosts };
-  });
+  // La energía viene del UserStatusService (API)
+  // No se modifica localmente, viene del servidor
 
   readonly isLoading = computed(() => !this.localApi.isInitialized());
   readonly error = computed(() => null);
 
   decrementEnergy(amount: number) {
-    this.localApi.consumeEnergy(amount);
+    // Ya no se modifica localmente - la energía viene de la API
+    // El consumo de energía se maneja en el backend
+    console.warn('Energy decrement should be handled by API');
   }
 
   incrementEnergy(amount: number) {
-    this.localApi.addEnergy(amount);
+    // Ya no se modifica localmente - la energía viene de la API
+    console.warn('Energy increment should be handled by API');
   }
 
   loadEnergy() {
-    // No necesario, los datos ya están en LocalApiService
-    this.localApi.regenerateEnergy();
+    // Recargar el estado del usuario desde la API
+    this.userStatusService.loadUserStatus();
   }
 
-  getEnergyState(): EnergyState | null {
-    return this.localApi.energy();
+  getCurrentEnergy(): number {
+    return this.userStatusService.wallet()?.energy ?? 0;
+  }
+
+  getMaxEnergy(): number {
+    const skills = this.userStatusService.skillsLevelReport();
+    return 500 + ((skills?.maxEnergyLVL ?? 0) * 100);
   }
 
   getBoosts(): Boost[] {
     return this.localApi.boosts();
   }
 
-  applyBoost(boostId: number) {
-    const result = this.localApi.purchaseBoost(boostId);
+  async applyBoost(boostId: number) {
+    const result = await this.userInfo.purchaseSkill(boostId);
     if (result.success) {
       return this.localApi.boosts().find(b => b.id === boostId) ?? null;
     }
     return null;
   }
 
-  purchaseBoost(boostId: number): { success: boolean; message: string } {
-    return this.localApi.purchaseBoost(boostId);
+  async purchaseBoost(boostId: number): Promise<{ success: boolean; message: string }> {
+    const result = await this.userInfo.purchaseSkill(boostId);
+    return { success: result.success, message: result.message ?? result.error ?? 'Unknown error' };
   }
 }

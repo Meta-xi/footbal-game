@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, signal, inject, computed } from '@a
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 import { LocalApiService } from '../../core/services/local-api.service';
+import { UserStatusService } from '../../core/services/user-status.service';
 import { Transaction } from '../../models/transaction.model';
 import { SupportChatComponent } from './support-chat.component';
 import { BalanceWalletComponent } from '../../shared/components/balance-wallet/balance-wallet.component';
@@ -302,6 +303,7 @@ interface Deposit {
 export class WalletComponent {
   private router = inject(Router);
   private localApi = inject(LocalApiService);
+  private userStatusService = inject(UserStatusService);
 
   readonly walletTabs: GlassTab[] = [
     { id: 'depositar', label: 'Depositar' },
@@ -313,16 +315,15 @@ export class WalletComponent {
   activeTab = computed(() => this.activeTabStr() as 'depositar' | 'historial' | 'retirar');
 
   showSupportChat = signal(false);
-  readonly balance = this.localApi.balance;
+  readonly balance = computed(() => this.userStatusService.wallet()?.principalBalance ?? 0);
 
-  deposits = computed(() => {
-    const methods = this.localApi.depositMethods();
-    return methods.map(m => ({
-      title: m.title,
-      desc: m.desc,
-      icon: m.icon,
-    }));
-  });
+  readonly depositMethods: Deposit[] = [
+    { title: 'Colombia', desc: 'Depósitos instantáneos', icon: 'wallet/main/col.webp' },
+    { title: 'Perú', desc: 'Depósitos instantáneos', icon: 'wallet/main/peru.png' },
+    { title: 'Cryptos', desc: 'Depósitos vía criptomonedas', icon: 'wallet/main/bynance.png' },
+  ];
+
+  deposits = computed(() => this.depositMethods);
 
   getDepositIcon(title: string): string {
     const icons: Record<string, string> = {
@@ -351,12 +352,12 @@ export class WalletComponent {
     return colors[title] ?? 'rgba(255,255,255,0.10)';
   }
 
-  readonly transactions = this.localApi.transactions;
+  readonly transactions = signal<Transaction[]>([]);
 
   historyTransactions = computed(() => {
     const txs = this.transactions();
     return txs
-      .filter(t => t.type === 'deposit' || t.type === 'withdrawal')
+      .filter((t): t is Transaction => t.type === 'deposit' || t.type === 'withdrawal')
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .map(t => ({
         ...t,
