@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
+import { UserStatusService } from '../../../core/services/user-status.service';
 
 interface Box {
   id: number;
@@ -23,7 +24,7 @@ interface Box {
 
       <div class="header glass !p-2 !mb-4 inline-flex items-center gap-3 border-yellow-500/30 shadow-lg accent-amber">
         <img ngSrc="mini-games/tickets/tickets.webp" alt="Jugadores" class="w-12 h-12 object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 drop-shadow-md transition-all" width="48" height="48">
-        <h1>Tickets: <span class="text-glow-yellow"> {{ balance }}</span></h1>
+        <h1>Tickets: <span class="text-glow-yellow"> {{ balance() }}</span></h1>
       </div>
 
       <div class="grid-container !gap-4 !mb-6">
@@ -41,9 +42,9 @@ interface Box {
         }
       </div>
 
-       <button class="play-btn glass !px-6 !py-3 !text-base bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 shadow-lg shadow-blue-500/30 border border-white/20 hover:shadow-blue-500/50 hover:scale-105 active:scale-95"
-               (click)="startGame()" [disabled]="gameState === 'playing'">
-         {{ gameState === 'idle' ? 'JUGAR (Costo: $10)' : '🎯 SELECCIONA UNA CAJA 🎯' }}
+       <button class="play-btn glass !px-6 !py-3 !text-base bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 shadow-lg shadow-blue-500/30 border border-white/20 hover:shadow-blue-500/50 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+               (click)="startGame()" [disabled]="gameState === 'playing' || balance() <= 0">
+         {{ balance() <= 0 ? 'SIN TICKETS' : (gameState === 'idle' ? 'JUGAR (Costo: $10)' : '🎯 SELECCIONA UNA CAJA 🎯') }}
        </button>
 
       @if (gameState === 'won' || gameState === 'lost') {
@@ -251,13 +252,19 @@ interface Box {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BoxComponent {
-  balance = 100;
+  private userStatusService = inject(UserStatusService);
+  
+  // Balance inicial desde wallet, mutable durante el juego
+  balance = signal(0);
   boxes: Box[] = [];
   gameState: 'idle' | 'playing' | 'won' | 'lost' = 'idle';
 
   private readonly router = inject(Router);
 
   constructor() {
+    // Sincronizar balance inicial desde wallet
+    const walletBalance = this.userStatusService.wallet()?.ticketBalance ?? 0;
+    this.balance.set(walletBalance);
     this.initBoxes();
   }
 
@@ -280,8 +287,8 @@ export class BoxComponent {
   }
 
   startGame() {
-    if (this.balance < 10) return;
-    this.balance -= 10;
+    if (this.balance() < 10) return;
+    this.balance.update(v => v - 10);
     this.gameState = 'playing';
     this.initBoxes();
     this.playAudioSynth('start');
@@ -301,7 +308,7 @@ export class BoxComponent {
     box.opened = true;
     if (box.hasPrize) {
       this.gameState = 'won';
-      this.balance += 50;
+      this.balance.update(v => v + 50);
       this.playAudioSynth('win');
       this.triggerConfetti();
     } else {

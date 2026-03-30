@@ -9,6 +9,7 @@ import {
 import { Router } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import confetti from 'canvas-confetti';
+import { UserStatusService } from '../../../core/services/user-status.service';
 
 interface Prize {
   amount: string;
@@ -79,11 +80,11 @@ interface Prize {
         <button
           type="button"
           class="w-full lg-btn-primary py-3.5 text-sm uppercase font-black tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
-          [disabled]="isSpinning()"
+          [disabled]="isSpinning() || ticketsCount() <= 0"
           (click)="spin()"
           [attr.aria-busy]="isSpinning()"
         >
-          {{ isSpinning() ? 'GIRANDO...' : 'GIRAR RULETA' }}
+          {{ isSpinning() ? 'GIRANDO...' : (ticketsCount() <= 0 ? 'SIN TICKETS' : 'GIRAR RULETA') }}
         </button>
       </section>
 
@@ -310,6 +311,10 @@ interface Prize {
 })
 export class RuletaComponent implements OnDestroy {
   private router = inject(Router);
+  private userStatusService = inject(UserStatusService);
+  
+  readonly ticketsCount = computed(() => this.userStatusService.wallet()?.ticketBalance ?? 0);
+  
   private readonly spinStartAudio = this.createAudio('/sounds/button-click-off-click.mp3', 0.55);
   private readonly spinEndAudio = this.createAudio('/sounds/010707105_prev.mp3', 0.6);
 
@@ -356,6 +361,9 @@ export class RuletaComponent implements OnDestroy {
 
   spin(): void {
     if (this.isSpinning()) {
+      return;
+    }
+    if (this.ticketsCount() <= 0) {
       return;
     }
 

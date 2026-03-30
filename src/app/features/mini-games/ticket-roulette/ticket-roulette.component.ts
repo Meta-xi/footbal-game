@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
+import { UserStatusService } from '../../../core/services/user-status.service';
 
 interface Ticket {
   id: number;
@@ -55,9 +56,10 @@ interface Ticket {
 
       <button 
         class="spin-btn action-glow" 
-        [class.disabled]="isSpinning()"
+        [class.disabled]="isSpinning() || ticketsCount() <= 0"
+        [disabled]="isSpinning() || ticketsCount() <= 0"
         (click)="spin()">
-        GIRAR
+        {{ ticketsCount() <= 0 ? 'SIN TICKETS' : 'GIRAR' }}
       </button>
     </div>
   `,
@@ -289,11 +291,13 @@ interface Ticket {
   `]
 })
 export class TicketRouletteComponent {
+  private userStatusService = inject(UserStatusService);
+  
   // Estado del juego con Signals
   isSpinning = signal(false);
   currentOffset = signal(0);
   transitionDuration = signal(0);
-  ticketsCount = signal(5);
+  ticketsCount = computed(() => this.userStatusService.wallet()?.ticketBalance ?? 0);
 
   // Configuración de la ruleta
   ticketHeight = 100; // 80px alto + 20px gap
@@ -338,6 +342,7 @@ export class TicketRouletteComponent {
 
   spin() {
     if (this.isSpinning()) return;
+    if (this.ticketsCount() <= 0) return;
 
     this.audioClick.play().catch(() => console.log('Esperando interacción para audio...'));
     this.isSpinning.set(true);
