@@ -87,8 +87,8 @@ export class HeaderComponent {
   vibrationEnabled = computed(() => this.userStatusService.settings()?.vibration ?? true);
   language = computed(() => this.userStatusService.settings()?.language ?? 'es');
 
-  readonly level = computed(() => this.localApi.profile()?.level ?? 1);
-  readonly levelInfo = computed(() => this.localApi.getLevelInfo());
+  readonly level = computed(() => this.userStatusService.level());
+  readonly levelInfo = computed(() => this.userStatusService.levelInfo());
 
   toggleLevelMenu() { this.showLevelMenu.update(v => !v); }
   closeLevelMenu() { this.showLevelMenu.set(false); }
