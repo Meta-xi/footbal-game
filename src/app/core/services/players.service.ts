@@ -1,5 +1,4 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { LocalApiService } from './local-api.service';
 import { InvestService } from './invest.service';
 import { StorageService } from './storage.service';
 import { ErrorHandlerService } from './error-handler.service';
@@ -71,7 +70,6 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
   providedIn: 'root',
 })
 export class PlayersService {
-  private localApi = inject(LocalApiService);
   private investService = inject(InvestService);
   private storage = inject(StorageService);
   private errorHandler = inject(ErrorHandlerService);
@@ -112,10 +110,10 @@ export class PlayersService {
 
   /**
    * Overall loading state.
-   * True while LocalApiService hasn't initialized OR API fetch is in progress.
+   * True while API fetch is in progress.
    */
   readonly isLoading = computed(
-    () => !this.localApi.isInitialized() || this._isLoadingApi()
+    () => this._isLoadingApi()
   );
 
   /** True when the device is offline (no network connectivity). */
@@ -128,12 +126,14 @@ export class PlayersService {
   }
 
   /**
-   * Seeds signals from LocalApiService so the UI has data immediately.
+   * Seeds signals with empty arrays. Data comes from API or cache.
    */
   private loadFromLocal(): void {
-    this._availablePlayers.set(this.localApi.availablePlayers());
-    this._vipPlayers.set(this.localApi.vipPlayers());
-    this._ownedPlayers.set(this.localApi.ownedPlayers());
+    // Data will be loaded from API/cache in refreshPlayers()
+    // ownedPlayers stays empty until user makes a purchase
+    this._availablePlayers.set([]);
+    this._vipPlayers.set([]);
+    this._ownedPlayers.set([]);
   }
 
   // ---------- Initialization ----------
@@ -176,8 +176,7 @@ export class PlayersService {
 
         this._availablePlayers.set(regular);
         this._vipPlayers.set(vip);
-        // owned players stay local (not from API)
-        this._ownedPlayers.set(this.localApi.ownedPlayers());
+        // owned players stay as they are (local, not from API)
 
         // Update cache
         this.saveCache(result.players);
@@ -198,7 +197,7 @@ export class PlayersService {
           const vip = cached.filter(p => p.exclusive);
           this._availablePlayers.set(regular);
           this._vipPlayers.set(vip);
-          this._ownedPlayers.set(this.localApi.ownedPlayers());
+          // owned players stay as they are
         } else {
           // No cache — fall back to local defaults
           this._usingCache.set(true);
@@ -223,7 +222,7 @@ export class PlayersService {
       const vip = cached.filter(p => p.exclusive);
       this._availablePlayers.set(regular);
       this._vipPlayers.set(vip);
-      this._ownedPlayers.set(this.localApi.ownedPlayers());
+      // owned players stay as they are
 
       this.errorHandler.showToast(
         'Sin conexión. Mostrando datos guardados.',
@@ -234,7 +233,7 @@ export class PlayersService {
       this._usingCache.set(true);
       this.fallbackToLocal();
       this.errorHandler.showToast(
-        'Sin conexión. Mostrando datos locales.',
+        'Sin conexión. No hay datos disponibles.',
         'info',
         4000
       );
@@ -274,9 +273,19 @@ export class PlayersService {
   }
 
   private fallbackToLocal(): void {
-    this._availablePlayers.set(this.localApi.availablePlayers());
-    this._vipPlayers.set(this.localApi.vipPlayers());
-    this._ownedPlayers.set(this.localApi.ownedPlayers());
+    // Try cache first
+    const cached = this.loadCache();
+    if (cached) {
+      const regular = cached.filter(p => !p.exclusive);
+      const vip = cached.filter(p => p.exclusive);
+      this._availablePlayers.set(regular);
+      this._vipPlayers.set(vip);
+    } else {
+      // No cache - set empty
+      this._availablePlayers.set([]);
+      this._vipPlayers.set([]);
+    }
+    // owned players stay as they are
   }
 
   // ---------- Public API ----------

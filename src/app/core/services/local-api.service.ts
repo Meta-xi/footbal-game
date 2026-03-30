@@ -1,11 +1,8 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { StorageService } from './storage.service';
 import { UserStatusService } from './user-status.service';
-import type { UserProfile, UserStats } from '../../models/user.model';
+import type { UserStats } from '../../models/user.model';
 import type { Boost, ActiveBoost, TapConfig, GameState } from '../../models/game.model';
-import type { Transaction } from '../../models/transaction.model';
-import type { Player, PlayersData } from '../../models/player.model';
-import type { LocalApiData } from '../../models/index';
 
 // ============== STORAGE KEYS ==============
 
@@ -79,7 +76,6 @@ export class LocalApiService {
 
 
     private _gameState = signal<GameState | null>(null);
-    private _players = signal<PlayersData | null>(null);
     private _isLoading = signal(false);
     private _isInitialized = signal(false);
     private _levelUp = signal<{ newLevel: number; oldLevel: number } | null>(null);
@@ -92,7 +88,6 @@ export class LocalApiService {
 
 
     readonly gameState = this._gameState.asReadonly();
-    readonly players = this._players.asReadonly();
     readonly isLoading = this._isLoading.asReadonly();
     readonly isInitialized = this._isInitialized.asReadonly();
     readonly levelUp = this._levelUp.asReadonly();
@@ -105,9 +100,6 @@ export class LocalApiService {
         return 500 + ((skills?.maxEnergyLVL ?? 0) * 100);
     });
     readonly hourlyEarning = computed(() => this._stats()?.hourlyEarning ?? 20);
-    readonly ownedPlayers = computed(() => this._players()?.ownedPlayers ?? []);
-    readonly availablePlayers = computed(() => this._players()?.availablePlayers ?? []);
-    readonly vipPlayers = computed(() => this._players()?.vipPlayers ?? []);
 
     readonly tapValue = computed(() => {
         const config = this._tapConfig();
@@ -375,20 +367,6 @@ export class LocalApiService {
 
 
 
-    /**
-     * Obtiene todos los jugadores disponibles para comprar
-     */
-    getAvailablePlayersForPurchase(): Player[] {
-        const playersData = this._players();
-        if (!playersData) return [];
-
-        const ownedIds = new Set(playersData.ownedPlayers.map(p => p.id));
-
-        return [
-            ...playersData.availablePlayers.filter(p => !ownedIds.has(p.id)),
-            ...playersData.vipPlayers.filter(p => !ownedIds.has(p.id)),
-        ];
-    }
     clearLevelUp(): void {
         this._levelUp.set(null);
     }
