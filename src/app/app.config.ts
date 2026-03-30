@@ -5,6 +5,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { LocalApiService } from './core/services/local-api.service';
+import { NavigationSyncService } from './core/services/navigation-sync.service';
 import { apiInterceptor } from './core/interceptors/api.interceptor';
 
 function initializeLocalApi(): () => void {
@@ -12,6 +13,12 @@ function initializeLocalApi(): () => void {
   return () => {
     localApi.initialize();
   };
+}
+
+function initializeNavigationSync(): () => void {
+  const navSync = inject(NavigationSyncService);
+  // El servicio ya se inicializa en su constructor
+  return () => {};
 }
 
 export const appConfig: ApplicationConfig = {
@@ -24,6 +31,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initializeLocalApi,
+      multi: true,
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeNavigationSync,
       multi: true,
     },
   ]

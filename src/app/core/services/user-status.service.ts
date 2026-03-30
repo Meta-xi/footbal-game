@@ -65,11 +65,11 @@ export class UserStatusService {
     };
   });
 
-  async loadUserStatus(): Promise<void> {
+  async loadUserStatus(pendingTaps?: number): Promise<void> {
     this.isLoading.set(true);
     this.error.set(null);
 
-    const result = await this.userInfoService.getUserStatus();
+    const result = await this.userInfoService.getUserStatus(pendingTaps);
 
     if (result.success && result.data) {
       const data = result.data;

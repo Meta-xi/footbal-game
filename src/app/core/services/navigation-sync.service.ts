@@ -1,0 +1,76 @@
+import { Injectable, inject } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { AuthService } from './auth.service';
+import { TapService } from './tap.service';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class NavigationSyncService {
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private tapService = inject(TapService);
+
+  // Routes that require pendingTaps sync
+  private readonly SYNC_ROUTES = ['/main', '/social', '/mociones', '/wallet', '/mining'];
+
+  // Track last sync to prevent duplicate syncs
+  private lastSyncTime = 0;
+  private readonly SYNC_COOLDOWN = 5000; // 5 seconds cooldown
+
+  constructor() {
+    this.initNavigationListener();
+  }
+
+  private initNavigationListener(): void {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+      )
+      .subscribe((event: NavigationEnd) => {
+        if (this.shouldSyncOnRoute(event.urlAfterRedirects)) {
+          this.syncPendingTaps();
+        }
+      });
+  }
+
+  private shouldSyncOnRoute(url: string): boolean {
+    // Check if the URL starts with any of the sync routes
+    return this.SYNC_ROUTES.some((route) => url.startsWith(route));
+  }
+
+  private async syncPendingTaps(): Promise<void> {
+    // Check if user is authenticated
+    if (!this.authService.isAuthenticated()) {
+      console.log('NavigationSync: User not authenticated, skipping sync');
+      return;
+    }
+
+    // Prevent rapid successive syncs
+    const now = Date.now();
+    if (now - this.lastSyncTime < this.SYNC_COOLDOWN) {
+      console.log('NavigationSync: Skipping sync due to cooldown');
+      return;
+    }
+
+    this.lastSyncTime = now;
+
+    // Get pending taps from localStorage (same key as TapService)
+    const storedPending = localStorage.getItem('pendingTaps');
+    const pendingCount = storedPending ? parseInt(storedPending, 10) : 0;
+
+    // Only sync if there are pending taps
+    if (pendingCount > 0) {
+      console.log(`NavigationSync: Syncing ${pendingCount} pending taps on route change`);
+      
+      // Paso 1: Enviar pendingTaps a /Game/addTooks
+      await this.tapService.flushPendingTaps();
+      
+      console.log('NavigationSync: Pending taps sent, sync complete');
+    } else {
+      console.log('NavigationSync: No pending taps to sync, skipping');
+      // No se dispara ninguna actualización si no hay pendingTaps
+    }
+  }
+}

@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ApiMessageResponse } from '../../models/user.model';
-import { LocalApiService } from './local-api.service';
 
 export interface ReferInfoResponse {
   earnLastMonth: number;
@@ -63,7 +62,6 @@ export interface UserStatusResponse {
 })
 export class UserInfoService {
   private http = inject(HttpClient);
-  private localApi = inject(LocalApiService);
 
   private getBaseUrl(): string {
     return environment.apiBaseUrl;
@@ -116,10 +114,12 @@ export class UserInfoService {
     }
   }
 
-  async getUserStatus(): Promise<{ success: boolean; error?: string; data?: UserStatusResponse }> {
+  async getUserStatus(pendingTaps?: number): Promise<{ success: boolean; error?: string; data?: UserStatusResponse }> {
     try {
       const url = `${this.getBaseUrl()}UserInfo/getUserStatus`;
-      const response = await this.http.get<UserStatusResponse>(url).toPromise();
+      // Send pendingTaps as query parameter if provided
+      const options = pendingTaps ? { params: { pendingTaps: pendingTaps.toString() } } : {};
+      const response = await this.http.get<UserStatusResponse>(url, options).toPromise();
 
       if (response) {
         return { success: true, data: response };

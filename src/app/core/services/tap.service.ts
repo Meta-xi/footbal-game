@@ -23,18 +23,32 @@ export class TapService {
   // Signal to track pending taps waiting to be sent to API
   private pendingTaps = signal<number>(0);
 
-  // Signals conectados a LocalApiService
-  readonly coins = this.localApi.balance;
-  readonly totalTaps = computed(() => this.localApi.stats()?.totalTaps ?? 0);
+  constructor() {
+    // Initialize pending taps from localStorage
+    const storedPending = localStorage.getItem(this.PENDING_TAPS_KEY);
+    if (storedPending) {
+      const pendingCount = parseInt(storedPending, 10);
+      if (!isNaN(pendingCount)) {
+        this.pendingTaps.set(pendingCount);
+      }
+    }
+  }
+
+  // Signals conectados a UserStatusService
+  readonly coins = computed(() => {
+    const serverBalance = this.userStatusService.wallet()?.principalBalance ?? 0;
+    return serverBalance + this.pendingTaps();
+  });
+  readonly totalTaps = computed(() => this.userStatusService.totalTooks());
 
   // Computed para determinar el nivel basado en el perfil
-  readonly level = computed(() => this.localApi.profile()?.level ?? 1);
+  readonly level = this.userStatusService.level;
 
   // Valor por tap calculado desde LocalApiService
   readonly tapValue = this.localApi.tapValue;
 
   setCoins(coins: number) {
-    this.localApi.setBalance(coins);
+    // Balance is now managed by API, this method is deprecated
   }
 
   getCoins(): number {
@@ -42,11 +56,11 @@ export class TapService {
   }
 
   addCoins(amount: number) {
-    this.localApi.addEarnings(amount);
+    // Balance is now managed by API, this method is deprecated
   }
 
   removeCoins(amount: number) {
-    this.localApi.updateBalance(-amount);
+    // Balance is now managed by API, this method is deprecated
   }
 
   async addTap(count: number = 1) {
@@ -66,7 +80,8 @@ export class TapService {
     }
   }
 
-  private async flushPendingTaps() {
+  // Method to manually flush pending taps (called from NavigationSyncService)
+  async flushPendingTaps(): Promise<void> {
     const user = this.authService.user();
     const userId = user ? (user.id || user.Id) : null;
     if (!userId) {
@@ -108,8 +123,8 @@ export class TapService {
     }
   }
 
-  // Method to manually flush pending taps (useful when user is about to logout)
-  async flushPendingTapsIfAny() {
+  // Legacy method for backward compatibility
+  async flushPendingTapsIfAny(): Promise<void> {
     const storedPending = localStorage.getItem(this.PENDING_TAPS_KEY);
     if (storedPending && parseInt(storedPending, 10) > 0) {
       await this.flushPendingTaps();
