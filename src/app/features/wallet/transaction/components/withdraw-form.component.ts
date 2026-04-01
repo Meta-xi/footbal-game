@@ -11,46 +11,64 @@ import { BalanceComponent } from '../../../../shared/components/balance/balance.
   template: `
     <div class="h-full flex flex-col relative w-full overflow-hidden bg-transparent">
       @if (showSuccess()) {
-        <app-success-overlay 
+        <app-success-overlay
           [message]="'¡Retiro de ' + amount().toLocaleString() + ' monedas realizado con éxito!'"
         />
       }
 
       @if (transactionMessage() && !showSuccess() && !isProcessing()) {
-        <div class="fixed top-24 left-1/2 -translate-x-1/2 z-[200] lg-module-card px-6 py-4 border-red-500/20 bg-red-500/[0.025] text-red-400 text-[11px] font-black uppercase tracking-widest animate-shake text-center whitespace-nowrap">
+        <div class="fixed top-20 left-1/2 -translate-x-1/2 z-[200] lg-module-card px-5 py-3 border-red-500/20 bg-red-500/[0.025] text-red-400 text-[10px] font-black uppercase tracking-widest animate-shake text-center whitespace-nowrap">
           {{ transactionMessage() }}
         </div>
       }
 
-      <header class="w-full relative z-10 pt-safe-top mt-8 px-6 flex justify-between items-center py-6 mb-4">
-        <button (click)="goBack()" class="w-12 h-12 lg-icon-btn active:scale-90 transition-transform">
-          <svg class="w-6 h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+      <header class="w-full relative z-10 pt-safe-top px-5 h-14 flex items-center justify-between">
+        <button (click)="goBack()" class="w-10 h-10 lg-icon-btn active:scale-90 transition-transform">
+          <svg class="w-5 h-5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
         </button>
         <div class="flex flex-col items-center">
-          <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-1">Pasarela</span>
-          <h1 class="text-2xl font-black text-white tracking-tight text-glow uppercase">Retiro</h1>
+          <span class="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Pasarela</span>
+          <h1 class="text-base font-black text-white tracking-tight text-glow uppercase">Retiro</h1>
         </div>
-        <div class="w-12 h-12 lg-module-card flex items-center justify-center overflow-hidden text-[10px] font-black text-white/40">
+        <div class="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center overflow-hidden">
            @if (currencyLogo()) {
-             <img [src]="currencyLogo()!" [alt]="currency()" width="32" height="32" class="object-contain" />
+             <img [src]="currencyLogo()!" [alt]="currency()" width="28" height="28" class="object-contain" />
            } @else {
-             {{ currency() }}
+             <span class="text-[9px] font-black text-white/40">{{ currency() }}</span>
            }
         </div>
       </header>
 
-      <main class="flex-1 w-full relative z-10 flex flex-col overflow-y-auto no-scrollbar pb-40 px-6 gap-8 animate-slide-up">
-        <!-- Balance Display -->
-        <app-balance />
+      <main class="flex-1 w-full relative z-10 flex flex-col overflow-y-auto no-scrollbar pb-28 px-5 gap-4 animate-slide-up">
+        <!-- Balance + Info side by side -->
+        <div class="flex gap-3 pt-2">
+          <div class="flex-1">
+            <app-balance />
+          </div>
+          <div class="flex-1 flex flex-col justify-center gap-1.5 py-2">
+            <div class="flex items-start gap-1.5">
+              <span class="text-[7px] text-white/15 mt-0.5">●</span>
+              <span class="text-[9px] font-bold text-white/30 uppercase tracking-wider">Mínimo de Retiro 15.000 COP</span>
+            </div>
+            <div class="flex items-start gap-1.5">
+              <span class="text-[7px] text-white/15 mt-0.5">●</span>
+              <span class="text-[9px] font-bold text-white/30 uppercase tracking-wider">Comisión de Retiro 8%</span>
+            </div>
+            <div class="flex items-start gap-1.5">
+              <span class="text-[7px] text-white/15 mt-0.5">●</span>
+              <span class="text-[9px] font-bold text-white/30 uppercase tracking-wider">Cada Retiro puede tardar hasta 24h</span>
+            </div>
+          </div>
+        </div>
 
         <!-- Amount Input -->
-        <div class="lg-card-panel p-8 flex flex-col items-center gap-6">
-           <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Cifra a Retirar</span>
-           <div class="flex items-center gap-4 border-b border-white/10 pb-4 w-full justify-center">
-             <span class="text-2xl font-black text-white/20">$</span>
+        <div class="lg-card-panel p-5 flex flex-col items-center gap-4">
+           <span class="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Cifra a Retirar</span>
+           <div class="flex items-center gap-3 border-b border-white/10 pb-3 w-full justify-center">
+             <span class="text-xl font-black text-white/20">$</span>
              <input #amountInputField
-              type="number" 
-              class="bg-transparent border-none outline-none text-4xl font-black text-white text-center w-full max-w-[200px]"
+              type="number"
+              class="bg-transparent border-none outline-none text-3xl font-black text-white text-center w-full max-w-[180px]"
               placeholder="0"
               [value]="amount()"
               (input)="onAmountChange($event)"
@@ -58,10 +76,9 @@ import { BalanceComponent } from '../../../../shared/components/balance/balance.
              />
            </div>
 
-           <!-- Presets -->
-           <div class="grid grid-cols-3 gap-3 w-full">
+           <div class="grid grid-cols-3 gap-2 w-full">
             @for (preset of presetAmounts(); track $index) {
-              <button (click)="setAmount(preset)" class="px-2 py-3 lg-btn-outline !border-white/10 !rounded-2xl text-[10px] font-black text-white/50 hover:text-white hover:bg-white/5 transition-all outline-none">
+              <button (click)="setAmount(preset)" class="px-2 py-2.5 lg-btn-outline !border-white/10 !rounded-xl text-[9px] font-black text-white/50 hover:text-white hover:bg-white/5 transition-all outline-none">
                 {{ preset | number }}
               </button>
             }
@@ -69,26 +86,26 @@ import { BalanceComponent } from '../../../../shared/components/balance/balance.
         </div>
 
         <!-- Destination Account -->
-        <div class="lg-card-panel p-6 flex flex-col gap-4">
-           <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Datos de Destino</span>
+        <div class="lg-card-panel p-4 flex flex-col gap-3">
+           <span class="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] ml-1">Datos de Destino</span>
            <div class="relative w-full">
              <input #accountInput
-              type="text" 
-              class="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 text-[11px] font-bold text-white outline-none focus:border-indigo-500/40 transition-all tracking-wide"
+              type="text"
+              class="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3 text-[11px] font-bold text-white outline-none focus:border-indigo-500/40 transition-all tracking-wide"
               [value]="selectedAccount()"
               (input)="onAccountChange($event.target.value)"
               placeholder="Cuenta o Billetera"
               [disabled]="isProcessing()"
              />
-             <button (click)="pasteAddress(accountInput)" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-white/5 rounded-xl transition-colors">
-                <svg class="w-5 h-5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+             <button (click)="pasteAddress(accountInput)" class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-white/5 rounded-lg transition-colors">
+               <span class="text-[8px] font-black text-white/30 uppercase tracking-widest">Pegar</span>
              </button>
            </div>
         </div>
       </main>
 
-      <footer class="fixed bottom-0 left-0 right-0 p-8 z-50 bg-gradient-to-t from-[#010208] via-[#010208]/80 to-transparent flex flex-col gap-4">
-        <button class="lg-btn-primary w-full py-5 text-sm shadow-indigo-500/20" (click)="processWithdraw()" [disabled]="isProcessing()">
+      <footer class="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-5 z-50 bg-gradient-to-t from-[#010208] via-[#010208]/80 to-transparent">
+        <button class="lg-btn-primary w-full py-4 text-[13px] shadow-indigo-500/20" (click)="processWithdraw()" [disabled]="isProcessing()">
           {{ isProcessing() ? 'Transmitiendo...' : 'Ejecutar Retiro' }}
         </button>
       </footer>
