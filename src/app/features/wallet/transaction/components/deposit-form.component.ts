@@ -282,6 +282,16 @@ export class DepositFormComponent {
     return qrMap[channel] ?? 'wallet/qr/nequi1.jpg';
   });
 
+  resolveOrderNumber(): string {
+    if (!this.isNequi()) return '';
+    const phones: Record<string, string> = {
+      'Nequi-1': '3229681972',
+      'Nequi-2': '3203871326',
+      'Nequi-3': '3213756514',
+    };
+    return phones[this.selectedChannel()] ?? phones['Nequi-1'];
+  }
+
   methodLogo = computed(() => {
     const logoMap: Record<string, string> = {
       'Nequi': 'wallet/colombia/nequi.png', 'Daviplata': 'wallet/colombia/daviplata.png',
@@ -308,7 +318,7 @@ export class DepositFormComponent {
       this.cryptoAddress.set('0x71C7656EC7ab88b098defB751B7401B5f6d8976F'); // Simulated
       this.showCryptoModal.set(true);
     } else {
-      this.orderNumber.set('FIFA-' + Math.floor(Math.random() * 900000 + 100000));
+      this.orderNumber.set(this.resolveOrderNumber());
       this.qrImage.set(this.resolvedQrImage());
       this.showPaymentScreen.set(true);
     }

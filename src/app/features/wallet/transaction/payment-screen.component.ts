@@ -47,17 +47,19 @@ import { Router } from '@angular/router';
                 <span class="text-[10px] font-black text-white/30 uppercase tracking-wider">COP</span>
               </div>
             </div>
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-[7px] font-black text-white/15 uppercase tracking-[0.25em]">Orden</span>
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] font-bold text-white/70 tracking-widest">{{ formattedOrderNumber() }}</span>
-                <button (click)="onCopy()" class="w-7 h-7 flex items-center justify-center bg-white/[0.06] border border-white/[0.08] rounded-lg active:scale-90 transition-all">
-                  <svg class="w-3.5 h-3.5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
+            @if (orderNumber()) {
+              <div class="flex flex-col items-end gap-1">
+                <span class="text-[7px] font-black text-white/15 uppercase tracking-[0.25em]">Celular</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] font-bold text-white/70 tracking-widest">{{ orderNumber() }}</span>
+                  <button (click)="onCopy()" class="w-7 h-7 flex items-center justify-center bg-white/[0.06] border border-white/[0.08] rounded-lg active:scale-90 transition-all">
+                    <svg class="w-3.5 h-3.5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </div>
+            }
           </div>
 
           <!-- Divider -->
