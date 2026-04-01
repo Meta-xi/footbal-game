@@ -16,11 +16,12 @@ import { PaymentScreenComponent } from '../payment-screen.component';
       }
 
       @if (showPaymentScreen()) {
-        <app-payment-screen 
-          [currency]="selectedMethod()" 
-          [amount]="amount()" 
+        <app-payment-screen
+          [currency]="selectedMethod()"
+          [amount]="amount()"
           [orderNumber]="orderNumber()"
           [qrImage]="qrImage()"
+          (goBack)="showPaymentScreen.set(false)"
         />
       }
 

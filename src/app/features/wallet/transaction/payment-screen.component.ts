@@ -153,6 +153,7 @@ export class PaymentScreenComponent {
   amount = input.required<number>();
   orderNumber = input.required<string>();
   qrImage = input.required<string>();
+  goBack = output<void>();
 
   reference = signal('');
   copied = signal(false);
@@ -171,7 +172,7 @@ export class PaymentScreenComponent {
   }
 
   onGoBack() {
-    this.router.navigate(['/wallet']);
+    this.goBack.emit();
   }
 
   async onCopy() {
