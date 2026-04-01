@@ -3,7 +3,7 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 interface Message {
-  id: number; text: string; timestamp: string; sender: 'user' | 'support';
+  id: number; text: string; timestamp: Date; sender: 'user' | 'support';
 }
 
 @Component({
@@ -48,7 +48,7 @@ interface Message {
                  [class.rounded-bl-md]="message.sender === 'support'">
               <p class="text-white/90">{{ message.text }}</p>
               <span class="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-2 block"
-                    [class.text-right]="message.sender === 'user'">{{ message.timestamp }}</span>
+                    [class.text-right]="message.sender === 'user'">{{ formatTime(message.timestamp) }}</span>
             </div>
           </div>
         }
@@ -103,9 +103,9 @@ export class SupportChatComponent {
   closeChat = output<void>();
 
   messages = signal<Message[]>([
-    { id: 1, text: '¡Hola! 👋 ¿En qué podemos ayudarte hoy?', timestamp: this.formatTime(new Date()), sender: 'support' },
-    { id: 2, text: 'Tengo un problema con un depósito que no se ha reflejado en mi cuenta.', timestamp: this.formatTime(new Date(Date.now() - 2 * 60000)), sender: 'user' },
-    { id: 3, text: 'Entendido. Por favor, bríndame el número de orden o la referencia de la transacción para poder verificarlo.', timestamp: this.formatTime(new Date(Date.now() - 1 * 60000)), sender: 'support' }
+    { id: 1, text: '¡Hola! 👋 ¿En qué podemos ayudarte hoy?', timestamp: new Date(), sender: 'support' },
+    { id: 2, text: 'Tengo un problema con un depósito que no se ha reflejado en mi cuenta.', timestamp: new Date(Date.now() - 2 * 60000), sender: 'user' },
+    { id: 3, text: 'Entendido. Por favor, bríndame el número de orden o la referencia de la transacción para poder verificarlo.', timestamp: new Date(Date.now() - 1 * 60000), sender: 'support' }
   ]);
 
   newMessage = signal('');
@@ -115,17 +115,17 @@ export class SupportChatComponent {
   sendMessage() {
     const text = this.newMessage().trim();
     if (text) {
-      const message: Message = { id: Date.now(), text, timestamp: this.formatTime(new Date()), sender: 'user' };
+      const message: Message = { id: Date.now(), text, timestamp: new Date(), sender: 'user' };
       this.messages.update(m => [...m, message]);
       this.newMessage.set('');
       setTimeout(() => {
-        const reply: Message = { id: Date.now() + 1, text: 'Estamos verificando la información. Un operador te atenderá en breve.', timestamp: this.formatTime(new Date()), sender: 'support' };
+        const reply: Message = { id: Date.now() + 1, text: 'Estamos verificando la información. Un operador te atenderá en breve.', timestamp: new Date(), sender: 'support' };
         this.messages.update(m => [...m, reply]);
       }, 1500);
     }
   }
 
-  private formatTime(date: Date): string {
+  formatTime(date: Date): string {
     return date.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
   }
 }

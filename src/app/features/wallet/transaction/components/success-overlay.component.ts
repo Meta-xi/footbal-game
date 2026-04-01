@@ -39,9 +39,9 @@ import { CommonModule } from '@angular/common';
     @keyframes scaleUp { from { transform: scale(0.6) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
     .text-glow-emerald { text-shadow: 0 0 25px rgba(52, 211, 153, 0.6); }
     .animate-progress { animation: progress 2.5s linear forwards; width: 0; }
-    @keyframes progress { 
-      0% { transform: translateX(-100%); width: 100%; } 
-      100% { transform: translateX(0%); width: 100%; } 
+    @keyframes progress {
+      0% { width: 0%; }
+      100% { width: 100%; }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,

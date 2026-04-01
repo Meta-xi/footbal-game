@@ -14,12 +14,12 @@ import { WithdrawFormComponent } from './components/withdraw-form.component';
       <div class="relative z-10 flex-1 flex flex-col no-scrollbar overflow-y-auto">
         @if (isDeposit()) {
           <app-deposit-form
-            [currency]="currency()!"
+            [currency]="currency()"
             [network]="network()"
           />
         } @else if (isWithdraw()) {
           <app-withdraw-form
-            [currency]="currency()!"
+            [currency]="currency()"
             [network]="network()"
           />
         } @else {
@@ -47,7 +47,7 @@ export class TransactionComponent {
   private queryParams = toSignal(this.route.queryParams);
 
   type = computed(() => this.queryParams()?.['type']);
-  currency = computed(() => this.queryParams()?.['currency']);
+  currency = computed(() => this.queryParams()?.['currency'] ?? '');
   network = computed(() => this.queryParams()?.['network']);
 
   isDeposit = computed(() => this.type() === 'depositar');

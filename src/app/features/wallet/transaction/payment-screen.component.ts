@@ -164,8 +164,6 @@ export class PaymentScreenComponent {
 
   displayAmount = computed(() => this.amount().toLocaleString('es-CO'));
 
-  formattedOrderNumber = computed(() => this.orderNumber());
-
   onReferenceChange(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.reference.set(value);
@@ -187,7 +185,9 @@ export class PaymentScreenComponent {
       const text = await navigator.clipboard.readText();
       this.reference.set(text);
       this.showToast('Pegado');
-    } catch { }
+    } catch {
+      this.showToast('No se pudo pegar');
+    }
   }
 
   private showToast(message: string) {

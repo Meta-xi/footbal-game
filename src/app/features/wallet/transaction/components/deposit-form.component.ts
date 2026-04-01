@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, input, viewChild, ElementRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { LocalApiService } from '../../../../core/services/local-api.service';
@@ -61,7 +61,7 @@ import { PaymentScreenComponent } from '../payment-screen.component';
            <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Cifra a Recargar</span>
            <div class="flex items-center gap-4 border-b border-white/10 pb-4 w-full justify-center">
              <span class="text-2xl font-black text-white/20">$</span>
-             <input #amountInput
+             <input
               type="number" 
               class="bg-transparent border-none outline-none text-4xl font-black text-white text-center w-full max-w-[200px]"
               placeholder="0"

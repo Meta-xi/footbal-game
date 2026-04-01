@@ -83,7 +83,7 @@ import { BalanceComponent } from '../../../../shared/components/balance/balance.
            </div>
 
            <div class="grid grid-cols-3 gap-2 w-full">
-            @for (preset of presetAmounts(); track $index) {
+            @for (preset of presetAmounts(); track preset) {
               <button (click)="setAmount(preset)" class="px-2 py-2.5 lg-btn-outline !border-white/10 !rounded-xl text-[9px] font-black text-white/50 hover:text-white hover:bg-white/5 transition-all outline-none">
                 {{ preset | number }}
               </button>
