@@ -330,29 +330,94 @@ export class SpotlightTutorialComponent implements OnDestroy {
   private updatePositions(): void {
     const rect = this.spotlightRect();
     const step = this.currentStepData();
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const isStanding = step.characterPose === 'standing';
 
-    if (isStanding || !rect) {
-      // Intro/closing: character small bottom-left, dialog above-right
+    // Per-step explicit positioning — user-verified
+    const positions: Record<string, { char: ElementStyle; bubble: ElementStyle }> = {
+      // Intro: character bottom-left, dialog above
+      'welcome': {
+        char: { bottom: '20px', left: '16px', right: 'auto', top: 'auto' },
+        bubble: { bottom: '140px', left: '16px', right: 'auto', top: 'auto' },
+      },
+      // Header profile: below the spotlight, top-left
+      'profile': {
+        char: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 16}px`, left: '16px', right: 'auto', bottom: 'auto' },
+        bubble: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 20}px`, left: '80px', right: 'auto', bottom: 'auto' },
+      },
+      // Header settings: below the spotlight, top-right area
+      'settings': {
+        char: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 16}px`, left: '16px', right: 'auto', bottom: 'auto' },
+        bubble: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 20}px`, left: '80px', right: 'auto', bottom: 'auto' },
+      },
+      // Balance: below the spotlight
+      'balance': {
+        char: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 16}px`, left: '16px', right: 'auto', bottom: 'auto' },
+        bubble: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 20}px`, left: '80px', right: 'auto', bottom: 'auto' },
+      },
+      // Open Ball: below spotlight
+      'openball': {
+        char: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 16}px`, left: '16px', right: 'auto', bottom: 'auto' },
+        bubble: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 20}px`, left: '80px', right: 'auto', bottom: 'auto' },
+      },
+      // Roulette: below spotlight
+      'roulette': {
+        char: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 16}px`, left: '16px', right: 'auto', bottom: 'auto' },
+        bubble: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 20}px`, left: '80px', right: 'auto', bottom: 'auto' },
+      },
+      // COP Spin: below spotlight
+      'copspin': {
+        char: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 16}px`, left: '16px', right: 'auto', bottom: 'auto' },
+        bubble: { top: `${(rect?.top ?? 0) + (rect?.height ?? 0) + 20}px`, left: '80px', right: 'auto', bottom: 'auto' },
+      },
+      // Tap area: above spotlight (large target, character+dialog at top)
+      'tap': {
+        char: { top: '60px', left: '16px', right: 'auto', bottom: 'auto' },
+        bubble: { top: '70px', left: '80px', right: 'auto', bottom: 'auto' },
+      },
+      // Energy: above spotlight
+      'energy': {
+        char: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 16}px`, left: '16px', right: 'auto', top: 'auto' },
+        bubble: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 20}px`, left: '80px', right: 'auto', top: 'auto' },
+      },
+      // Boost: above spotlight
+      'boost': {
+        char: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 16}px`, left: '16px', right: 'auto', top: 'auto' },
+        bubble: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 20}px`, left: '80px', right: 'auto', top: 'auto' },
+      },
+      // Nav social: above spotlight
+      'nav-social': {
+        char: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 16}px`, left: '16px', right: 'auto', top: 'auto' },
+        bubble: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 20}px`, left: '80px', right: 'auto', top: 'auto' },
+      },
+      // Nav retos: above spotlight
+      'nav-retos': {
+        char: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 16}px`, left: '16px', right: 'auto', top: 'auto' },
+        bubble: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 20}px`, left: '80px', right: 'auto', top: 'auto' },
+      },
+      // Nav fichajes: above spotlight
+      'nav-fichajes': {
+        char: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 16}px`, left: '16px', right: 'auto', top: 'auto' },
+        bubble: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 20}px`, left: '80px', right: 'auto', top: 'auto' },
+      },
+      // Nav banco: above spotlight
+      'nav-banco': {
+        char: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 16}px`, left: '16px', right: 'auto', top: 'auto' },
+        bubble: { bottom: `${window.innerHeight - (rect?.top ?? 0) + 20}px`, left: '80px', right: 'auto', top: 'auto' },
+      },
+      // Closing: character bottom-left, dialog above
+      'closing': {
+        char: { bottom: '20px', left: '16px', right: 'auto', top: 'auto' },
+        bubble: { bottom: '140px', left: '16px', right: 'auto', top: 'auto' },
+      },
+    };
+
+    const pos = positions[step.id];
+    if (pos) {
+      this.characterPos.set(pos.char);
+      this.bubblePos.set(pos.bubble);
+    } else {
+      // Fallback
       this.characterPos.set({ bottom: '20px', left: '16px', right: 'auto', top: 'auto' });
       this.bubblePos.set({ bottom: '140px', left: '16px', right: 'auto', top: 'auto' });
-      return;
-    }
-
-    const midY = vh * 0.5;
-    const targetCenter = rect.top + rect.height / 2;
-    const targetIsAbove = targetCenter < midY;
-
-    if (targetIsAbove) {
-      // Target is in upper half → character + bubble at the BOTTOM (far from target)
-      this.characterPos.set({ bottom: '20px', left: '16px', right: 'auto', top: 'auto' });
-      this.bubblePos.set({ bottom: '30px', left: '140px', right: 'auto', top: 'auto' });
-    } else {
-      // Target is in lower half → character + bubble at the TOP (far from target)
-      this.characterPos.set({ top: '80px', left: '16px', right: 'auto', bottom: 'auto' });
-      this.bubblePos.set({ top: '90px', left: '140px', right: 'auto', bottom: 'auto' });
     }
   }
 
