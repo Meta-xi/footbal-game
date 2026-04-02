@@ -69,6 +69,5 @@ export class GameLayoutComponent {
   onBonusClaimed(): void {
     // Bonus is already credited by the backend on registration
     // This is just for UI celebration — could trigger confetti, sound, etc.
-    console.log('Welcome bonus claimed!');
   }
 }

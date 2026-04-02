@@ -198,7 +198,6 @@ export class PaymentScreenComponent {
 
   onConfirm() {
     if (this.isValidReference()) {
-      console.log('Confirmando referencia:', this.reference());
       this.router.navigate(['/wallet']);
     }
   }

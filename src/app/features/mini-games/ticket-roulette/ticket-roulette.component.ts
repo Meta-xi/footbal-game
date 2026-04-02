@@ -344,7 +344,7 @@ export class TicketRouletteComponent {
     if (this.isSpinning()) return;
     if (this.ticketsCount() <= 0) return;
 
-    this.audioClick.play().catch(() => console.log('Esperando interacción para audio...'));
+    this.audioClick.play().catch(() => {});
     this.isSpinning.set(true);
 
     const minSpins = 200;
@@ -387,7 +387,7 @@ export class TicketRouletteComponent {
       if (currentIndex !== lastTickIndex && currentIndex > 0) {
         lastTickIndex = currentIndex;
         this.audioTick.currentTime = 0;
-        this.audioTick.play().catch(() => console.log('Esperando interacción para audio...'));
+        this.audioTick.play().catch(() => {});
       }
 
       if (progress < 1) {
@@ -400,10 +400,7 @@ export class TicketRouletteComponent {
 
   finishSpin(winningIndex: number) {
     this.isSpinning.set(false);
-    this.audioWin.play().catch(() => console.log('Esperando interacción para audio...'));
-
-    const wonTicket = this.reelTickets()[winningIndex];
-    console.log(`¡Ganaste ${wonTicket.value}!`);
+    this.audioWin.play().catch(() => {});
   }
 
   goBack() {
