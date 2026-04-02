@@ -25,6 +25,7 @@ import { map, filter } from 'rxjs';
 
       @for (nav of navItems; track nav.id) {
         <button [routerLink]="nav.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: nav.id === 'Social'}"
+          [attr.data-tutorial-id]="nav.tutorialId"
           class="nav-btn group relative z-10" [attr.aria-label]="nav.id">
           <div class="nav-content">
             <img [ngSrc]="nav.icon" alt="" width="28" height="28" class="nav-icon group-[.active]:opacity-100 opacity-30 group-hover:opacity-60 transition-all duration-500">
@@ -68,11 +69,11 @@ export class BottomNavComponent {
   private router = inject(Router);
 
   navItems = [
-    { id: 'Social', route: '/social', icon: 'shared/navigation/friends.webp' },
-    { id: 'Retos', route: '/mociones', icon: 'shared/navigation/mociones.webp' },
-    { id: 'Jugar', route: '/main', icon: 'shared/navigation/home.webp' },
-    { id: 'Fichajes', route: '/mining', icon: 'shared/navigation/inversion.webp' },
-    { id: 'Banco', route: '/wallet', icon: 'shared/navigation/cartera.webp' }
+    { id: 'Social', route: '/social', icon: 'shared/navigation/friends.webp', tutorialId: 'nav-social' },
+    { id: 'Retos', route: '/mociones', icon: 'shared/navigation/mociones.webp', tutorialId: 'nav-retos' },
+    { id: 'Jugar', route: '/main', icon: 'shared/navigation/home.webp', tutorialId: 'nav-jugar' },
+    { id: 'Fichajes', route: '/mining', icon: 'shared/navigation/inversion.webp', tutorialId: 'nav-fichajes' },
+    { id: 'Banco', route: '/wallet', icon: 'shared/navigation/cartera.webp', tutorialId: 'nav-banco' }
   ];
 
   private currentUrl = toSignal(this.router.events.pipe(

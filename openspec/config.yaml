@@ -7,6 +7,24 @@ context: |
   Testing: Vitest con jsdom
   Styling: TailwindCSS v4 (no @apply, mobile-first)
 
+strict_tdd: true
+
+testing:
+  runner:
+    command: "ng test"
+    framework: vitest
+  layers:
+    unit: true
+    integration: false
+    e2e: false
+  coverage:
+    available: false
+    command: null
+  quality:
+    linter: null
+    type_checker: "tsc --noEmit"
+    formatter: "prettier"
+
 rules:
   proposal:
     - Include rollback plan for risky changes

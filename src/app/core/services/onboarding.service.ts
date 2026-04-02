@@ -99,7 +99,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: 'Social',
     description: 'Mirá lo que hacen tus amigos, competí y divertite juntos.',
     icon: '👥',
-    targetId: 'bottom-nav',
+    targetId: 'nav-social',
     characterPose: 'pointing',
   },
   {
@@ -107,7 +107,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: 'Retos',
     description: 'Completá desafíos diarios para ganar recompensas extra. ¡No te los pierdas!',
     icon: '🏆',
-    targetId: 'bottom-nav',
+    targetId: 'nav-retos',
     characterPose: 'pointing',
   },
   {
@@ -115,7 +115,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: 'Fichajes',
     description: 'Invertí tus monedas en jugadores. Cada uno te genera ganancias por hora automáticamente.',
     icon: '💎',
-    targetId: 'bottom-nav',
+    targetId: 'nav-fichajes',
     characterPose: 'pointing',
   },
   {
@@ -123,7 +123,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: 'Banco',
     description: 'Tu billetera. Acá ves todo tu historial y podés hacer retiros.',
     icon: '🏦',
-    targetId: 'bottom-nav',
+    targetId: 'nav-banco',
     characterPose: 'pointing',
   },
   {

@@ -13,6 +13,7 @@
 | sdd-apply | When the orchestrator launches you to implement one or more tasks from a change | ~/.config/opencode/skills/sdd-apply/SKILL.md |
 | sdd-verify | When the orchestrator launches you to verify a completed (or partially completed) change | ~/.config/opencode/skills/sdd-verify/SKILL.md |
 | sdd-archive | When the orchestrator launches you to archive a change after implementation and verification | ~/.config/opencode/skills/sdd-archive/SKILL.md |
+| sdd-reviewer | When the orchestrator launches you to audit a completed implementation | ~/.config/opencode/skills/sdd-reviewer/SKILL.md |
 | skill-creator | When user asks to create a new skill, add agent instructions, or document patterns for AI | ~/.config/opencode/skills/skill-creator/SKILL.md |
 | go-testing | When writing Go tests, using teatest, or adding test coverage | ~/.config/opencode/skills/go-testing/SKILL.md |
 
