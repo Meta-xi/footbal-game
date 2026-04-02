@@ -337,7 +337,7 @@ export class SpotlightTutorialComponent implements OnDestroy {
     if (isStanding || !rect) {
       // Intro/closing: character small bottom-left, dialog above-right
       this.characterPos.set({ bottom: '20px', left: '16px', right: 'auto', top: 'auto' });
-      this.bubblePos.set({ bottom: '140px', left: '80px', right: 'auto', top: 'auto' });
+      this.bubblePos.set({ bottom: '140px', left: '16px', right: 'auto', top: 'auto' });
       return;
     }
 
