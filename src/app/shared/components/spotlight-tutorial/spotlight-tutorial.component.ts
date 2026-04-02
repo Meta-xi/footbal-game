@@ -210,7 +210,7 @@ interface SpotlightRect {
       border-radius: 24px;
       padding: 20px;
       max-width: 320px;
-      width: calc(100vw - 100px);
+      width: calc(100vw - 32px);
       box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.5),
         inset 0 1px 1px rgba(255, 255, 255, 0.1);
@@ -280,34 +280,60 @@ export class SpotlightTutorialComponent implements OnDestroy {
     const isStanding = this.currentStepData().characterPose === 'standing';
 
     if (isStanding || !rect) {
-      return { bottom: '20px', left: '20px', right: 'auto', top: 'auto' };
+      // Intro/closing: character at bottom-left
+      return { bottom: '20px', left: '16px', right: 'auto', top: 'auto' };
     }
 
     const midY = window.innerHeight * 0.5;
     const targetIsAbove = rect.top + rect.height / 2 < midY;
 
     if (targetIsAbove) {
+      // Target is high → character at bottom-left
       return { bottom: '20px', left: '16px', right: 'auto', top: 'auto' };
     } else {
-      return { top: '100px', left: '16px', right: 'auto', bottom: 'auto' };
+      // Target is low → character at top-left, below safe area
+      return { top: 'max(80px, env(safe-area-inset-top, 80px))', left: '16px', right: 'auto', bottom: 'auto' };
     }
   });
 
   bubbleStyle = computed(() => {
     const rect = this.spotlightRect();
     const isStanding = this.currentStepData().characterPose === 'standing';
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 375;
+
+    // Bubble width: calc(100vw - 32px) max 320px
+    const bubbleW = Math.min(320, vw - 32);
 
     if (isStanding || !rect) {
-      return { bottom: '150px', left: '16px', right: 'auto', top: 'auto' };
+      // Intro/closing: bubble at bottom, centered
+      return {
+        bottom: '150px',
+        left: `${Math.max(16, (vw - bubbleW) / 2)}px`,
+        right: 'auto',
+        top: 'auto',
+      };
     }
 
     const midY = window.innerHeight * 0.5;
     const targetIsAbove = rect.top + rect.height / 2 < midY;
 
     if (targetIsAbove) {
-      return { bottom: '160px', left: '16px', right: 'auto', top: 'auto' };
+      // Target is high → bubble at bottom, centered
+      return {
+        bottom: `${Math.max(160, window.innerHeight - rect.top + 20)}px`,
+        left: `${Math.max(16, (vw - bubbleW) / 2)}px`,
+        right: 'auto',
+        top: 'auto',
+      };
     } else {
-      return { top: '100px', left: '160px', right: 'auto', bottom: 'auto' };
+      // Target is low → bubble at top, centered, below spotlight
+      const topPos = rect.top + rect.height + 20;
+      return {
+        top: `${Math.max(80, topPos)}px`,
+        left: `${Math.max(16, (vw - bubbleW) / 2)}px`,
+        right: 'auto',
+        bottom: 'auto',
+      };
     }
   });
 
