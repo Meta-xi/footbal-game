@@ -335,9 +335,9 @@ export class SpotlightTutorialComponent implements OnDestroy {
     const isStanding = step.characterPose === 'standing';
 
     if (isStanding || !rect) {
-      // Intro/closing: character bottom-left, bubble centered above
+      // Intro/closing: character bottom-left, bubble beside it
       this.characterPos.set({ bottom: '20px', left: '16px', right: 'auto', top: 'auto' });
-      this.bubblePos.set({ bottom: '150px', left: '16px', right: 'auto', top: 'auto' });
+      this.bubblePos.set({ bottom: '30px', left: '140px', right: 'auto', top: 'auto' });
       return;
     }
 
@@ -346,30 +346,13 @@ export class SpotlightTutorialComponent implements OnDestroy {
     const targetIsAbove = targetCenter < midY;
 
     if (targetIsAbove) {
-      // Target is in upper half → character + bubble at bottom
+      // Target is in upper half → character + bubble at the BOTTOM (far from target)
       this.characterPos.set({ bottom: '20px', left: '16px', right: 'auto', top: 'auto' });
-
-      // Bubble: centered horizontally, below the spotlight gap
-      const gapBelowSpotlight = vh - rect.top + 20;
-      const bubbleBottom = Math.min(gapBelowSpotlight, vh - 300);
-      this.bubblePos.set({
-        bottom: `${Math.max(140, bubbleBottom)}px`,
-        left: '16px',
-        right: 'auto',
-        top: 'auto',
-      });
+      this.bubblePos.set({ bottom: '30px', left: '140px', right: 'auto', top: 'auto' });
     } else {
-      // Target is in lower half → character + bubble at top
+      // Target is in lower half → character + bubble at the TOP (far from target)
       this.characterPos.set({ top: '80px', left: '16px', right: 'auto', bottom: 'auto' });
-
-      // Bubble: below the spotlight, centered
-      const bubbleTop = rect.top + rect.height + 30;
-      this.bubblePos.set({
-        top: `${Math.max(80, Math.min(bubbleTop, vh - 250))}px`,
-        left: '16px',
-        right: 'auto',
-        bottom: 'auto',
-      });
+      this.bubblePos.set({ top: '90px', left: '140px', right: 'auto', bottom: 'auto' });
     }
   }
 
