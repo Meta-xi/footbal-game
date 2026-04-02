@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { GlassModalComponent } from '../../../../shared/ui';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-level-menu',
@@ -68,7 +69,16 @@ import { GlassModalComponent } from '../../../../shared/ui';
           }
         </main>
 
-        @if (!isAuthenticated()) {
+          <!-- Logout button (authenticated only) -->
+          @if (isAuthenticated()) {
+            <button (click)="logout()"
+              class="w-full mt-2 py-2.5 rounded-xl text-[11px] font-bold text-red-400/70 bg-red-500/5 border border-red-500/10 hover:bg-red-500/10 hover:text-red-400 active:scale-[0.98] transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              Salir
+            </button>
+          }
+
+          @if (!isAuthenticated()) {
           <footer class="mt-3 pt-3 border-t border-white/5 w-full flex flex-col gap-4">
             <div class="p-4 liquid-glass-card bg-amber-500/5 border-amber-500/10 text-center">
                <p class="text-[9px] font-black text-amber-500 uppercase tracking-widest">Sesión de Invitado: Progreso Local No Sincronizado</p>
@@ -86,6 +96,8 @@ import { GlassModalComponent } from '../../../../shared/ui';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LevelMenuComponent {
+  private authService = inject(AuthService);
+
   isOpen = input.required<boolean>();
   levelInfo = input.required<any>();
   isAuthenticated = input.required<boolean>();
@@ -94,4 +106,9 @@ export class LevelMenuComponent {
   close = output<void>();
 
   onClose() { this.close.emit(); }
+
+  logout(): void {
+    this.onClose();
+    this.authService.logout();
+  }
 }
