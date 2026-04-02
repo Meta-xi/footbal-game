@@ -192,7 +192,7 @@ interface ElementStyle {
       filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5));
     }
 
-    .referee-character.pose-standing { width: 90px; height: auto; }
+    .referee-character.pose-standing { width: 130px; height: auto; }
     .referee-character.pose-pointing { width: 140px; height: auto; }
 
     .speech-bubble {
