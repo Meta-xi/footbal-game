@@ -49,19 +49,20 @@ interface Prize {
           <div class="wheel-face" aria-hidden="true"></div>
           
           @for (prize of prizes; track prize.amount; let i = $index) {
-            <div 
+            <div
               class="prize-segment"
               [style.transform]="prizeTransform(i)"
             >
-              <img 
-                [ngSrc]="prize.icon" 
-                [alt]="prize.amount" 
-                width="40" 
-                height="40"
-                sizes="40px"
-                class="prize-icon"
-              />
-              <span class="prize-text">{{ prize.amount }}</span>
+              <div class="prize-content" [style.transform]="prizeCounterRotate(i)">
+                <img
+                  [ngSrc]="prize.icon"
+                  [alt]="prize.amount"
+                  width="40"
+                  height="40"
+                  class="prize-icon"
+                />
+                <span class="prize-text">{{ prize.amount }}</span>
+              </div>
             </div>
           }
           
@@ -200,9 +201,15 @@ interface Prize {
       align-items: center;
       justify-content: flex-start;
       padding-top: 28px;
-      gap: 2px;
-      transform-origin: center center;
       pointer-events: none;
+      transform-origin: center center;
+    }
+
+    .prize-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
     }
 
     .prize-icon {
@@ -358,6 +365,12 @@ export class RuletaComponent implements OnDestroy {
     const segmentAngle = 360 / this.prizes.length;
     const angle = index * segmentAngle + segmentAngle / 2;
     return `rotate(${angle}deg)`;
+  }
+
+  prizeCounterRotate(index: number): string {
+    const segmentAngle = 360 / this.prizes.length;
+    const angle = index * segmentAngle + segmentAngle / 2;
+    return `rotate(${-angle}deg)`;
   }
 
   spin(): void {
