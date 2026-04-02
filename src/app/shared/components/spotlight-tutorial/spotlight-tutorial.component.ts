@@ -17,42 +17,38 @@ interface SpotlightRect {
   height: number;
 }
 
+interface ElementStyle {
+  [key: string]: string;
+}
+
 @Component({
   selector: 'app-spotlight-tutorial',
   template: `
     @if (isActive()) {
-      <!-- 4 overlay panels that SURROUND the spotlight — where there's no panel, there's no blur -->
+      <!-- 4 overlay panels that SURROUND the spotlight -->
       @if (spotlightRect(); as rect) {
-        <!-- Top panel -->
         <div class="tutorial-panel"
-          [style.top.px]="0"
-          [style.left.px]="0"
-          [style.width.vw]="100"
+          style.top: 0; left: 0; width: 100vw;"
           [style.height.px]="rect.top - PANEL_GAP">
         </div>
-        <!-- Bottom panel -->
         <div class="tutorial-panel"
+          style.left: 0; width: 100vw;"
           [style.top.px]="rect.top + rect.height + PANEL_GAP"
-          [style.left.px]="0"
-          [style.width.vw]="100"
           [style.height.vh]="100">
         </div>
-        <!-- Left panel -->
         <div class="tutorial-panel"
+          style.left: 0;"
           [style.top.px]="rect.top - PANEL_GAP"
-          [style.left.px]="0"
           [style.width.px]="rect.left - PANEL_GAP"
           [style.height.px]="rect.height + PANEL_GAP * 2">
         </div>
-        <!-- Right panel -->
         <div class="tutorial-panel"
+          style="left: auto; right: 0;"
           [style.top.px]="rect.top - PANEL_GAP"
-          [style.left.px]="rect.left + rect.width + PANEL_GAP"
-          [style.width.vw]="100"
+          [style.width.px]="window.innerWidth - rect.left - rect.width - PANEL_GAP"
           [style.height.px]="rect.height + PANEL_GAP * 2">
         </div>
       } @else {
-        <!-- No target (intro/closing) — full overlay -->
         <div class="tutorial-panel-full"></div>
       }
 
@@ -73,11 +69,18 @@ interface SpotlightRect {
         class="referee-character"
         [class.pose-standing]="currentStepData().characterPose === 'standing'"
         [class.pose-pointing]="currentStepData().characterPose === 'pointing'"
-        [style]="characterStyle()"
+        [style.top]="characterPos().top"
+        [style.bottom]="characterPos().bottom"
+        [style.left]="characterPos().left"
+        [style.right]="characterPos().right"
         draggable="false" />
 
       <!-- Speech Bubble -->
-      <div class="speech-bubble" [style]="bubbleStyle()">
+      <div class="speech-bubble"
+        [style.top]="bubblePos().top"
+        [style.bottom]="bubblePos().bottom"
+        [style.left]="bubblePos().left"
+        [style.right]="bubblePos().right">
         <!-- Step indicators -->
         <div class="flex items-center justify-center gap-1.5 mb-3">
           @for (step of steps; track step.id; let i = $index) {
@@ -131,11 +134,8 @@ interface SpotlightRect {
     }
   `,
   styles: [`
-    :host {
-      display: contents;
-    }
+    :host { display: contents; }
 
-    /* Panel that covers one area with blur + dim */
     .tutorial-panel {
       position: fixed;
       z-index: 9998;
@@ -146,7 +146,6 @@ interface SpotlightRect {
       animation: panel-fade-in 300ms ease-out forwards;
     }
 
-    /* Full overlay for intro/closing (no spotlight target) */
     .tutorial-panel-full {
       position: fixed;
       inset: 0;
@@ -178,8 +177,8 @@ interface SpotlightRect {
     }
 
     @keyframes ring-pulse {
-      0%, 100% { border-color: rgba(0, 212, 255, 0.6); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3), 0 0 60px rgba(0, 212, 255, 0.1); }
-      50% { border-color: rgba(0, 212, 255, 0.9); box-shadow: 0 0 30px rgba(0, 212, 255, 0.5), 0 0 80px rgba(0, 212, 255, 0.2); }
+      0%, 100% { border-color: rgba(0, 212, 255, 0.6); }
+      50% { border-color: rgba(0, 212, 255, 0.9); }
     }
 
     .referee-character {
@@ -190,15 +189,8 @@ interface SpotlightRect {
       filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5));
     }
 
-    .referee-character.pose-standing {
-      width: 120px;
-      height: auto;
-    }
-
-    .referee-character.pose-pointing {
-      width: 140px;
-      height: auto;
-    }
+    .referee-character.pose-standing { width: 120px; height: auto; }
+    .referee-character.pose-pointing { width: 140px; height: auto; }
 
     .speech-bubble {
       position: fixed;
@@ -214,7 +206,7 @@ interface SpotlightRect {
       box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.5),
         inset 0 1px 1px rgba(255, 255, 255, 0.1);
-      transition: all 350ms cubic-bezier(0.25, 1, 0.5, 1);
+      transition: top 350ms ease, bottom 350ms ease, left 350ms ease;
       animation: bubble-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
@@ -224,23 +216,16 @@ interface SpotlightRect {
     }
 
     .step-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
+      width: 6px; height: 6px; border-radius: 50%;
       background: rgba(255, 255, 255, 0.15);
       transition: all 250ms ease-out;
     }
-
     .step-dot.active {
-      width: 20px;
-      border-radius: 10px;
+      width: 20px; border-radius: 10px;
       background: rgba(0, 212, 255, 0.9);
       box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
     }
-
-    .step-dot.completed {
-      background: rgba(0, 212, 255, 0.4);
-    }
+    .step-dot.completed { background: rgba(0, 212, 255, 0.4); }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -254,17 +239,23 @@ export class SpotlightTutorialComponent implements OnDestroy {
   readonly isFirstStep = this.onboarding.isFirstStep;
   readonly isLastStep = this.onboarding.isLastStep;
   readonly steps = ONBOARDING_STEPS;
-
-  // Gap between spotlight ring and overlay panels
   readonly PANEL_GAP = 4;
 
+  // Expose window for template
+  readonly window = typeof window !== 'undefined' ? window : { innerWidth: 375, innerHeight: 812 } as any;
+
   spotlightRect = signal<SpotlightRect | null>(null);
+
+  // Positioning signals — set imperatively by updatePositions()
+  characterPos = signal<ElementStyle>({ bottom: '20px', left: '16px', right: 'auto', top: 'auto' });
+  bubblePos = signal<ElementStyle>({ bottom: '150px', left: '16px', right: 'auto', top: 'auto' });
+
   private resizeTimeout: any = null;
 
   private readonly onResizeHandler = () => {
     clearTimeout(this.resizeTimeout);
     this.resizeTimeout = setTimeout(() => {
-      if (this.isActive()) this.updateSpotlight();
+      if (this.isActive()) this.updateAll();
     }, 100);
   };
 
@@ -274,68 +265,6 @@ export class SpotlightTutorialComponent implements OnDestroy {
   characterSrc = computed(() =>
     this.currentStepData().characterPose === 'standing' ? this.standingPose : this.pointingPose
   );
-
-  characterStyle = computed(() => {
-    const rect = this.spotlightRect();
-    const isStanding = this.currentStepData().characterPose === 'standing';
-
-    if (isStanding || !rect) {
-      // Intro/closing: character at bottom-left
-      return { bottom: '20px', left: '16px', right: 'auto', top: 'auto' };
-    }
-
-    const midY = window.innerHeight * 0.5;
-    const targetIsAbove = rect.top + rect.height / 2 < midY;
-
-    if (targetIsAbove) {
-      // Target is high → character at bottom-left
-      return { bottom: '20px', left: '16px', right: 'auto', top: 'auto' };
-    } else {
-      // Target is low → character at top-left, below safe area
-      return { top: 'max(80px, env(safe-area-inset-top, 80px))', left: '16px', right: 'auto', bottom: 'auto' };
-    }
-  });
-
-  bubbleStyle = computed(() => {
-    const rect = this.spotlightRect();
-    const isStanding = this.currentStepData().characterPose === 'standing';
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 375;
-
-    // Bubble width: calc(100vw - 32px) max 320px
-    const bubbleW = Math.min(320, vw - 32);
-
-    if (isStanding || !rect) {
-      // Intro/closing: bubble at bottom, centered
-      return {
-        bottom: '150px',
-        left: `${Math.max(16, (vw - bubbleW) / 2)}px`,
-        right: 'auto',
-        top: 'auto',
-      };
-    }
-
-    const midY = window.innerHeight * 0.5;
-    const targetIsAbove = rect.top + rect.height / 2 < midY;
-
-    if (targetIsAbove) {
-      // Target is high → bubble at bottom, centered
-      return {
-        bottom: `${Math.max(160, window.innerHeight - rect.top + 20)}px`,
-        left: `${Math.max(16, (vw - bubbleW) / 2)}px`,
-        right: 'auto',
-        top: 'auto',
-      };
-    } else {
-      // Target is low → bubble at top, centered, below spotlight
-      const topPos = rect.top + rect.height + 20;
-      return {
-        top: `${Math.max(80, topPos)}px`,
-        left: `${Math.max(16, (vw - bubbleW) / 2)}px`,
-        right: 'auto',
-        bottom: 'auto',
-      };
-    }
-  });
 
   constructor() {
     effect(() => {
@@ -349,7 +278,7 @@ export class SpotlightTutorialComponent implements OnDestroy {
       }
 
       this.lockScroll();
-      setTimeout(() => this.updateSpotlight(), 50);
+      setTimeout(() => this.updateAll(), 50);
     });
 
     if (typeof window !== 'undefined') {
@@ -365,8 +294,11 @@ export class SpotlightTutorialComponent implements OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    // Cleanup handled by destroyRef
+  ngOnDestroy(): void {}
+
+  private updateAll(): void {
+    this.updateSpotlight();
+    this.updatePositions();
   }
 
   private updateSpotlight(): void {
@@ -392,6 +324,52 @@ export class SpotlightTutorialComponent implements OnDestroy {
     });
   }
 
+  private updatePositions(): void {
+    const rect = this.spotlightRect();
+    const step = this.currentStepData();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const isStanding = step.characterPose === 'standing';
+
+    if (isStanding || !rect) {
+      // Intro/closing: character bottom-left, bubble centered above
+      this.characterPos.set({ bottom: '20px', left: '16px', right: 'auto', top: 'auto' });
+      this.bubblePos.set({ bottom: '150px', left: '16px', right: 'auto', top: 'auto' });
+      return;
+    }
+
+    const midY = vh * 0.5;
+    const targetCenter = rect.top + rect.height / 2;
+    const targetIsAbove = targetCenter < midY;
+
+    if (targetIsAbove) {
+      // Target is in upper half → character + bubble at bottom
+      this.characterPos.set({ bottom: '20px', left: '16px', right: 'auto', top: 'auto' });
+
+      // Bubble: centered horizontally, below the spotlight gap
+      const gapBelowSpotlight = vh - rect.top + 20;
+      const bubbleBottom = Math.min(gapBelowSpotlight, vh - 300);
+      this.bubblePos.set({
+        bottom: `${Math.max(140, bubbleBottom)}px`,
+        left: '16px',
+        right: 'auto',
+        top: 'auto',
+      });
+    } else {
+      // Target is in lower half → character + bubble at top
+      this.characterPos.set({ top: '80px', left: '16px', right: 'auto', bottom: 'auto' });
+
+      // Bubble: below the spotlight, centered
+      const bubbleTop = rect.top + rect.height + 30;
+      this.bubblePos.set({
+        top: `${Math.max(80, Math.min(bubbleTop, vh - 250))}px`,
+        left: '16px',
+        right: 'auto',
+        bottom: 'auto',
+      });
+    }
+  }
+
   private lockScroll(): void {
     document.body.style.overflow = 'hidden';
   }
@@ -400,19 +378,8 @@ export class SpotlightTutorialComponent implements OnDestroy {
     document.body.style.overflow = '';
   }
 
-  nextStep(): void {
-    this.onboarding.nextStep();
-  }
-
-  previousStep(): void {
-    this.onboarding.previousStep();
-  }
-
-  skipTutorial(): void {
-    this.onboarding.skipOnboarding();
-  }
-
-  finishTutorial(): void {
-    this.onboarding.completeOnboarding();
-  }
+  nextStep(): void { this.onboarding.nextStep(); }
+  previousStep(): void { this.onboarding.previousStep(); }
+  skipTutorial(): void { this.onboarding.skipOnboarding(); }
+  finishTutorial(): void { this.onboarding.completeOnboarding(); }
 }
