@@ -336,7 +336,7 @@ export class SpotlightTutorialComponent implements OnDestroy {
       // Intro: character bottom-left, dialog above
       'welcome': {
         char: { bottom: '20px', left: '16px', right: 'auto', top: 'auto' },
-        bubble: { bottom: '140px', left: '16px', right: 'auto', top: 'auto' },
+        bubble: { bottom: '165px', left: '16px', right: 'auto', top: 'auto' },
       },
       // Steps 2-7: dialog a la izquierda, character abajo del diálogo
       'profile': {
@@ -397,7 +397,7 @@ export class SpotlightTutorialComponent implements OnDestroy {
       // Closing: character bottom-left, dialog above
       'closing': {
         char: { bottom: '20px', left: '16px', right: 'auto', top: 'auto' },
-        bubble: { bottom: '140px', left: '16px', right: 'auto', top: 'auto' },
+        bubble: { bottom: '165px', left: '16px', right: 'auto', top: 'auto' },
       },
     };
 
