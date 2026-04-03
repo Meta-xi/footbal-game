@@ -69,7 +69,10 @@ interface Box {
        align-items: center;
        justify-content: center;
        min-height: 100vh;
-       padding: 0.75rem 1rem 1rem;
+       padding-top: var(--safe-top, 56px);
+       padding-left: 1rem;
+       padding-right: 1rem;
+       padding-bottom: 1rem;
        position: relative;
      }
 

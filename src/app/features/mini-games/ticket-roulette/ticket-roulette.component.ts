@@ -100,7 +100,10 @@ interface Ticket {
        min-height: 100vh;
        background: transparent;
        overflow: hidden;
-       padding: 20px;
+       padding-top: var(--safe-top, 56px);
+       padding-left: 20px;
+       padding-right: 20px;
+       padding-bottom: 20px;
        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
      }
 
