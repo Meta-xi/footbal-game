@@ -1,5 +1,4 @@
 import { Injectable, inject, computed } from '@angular/core';
-import { LocalApiService } from './local-api.service';
 import { UserStatusService } from './user-status.service';
 import { UserInfoService } from './user-info.service';
 
@@ -12,18 +11,19 @@ export interface EnergyData {
   providedIn: 'root'
 })
 export class EnergyService {
-  private localApi = inject(LocalApiService);
   private userStatusService = inject(UserStatusService);
   private userInfo = inject(UserInfoService);
 
-  // Signals conectados a LocalApiService/UserStatusService
-  readonly energy = this.localApi.currentEnergy;
-  readonly maxEnergy = this.localApi.maxEnergy;
+  // Signals conectados directamente a UserStatusService
+  readonly energy = computed(() => this.userStatusService.wallet()?.energy ?? 0);
+  readonly maxEnergy = computed(() => {
+    const skills = this.userStatusService.skillsLevelReport();
+    return 500 + ((skills?.maxEnergyLVL ?? 0) * 100);
+  });
 
   // La energía viene del UserStatusService (API)
   // No se modifica localmente, viene del servidor
 
-  readonly isLoading = computed(() => !this.localApi.isInitialized());
   readonly error = computed(() => null);
 
   decrementEnergy(amount: number) {
