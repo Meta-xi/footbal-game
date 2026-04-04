@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, AfterViewInit, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, signal, inject, afterNextRender } from '@angular/core';
 import { UserStatusService } from '../../../core/services/user-status.service';
 
 @Component({
@@ -8,20 +8,21 @@ import { UserStatusService } from '../../../core/services/user-status.service';
   styleUrls: ['./level-up-animation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LevelUpAnimationComponent implements AfterViewInit {
-  @Input() newLevel = 0;
-  @Input() oldLevel = 0;
-  @Output() animationFinished = new EventEmitter<void>();
+export class LevelUpAnimationComponent {
+  readonly newLevel = input.required<number>();
+  readonly oldLevel = input.required<number>();
+  readonly animationFinished = output<void>();
 
   private userStatusService = inject(UserStatusService);
 
   show = signal(false);
 
-  ngAfterViewInit(): void {
-    // Use a timeout to ensure the component is rendered before starting the animation
-    setTimeout(() => {
-      this.show.set(true);
-    }, 100);
+  constructor() {
+    afterNextRender(() => {
+      setTimeout(() => {
+        this.show.set(true);
+      }, 100);
+    });
   }
 
   close(): void {

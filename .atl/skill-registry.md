@@ -12,141 +12,186 @@ See `_shared/skill-resolver.md` for the full resolution protocol.
 | When creating Angular components, using signals, or setting up zoneless | angular-core | /home/winter/.agents/skills/angular-core/SKILL.md |
 | When working with forms, validation, or form state in Angular | angular-forms | /home/winter/.agents/skills/angular-forms/SKILL.md |
 | When optimizing Angular app performance, images, or lazy loading | angular-performance | /home/winter/.agents/skills/angular-performance/SKILL.md |
-| Automate browser interactions, test web pages and work with Playwright tests | playwright-cli | /home/winter/.agents/skills/playwright-cli/SKILL.md |
-| When user asks to find/install agent skills | find-skills | /home/winter/.agents/skills/find-skills/SKILL.md |
-| When building web components, pages, artifacts, posters, or applications | frontend-design | /home/winter/.agents/skills/frontend-design/SKILL.md |
-| When encountering any bug, test failure, or unexpected behavior, before proposing fixes | systematic-debugging | /home/winter/.agents/skills/systematic-debugging/SKILL.md |
 | Before any creative work — creating features, building components, adding functionality | brainstorming | /home/winter/.agents/skills/brainstorming/SKILL.md |
-| When designing, reviewing, or improving UI/UX for web and mobile | ui-ux-pro-max | /home/winter/.agents/skills/ui-ux-pro-max/SKILL.md |
-| When user says "judgment day", "review adversarial", "dual review", "juzgar" | judgment-day | /home/winter/.config/opencode/skills/judgment-day/SKILL.md |
-| When creating a GitHub issue, reporting a bug, or requesting a feature | issue-creation | /home/winter/.config/opencode/skills/issue-creation/SKILL.md |
-| When creating a pull request, opening a PR, or preparing changes for review | branch-pr | /home/winter/.config/opencode/skills/branch-pr/SKILL.md |
-| When user asks to create a new skill, add agent instructions, or document patterns for AI | skill-creator | /home/winter/.config/opencode/skills/skill-creator/SKILL.md |
-| When writing Go tests, using teatest, or adding test coverage | go-testing | /home/winter/.config/opencode/skills/go-testing/SKILL.md |
+| Go testing, Bubbletea TUI testing, teatest | go-testing | /home/winter/.config/opencode/skills/go-testing/SKILL.md |
+| "judgment day", "judgment-day", "review adversarial", "dual review", "doble review", "juzgar" | judgment-day | /home/winter/.config/opencode/skills/judgment-day/SKILL.md |
+| Creating a pull request, opening a PR, preparing changes for review | branch-pr | /home/winter/.config/opencode/skills/branch-pr/SKILL.md |
+| Creating a GitHub issue, reporting a bug, requesting a feature | issue-creation | /home/winter/.config/opencode/skills/issue-creation/SKILL.md |
+| Creating a new skill, add agent instructions, document patterns for AI | skill-creator | /home/winter/.config/opencode/skills/skill-creator/SKILL.md |
+| Discovering and installing agent skills | find-skills | /home/winter/.agents/skills/find-skills/SKILL.md |
+| Automate browser interactions, test web pages, Playwright tests | playwright-cli | /home/winter/.agents/skills/playwright-cli/SKILL.md |
+| UI/UX design, styles, color palettes, font pairings, accessibility | ui-ux-pro-max | /home/winter/.agents/skills/ui-ux-pro-max/SKILL.md |
+| Create web components, pages, artifacts, posters, applications | frontend-design | /home/winter/.agents/skills/frontend-design/SKILL.md |
+| Any bug, test failure, unexpected behavior, before proposing fixes | systematic-debugging | /home/winter/.agents/skills/systematic-debugging/SKILL.md |
 
 ## Compact Rules
 
 Pre-digested rules per skill. Delegators copy matching blocks into sub-agent prompts as `## Project Standards (auto-resolved)`.
 
+### angular-core
+- Standalone components by default — NEVER set `standalone: true` decorator
+- Use `input()`, `output()`, `model()` functions — NEVER `@Input()`/`@Output()` decorators
+- Use `signal()` for state, `computed()` for derived state, `effect()` for side effects
+- NEVER use lifecycle hooks (`ngOnInit`, `ngOnChanges`, `ngOnDestroy`) — use signals + effect
+- Use `inject()` instead of constructor injection
+- Set `changeDetection: ChangeDetectionStrategy.OnPush`
+- Use native control flow: `@if`, `@for`, `@switch` — NEVER `*ngIf`, `*ngFor`, `*ngSwitch`
+- NEVER use `ngClass` or `ngStyle` — use `[class.some-class]` and `[style.property]`
+- NEVER write arrow functions in templates (not supported)
+- Use `toSignal()` for RxJS → Signals conversion, avoid experimental `resource()` API
+- Signals are default; use RxJS ONLY for complex async (debounce, websockets, race conditions)
+
 ### angular-architecture
-- **Scope Rule**: Components used by 1 feature → `features/[feature]/components/`; used by 2+ features → `features/shared/components/`
-- **No suffixes**: `user-profile.ts` NOT `user-profile.component.ts`; `user.ts` NOT `user.service.ts` — folder tells you what it is
-- Use `inject()` over constructor injection
-- Use `class` and `style` bindings over `ngClass`/`ngStyle`
-- `protected` for template-only members, `readonly` for inputs/outputs/queries
+- Scope Rule: 1 feature → `features/[feature]/components/`, 2+ features → `features/shared/`
+- Core singletons go in `core/services/`, `core/interceptors/`, `core/guards/`
+- NO `.component`, `.service`, `.model` suffixes — folder tells you what it is
+- Main component has same name as folder: `features/cart/cart.ts`
+- Feature-specific components in `components/` subfolder
+- Shared components ONLY when used by 2+ features
+- Use `inject()` over constructor injection, `protected` for template-only members
 - Name handlers for action (`saveUser`) not event (`handleClick`)
 - One concept per file, keep lifecycle hooks simple — delegate to well-named methods
 
-### angular-core
-- Components are standalone by default — do NOT set `standalone: true`
-- Always use `input()`, `output()`, `model()` functions — NEVER `@Input()`/`@Output()` decorators
-- Use `signal()` for state, `computed()` for derived state, `effect()` for side effects
-- NEVER use lifecycle hooks (`ngOnInit`, `ngOnChanges`, `ngOnDestroy`) — use signals + effect instead
-- Always use `inject()` for DI — NEVER constructor injection
-- Use native control flow: `@if`, `@for`, `@switch` — NOT `*ngIf`, `*ngFor`
-- Signals are default; use RxJS ONLY for complex async (debounce, websockets, race conditions)
-- Angular is zoneless — use `provideZonelessChangeDetection()` and `OnPush`
-
 ### angular-forms
-- For new apps with signals: use Signal Forms (`form()` from `@angular/forms/signals`)
-- For production apps: use Reactive Forms with `fb.nonNullable.group()` for type safety
+- New apps with signals → Signal Forms (experimental, `form()` from `@angular/forms/signals`)
+- Production apps → Reactive Forms with `FormBuilder`, `Validators`
 - Use `getRawValue()` to get typed values from Reactive Forms
 - Reactive Forms are synchronous (easier to test)
-- Simple forms can use template-driven approach
+- Simple forms → Template-driven
+- Use `inject(FormBuilder)` instead of constructor injection
 
 ### angular-performance
-- ALWAYS use `NgOptimizedImage` for images — set `width` and `height` (or `fill`), add `priority` to LCP image
-- Use `@defer` for lazy loading components below the fold (`on viewport`, `on interaction`, `on idle`)
-- Lazy load routes with `loadComponent` or `loadChildren`
+- ALWAYS use `NgOptimizedImage` (`ngSrc`) — NEVER plain `src` for static images
+- ALWAYS set `width` and `height` (or `fill`) on `ngSrc` images
+- Add `priority` to LCP image only
+- Use `@defer (on viewport)` for below-fold content
+- Use `@defer (on interaction)` for click/focus/hover triggered content
+- Lazy load feature routes with `loadComponent`
+- Use `@defer` triggers: `on viewport`, `on interaction`, `on idle`, `on timer`, `when condition`
+- Parent of `fill` image must have `position: relative/fixed/absolute`
 - Use pure pipes for caching single results, `computed()` for derived signal state
 - NEVER trigger reflows/repaints in lifecycle hooks
-- SSR for SEO-critical pages, CSR for dashboards/admin, SSG for static marketing
 
 ### brainstorming
-- MUST explore project context, ask clarifying questions (one at a time), propose 2-3 approaches before implementation
-- MUST present design and get user approval BEFORE writing any code — no exceptions
+- MUST be invoked BEFORE any creative work (features, components, functionality)
+- Ask ONE question at a time — never overwhelm with multiple questions
+- Prefer multiple choice questions over open-ended
+- Propose 2-3 approaches with trade-offs before settling
+- Present design sections incrementally, get approval after each
+- HARD-GATE: Do NOT write code or implement until design is approved
 - "Simple" projects still need design (can be short, but must be presented and approved)
-- Prefer multiple choice questions, focus on purpose/constraints/success criteria
-- Break large projects into independent sub-projects with clear interfaces
-- Write design to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
-
-### find-skills
-- When user asks "how do I do X" or "find a skill for X", use `npx skills find [query]`
-- Check skills.sh leaderboard first for well-known skills
-- Verify quality: prefer 1K+ installs, check source reputation and GitHub stars
-- Install with `npx skills add <owner/repo@skill> -g -y`
-- If no skills found, offer to help directly or suggest `npx skills init`
-
-### frontend-design
-- Choose a BOLD aesthetic direction before coding — avoid generic "AI slop" (no Inter/Roboto, no purple gradients on white)
-- Use distinctive font pairings — one display font + one refined body font
-- Commit to a cohesive aesthetic with CSS variables, dominant colors with sharp accents
-- Use CSS-only animations for HTML, Motion library for React; one well-orchestrated staggered reveal > scattered micro-interactions
-- Never use the same design twice — vary between light/dark, different fonts, different aesthetics
-- Match complexity to vision: maximalist needs elaborate code, minimalist needs precision and restraint
+- Write spec to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+- Run spec review loop (max 3 iterations) before user review
+- Invoke `writing-plans` skill after spec approval — NEVER other implementation skills
 
 ### go-testing
-- Use table-driven tests for pure functions with multiple cases
-- Test Bubbletea models directly: call `Model.Update()` with `tea.KeyMsg` and assert state
-- Use `teatest.NewTestModel()` for full TUI integration flows with `tm.Send()` and `tm.WaitFinished()`
-- Use golden file testing for visual output comparison
-- Use `t.TempDir()` for file operation tests, mock system info via interfaces
+- Use table-driven tests for multiple test cases: `t.Run(tt.name, ...)`
+- Bubbletea TUI: test `Model.Update()` directly for state transitions
+- Use `teatest.NewTestModel()` for full TUI integration flows
+- Golden file testing for visual output: compare against saved `.golden` files
+- Mock system dependencies with interfaces, use `t.TempDir()` for file ops
+- Test both success and error cases for functions returning errors
+- Use `go test -short` to skip integration tests, `-update` to update golden files
 - Organize tests: `model_test.go`, `update_test.go`, `view_test.go` alongside source files
+
+### judgment-day
+- Launch TWO judges in parallel via `delegate` (async) — NEVER sequential
+- Neither judge knows about the other — no cross-contamination
+- Orchestrator synthesizes: Confirmed (both agree), Suspect (one only), Contradiction
+- WARNING classification: "Can a normal user trigger this?" → YES = real, NO = theoretical
+- Theoretical warnings reported as INFO — do NOT fix, do NOT re-judge
+- After fixes: re-launch both judges in parallel for re-judgment
+- After 2 fix iterations, ASK user before continuing — never escalate automatically
+- NEVER push/commit before re-judgment completes
+- NEVER declare APPROVED until: Round 1 CLEAN, or Round 2 with 0 confirmed CRITICALs + 0 confirmed real WARNINGs
+- Resolve skills from registry BEFORE launching judges (Pattern 0)
+
+### branch-pr
+- Every PR MUST link an approved issue (`status:approved` label)
+- Every PR MUST have exactly one `type:*` label
+- Branch naming: `type/description` — lowercase, only `a-z0-9._-`
+- Types: `feat`, `fix`, `chore`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `revert`
+- PR body MUST contain: `Closes #N`, type checkbox, summary, changes table, test plan
+- Conventional commits: `type(scope): description` — match regex pattern
+- Run `shellcheck` on modified scripts before pushing
+- NEVER add `Co-Authored-By` or AI attribution to commits
 
 ### issue-creation
 - Blank issues disabled — MUST use template (Bug Report or Feature Request)
-- Every issue gets `status:needs-review` automatically on creation
+- Every issue gets `status:needs-review` automatically
 - Maintainer MUST add `status:approved` before any PR can be opened
-- Questions go to Discussions, not issues
-- Search for duplicates before creating new issues
-
-### judgment-day
-- Launch TWO judge sub-agents via `delegate` (async, parallel) — NEVER review code yourself as orchestrator
-- Neither judge knows about the other — no cross-contamination
-- Synthesize verdict: Confirmed (both agree), Suspect (one only), Contradiction (disagree)
-- WARNING classification: "Can a normal user trigger this?" YES → real, NO → theoretical (report as INFO)
-- After fixes, re-launch both judges in parallel; after 2 fix iterations, ASK user before continuing
-- NEVER declare APPROVED until: Round 1 CLEAN, or Round 2 with 0 confirmed CRITICALs + 0 confirmed real WARNINGs
-
-### playwright-cli
-- Use `playwright-cli open`, `goto`, `click`, `type`, `fill`, `snapshot` for browser automation
-- Target elements using refs from snapshot (`e15`, `e3`) — prefer over CSS selectors
-- Use `playwright-cli snapshot` to get current page state with element refs
-- For form testing: `fill` inputs, `click` submit, `snapshot` to verify result
-- Close browser with `playwright-cli close` after testing
-- Use named sessions: `playwright-cli -s=mysession open` for parallel browser contexts
+- Questions go to Discussions, NOT issues
+- Search existing issues for duplicates before creating
+- Bug Report: include steps to reproduce, expected vs actual behavior, OS/agent/shell
+- Feature Request: include problem description, proposed solution, affected area
 
 ### skill-creator
-- Create skills when patterns repeat, conventions differ from best practices, or complex workflows need guidance
-- Structure: `skills/{name}/SKILL.md` (required), `assets/` (templates), `references/` (local docs)
-- Frontmatter required: `name`, `description` (with Trigger:), `license: Apache-2.0`, `metadata.author`, `metadata.version`
+- Create skill when: pattern repeats, AI needs guidance, complex workflows need steps
+- Don't create when: documentation exists, pattern is trivial, it's a one-off
+- Structure: `skills/{name}/SKILL.md` + optional `assets/` (templates) + `references/` (docs)
+- Frontmatter: `name`, `description` (with Trigger), `license: Apache-2.0`, `metadata.author`, `metadata.version`
 - DO: start with critical patterns, use tables for decisions, keep examples minimal
-- DON'T: duplicate existing docs, add keywords section, include lengthy explanations
+- DON'T: add Keywords section, duplicate existing docs, include lengthy explanations
+- references/ should point to LOCAL files, not web URLs
 - Register skill in AGENTS.md after creation
 
-### systematic-debugging
-- Iron Law: NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
-- Phase 1: Read errors carefully, reproduce consistently, check recent changes, gather evidence at component boundaries
-- Phase 2: Find working examples in codebase, compare differences, understand dependencies
-- Phase 3: Form single hypothesis, test minimally (one variable), verify before continuing
-- Phase 4: Create failing test, implement single fix, verify — if 3+ fixes fail, question the architecture
-- Red flags: "quick fix", "probably X", "skip the test" → STOP, return to Phase 1
+### find-skills
+- Use `npx skills find [query]` to search ecosystem
+- Check skills.sh leaderboard before running CLI search
+- Verify quality: prefer 1K+ installs, official sources (vercel-labs, anthropics, microsoft)
+- Present options with: name, description, install count, install command, link
+- Install with: `npx skills add <owner/repo@skill> -g -y`
+- If no skills found: acknowledge, offer to help directly, suggest `npx skills init`
+
+### playwright-cli
+- Core commands: `open`, `goto`, `click`, `type`, `fill`, `snapshot`, `screenshot`, `close`
+- Use `snapshot` to get refs (e15, e3, etc.) for interactions — prefer over CSS selectors
+- Keyboard: `press Enter`, `press ArrowDown`, `keydown Shift`, `keyup Shift`
+- Mouse: `mousemove x y`, `mousedown`, `mouseup`, `mousewheel dx dy`
+- Tabs: `tab-list`, `tab-new`, `tab-close`
+- Frames: `frame-list`, `frame-focus <id>`
+- Wait: `wait-for <selector>`, `wait-for text "..."`, `wait-for url "..."`
+- Network: `network-capture`, `network-list`, `network-clear`
+- Use named sessions: `playwright-cli -s=mysession open` for parallel browser contexts
 
 ### ui-ux-pro-max
 - Accessibility CRITICAL: contrast 4.5:1, focus rings, keyboard nav, aria-labels for icon-only buttons
-- Touch targets minimum 44×44pt (iOS) / 48×48dp (Android), 8px+ spacing between targets
-- Use WebP/AVIF images, lazy load non-critical, declare width/height to prevent CLS
-- No emoji as icons — use SVG (Lucide, Heroicons); consistent icon family and stroke width
-- Mobile-first design, min 16px body text, no horizontal scroll, use `min-h-dvh` not `100vh`
-- Animation: 150-300ms for micro-interactions, use transform/opacity only, respect prefers-reduced-motion
-- Forms: visible labels (not placeholder-only), errors below field, loading/success/error states on submit
-- Navigation: bottom nav max 5 items with labels, back must be predictable, deep linking for key screens
+- Touch targets: minimum 44x44pt, 8px+ spacing between targets
+- NEVER rely on hover alone for mobile — use click/tap for primary interactions
+- Performance: WebP/AVIF, lazy loading, reserve space (CLS < 0.1)
+- Style: match product type, consistency, SVG icons (no emoji)
+- Mobile-first breakpoints, viewport meta, no horizontal scroll
+- Typography: base 16px, line-height 1.5, semantic color tokens
+- Animation: duration 150-300ms, motion conveys meaning, respect prefers-reduced-motion
+- Forms: visible labels, error near field, helper text, progressive disclosure
+- Charts: legends, tooltips, accessible colors, never color-only meaning
+
+### frontend-design
+- Choose BOLD aesthetic direction before coding — NOT generic AI aesthetics
+- NEVER use: Inter, Roboto, Arial, system fonts, purple gradients on white
+- Pick distinctive fonts — pair display font with refined body font
+- Commit to cohesive color scheme with CSS variables
+- Motion: CSS-only for HTML, Motion library for React, staggered reveals
+- Spatial composition: asymmetry, overlap, diagonal flow, generous negative space
+- Match complexity to aesthetic vision — maximalist needs elaborate code, minimalist needs restraint
+- Production-grade, functional, visually striking, memorable
+
+### systematic-debugging
+- NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST — Iron Law
+- Phase 1: Read errors carefully, reproduce consistently, check recent changes
+- Phase 2: Find working examples in codebase, compare differences, understand dependencies
+- Phase 3: Form single hypothesis, test minimally, one variable at a time
+- Phase 4: Create failing test case, implement single fix, verify
+- If 3+ fixes failed → question architecture, discuss with human partner
+- STOP on: "quick fix for now", "just try X", "skip the test", "probably X"
+- Add diagnostic instrumentation at component boundaries for multi-component systems
 
 ## Project Conventions
 
 | File | Path | Notes |
 |------|------|-------|
-| AGENTS.md | AGENTS.md | Index — references project conventions and guidelines |
-| GEMINI.md | .gemini/GEMINI.md | Gemini-specific instructions |
+| AGENTS.md | /run/media/winter/DATA/Code/footbal-game/AGENTS.md | Index — references project conventions and guidelines |
+| .gemini/AGENTS.md | /run/media/winter/DATA/Code/footbal-game/.gemini/AGENTS.md | Gemini-specific agents config |
+| .gemini/GEMINI.md | /run/media/winter/DATA/Code/footbal-game/.gemini/GEMINI.md | Gemini CLI instructions |
 
 Read the convention files listed above for project-specific patterns and rules. All referenced paths have been extracted — no need to read index files to discover more.

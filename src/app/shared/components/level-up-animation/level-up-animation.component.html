@@ -19,17 +19,17 @@
       ¡NIVEL ALCANZADO!</h2>
 
     <div class="level-display flex items-center gap-4 text-3xl font-bold text-white mb-6">
-      <span class="level-old opacity-50">{{ oldLevel }}</span>
+      <span class="level-old opacity-50">{{ oldLevel() }}</span>
       <span class="level-arrow text-amber-400">→</span>
-      <span class="level-new text-5xl text-glow">{{ newLevel }}</span>
+      <span class="level-new text-5xl text-glow">{{ newLevel() }}</span>
     </div>
 
     <div class="level-badge relative w-32 h-32 mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
-      <img [src]="'game/balls/ball-lv' + newLevel + '.webp'" alt="Level {{newLevel}} Badge"
+      <img [src]="'game/balls/ball-lv' + newLevel() + '.webp'" alt="Level {{newLevel()}} Badge"
         class="badge-icon w-full h-full object-contain">
     </div>
 
-    <p class="message text-lg text-white/90 font-medium mb-8">¡Has ascendido al nivel {{ newLevel }}!</p>
+    <p class="message text-lg text-white/90 font-medium mb-8">¡Has ascendido al nivel {{ newLevel() }}!</p>
 
     <button class="close-button liquid-glass-button w-full py-4 text-lg tracking-wider bg-white/10 hover:bg-white/20"
       (click)="close()">Continuar</button>
