@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output, signal, inject, afterNextRender } from '@angular/core';
-import { UserStatusService } from '../../../core/services/user-status.service';
+import { ChangeDetectionStrategy, Component, input, output, signal, afterNextRender } from '@angular/core';
 
 @Component({
   selector: 'app-level-up-animation',
@@ -12,8 +11,6 @@ export class LevelUpAnimationComponent {
   readonly newLevel = input.required<number>();
   readonly oldLevel = input.required<number>();
   readonly animationFinished = output<void>();
-
-  private userStatusService = inject(UserStatusService);
 
   show = signal(false);
 
@@ -29,7 +26,6 @@ export class LevelUpAnimationComponent {
     this.show.set(false);
     // Allow fade-out animation to complete before emitting event
     setTimeout(() => {
-      this.userStatusService.levelUp.set(null);
       this.animationFinished.emit();
     }, 500);
   }

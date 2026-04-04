@@ -37,7 +37,7 @@ import { UserStatusService } from '../../core/services/user-status.service';
         <app-level-up-animation 
           [newLevel]="levelUpInfo.newLevel" 
           [oldLevel]="levelUpInfo.oldLevel"
-          (animationFinished)="userStatusService.levelUp.set(null)" />
+          (animationFinished)="onLevelUpAnimationFinished()" />
       }
 
       <!-- Welcome Tutorial (first-time onboarding) -->
@@ -60,6 +60,10 @@ export class GameLayoutComponent {
         this.onboarding.startOnboardingIfNeeded();
       }
     });
+  }
+
+  onLevelUpAnimationFinished(): void {
+    this.userStatusService.levelUp.set(null);
   }
 
   onBonusClaimed(): void {
