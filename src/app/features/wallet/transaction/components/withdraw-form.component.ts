@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed, input, vi
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserStatusService } from '../../../../core/services/user-status.service';
+import { WalletService, FinanceCoin, FincanceNetworks } from '../../../../core/services/wallet.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { SuccessOverlayComponent } from './success-overlay.component';
 import { BalanceComponent } from '../../../../shared/components/balance/balance.component';
 
@@ -132,6 +134,8 @@ import { BalanceComponent } from '../../../../shared/components/balance/balance.
 export class WithdrawFormComponent {
   private router = inject(Router);
   private userStatusService = inject(UserStatusService);
+  private walletService = inject(WalletService);
+  private authService = inject(AuthService);
 
   amountInputField = viewChild<ElementRef<HTMLInputElement>>('amountInputField');
 
@@ -155,6 +159,20 @@ export class WithdrawFormComponent {
     };
     return logoMap[this.currency()] || null;
   });
+
+  private coinMap: Record<string, FinanceCoin> = {
+    'Nequi': FinanceCoin.COP, 'Daviplata': FinanceCoin.COP,
+    'Plin': FinanceCoin.COP, 'Yape': FinanceCoin.COP,
+    'USDT': FinanceCoin.USDT, 'TRX': FinanceCoin.TRX,
+    'BNB': FinanceCoin.BNB, 'BTC': FinanceCoin.BTC,
+  };
+
+  private networkMap: Record<string, FincanceNetworks> = {
+    'Nequi': FincanceNetworks.Nequi, 'Daviplata': FincanceNetworks.Daviplata,
+    'Plin': FincanceNetworks.Plin, 'Yape': FincanceNetworks.Yape,
+    'USDT': FincanceNetworks.TRON, 'TRX': FincanceNetworks.TRON,
+    'BNB': FincanceNetworks.BSC, 'BTC': FincanceNetworks.Bitcoin,
+  };
 
   presetAmounts = computed(() => {
     const curr = this.currency();
@@ -189,7 +207,7 @@ export class WithdrawFormComponent {
 
   goBack() { this.router.navigate(['/wallet']); }
 
-  processWithdraw() {
+  async processWithdraw() {
     const amount = this.amount();
     if (amount <= 0) {
       this.transactionMessage.set('Monto inválido');
@@ -207,18 +225,35 @@ export class WithdrawFormComponent {
       return;
     }
 
+    const user = this.authService.user();
+    const token = this.authService.authToken();
+    if (!user?.id || !token) {
+      this.transactionMessage.set('Sesión expirada');
+      setTimeout(() => this.transactionMessage.set(''), 3000);
+      return;
+    }
+
     this.isProcessing.set(true);
-    setTimeout(() => {
-      // TODO: Implement API call for withdrawal
-      // this.localApi.updateBalance?.(-amount);
-      // this.localApi.addTransaction?.({
-      //   type: 'withdrawal', amount, currency: 'coins', status: 'completed',
-      //   method: this.selectedAccount() || this.currency(),
-      //   description: `Retiro de ${amount} monedas`,
-      // });
-      this.isProcessing.set(false);
-      this.showSuccess.set(true);
-      setTimeout(() => this.router.navigate(['/wallet']), 1500);
-    }, 2000);
+
+    const result = await this.walletService.addWithdrawal({
+      amountCOP: amount,
+      selectedCoin: this.coinMap[this.currency()] ?? FinanceCoin.COP,
+      selectedNetwork: this.networkMap[this.currency()] ?? FincanceNetworks.Nequi,
+      token,
+      uid: user.id,
+      walletAdress: this.selectedAccount(),
+    });
+
+    this.isProcessing.set(false);
+
+    if (!result.success) {
+      this.transactionMessage.set(result.error ?? 'Error al procesar el retiro');
+      setTimeout(() => this.transactionMessage.set(''), 3000);
+      return;
+    }
+
+    this.showSuccess.set(true);
+    await this.userStatusService.loadUserStatus();
+    setTimeout(() => this.router.navigate(['/wallet']), 1500);
   }
 }

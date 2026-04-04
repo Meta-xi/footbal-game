@@ -50,3 +50,18 @@ export const VISIBLE_MISSION_STATES: MisionState[] = [
   MisionState.Completed,
   MisionState.Failed,
 ];
+
+export interface ActivateMisionRequest {
+  misionId: number | string;
+  timestamp: number | string;
+}
+
+export interface ActivateMisionResponse {
+  // The spec says text/plain for 200 OK. It could be just "OK" or an empty body.
+  // We'll assume a successful response means the operation was completed.
+  // If the backend returns structured data, this interface will need to be updated.
+}
+
+export interface ApiMessageResponse {
+  message: string;
+}

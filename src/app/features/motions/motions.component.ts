@@ -588,7 +588,7 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
   // Delegated methods to service
   openMission(m: Mission) { this.motionsService.openMission(m); }
   closeModal() { this.motionsService.closeModal(); }
-  goToMission() { this.motionsService.goToMission(); }
+  async goToMission() { await this.motionsService.goToMission(); }
   openHistoryModal() {
     this.motionsService.openHistoryModal();
     this.motionsService.fetchCompletedMissions();

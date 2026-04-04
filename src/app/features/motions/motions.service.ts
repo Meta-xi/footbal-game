@@ -385,12 +385,11 @@ export class MotionsService {
     this.selectedMission.set(null);
   }
 
-  goToMission() {
+  async goToMission() {
     const m = this.selectedMission();
     if (m) {
       this.closeModal();
-      // Simulate mission claim (in real app, this would navigate or call API)
-      this.claimMission(Number(m.id));
+      await this.claimMission(Number(m.id));
     }
   }
 
@@ -456,8 +455,8 @@ export class MotionsService {
     }
   }
 
-  // Claim a mission (simulate success)
-  claimMission(missionId: number) {
+  // Claim a mission via backend
+  async claimMission(missionId: number): Promise<void> {
     const missions = this.missions();
     const mission = missions.find(m => m.id === String(missionId));
     if (!mission) {
@@ -470,12 +469,35 @@ export class MotionsService {
       this.showToast('Esta misión ya fue completada.', 'error');
       return;
     }
-    // Mark mission as completed
-    this.missions.update(list => list.map(m => 
-      m.id === String(missionId) ? { ...m, completed: true } : m
-    ));
-    this.emitEvent({ type: 'missionClaimed', missionId, amount: Number(mission.reward) });
-    this.showToast(`¡Misión completada! Recompensa: +${mission.reward} COP`, 'success');
+
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      this.showToast('No autorizado. Inicia sesión nuevamente.', 'error');
+      return;
+    }
+
+    try {
+      await firstValueFrom(
+        this.httpClient.post(
+          `${environment.apiBaseUrl}Misions/ActivateMision`,
+          {
+            misionId: missionId,
+            timestamp: Date.now(),
+            token,
+          }
+        )
+      );
+
+      // Mark mission as completed on success
+      this.missions.update(list => list.map(m =>
+        m.id === String(missionId) ? { ...m, completed: true } : m
+      ));
+      this.emitEvent({ type: 'missionClaimed', missionId, amount: Number(mission.reward) });
+      this.showToast(`¡Misión completada! Recompensa: +${mission.reward} COP`, 'success');
+    } catch (err) {
+      console.error('Failed to activate mission:', err);
+      this.showToast('Error al activar la misión. Intenta de nuevo.', 'error');
+    }
   }
 
   // Fail a mission (simulate error)

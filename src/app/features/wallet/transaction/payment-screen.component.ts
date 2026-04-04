@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { WalletService, FinanceCoin } from '../../../core/services/wallet.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { UserStatusService } from '../../../core/services/user-status.service';
 
 @Component({
   selector: 'app-payment-screen',
@@ -147,6 +150,9 @@ import { Router } from '@angular/router';
 })
 export class PaymentScreenComponent {
   private router = inject(Router);
+  private walletService = inject(WalletService);
+  private authService = inject(AuthService);
+  private userStatusService = inject(UserStatusService);
 
   currency = input.required<string>();
   amount = input.required<number>();
@@ -158,10 +164,18 @@ export class PaymentScreenComponent {
   copied = signal(false);
   toastVisible = signal(false);
   toastMessage = signal('');
+  isProcessing = signal(false);
 
   isValidReference = computed(() => this.reference().length >= 6);
 
   displayAmount = computed(() => this.amount().toLocaleString('es-CO'));
+
+  private coinMap: Record<string, FinanceCoin> = {
+    'Nequi': FinanceCoin.COP, 'Daviplata': FinanceCoin.COP,
+    'Plin': FinanceCoin.COP, 'Yape': FinanceCoin.COP,
+    'USDT': FinanceCoin.USDT, 'TRX': FinanceCoin.TRX,
+    'BNB': FinanceCoin.BNB, 'BTC': FinanceCoin.BTC,
+  };
 
   onReferenceChange(event: Event) {
     const value = (event.target as HTMLInputElement).value;
@@ -195,9 +209,37 @@ export class PaymentScreenComponent {
     setTimeout(() => this.toastVisible.set(false), 2000);
   }
 
-  onConfirm() {
-    if (this.isValidReference()) {
-      this.router.navigate(['/wallet']);
+  async onConfirm() {
+    if (!this.isValidReference()) return;
+
+    const user = this.authService.user();
+    const token = this.authService.authToken();
+    if (!user?.id || !token) {
+      this.showToast('Sesión expirada');
+      return;
     }
+
+    this.isProcessing.set(true);
+    this.toastMessage.set('Procesando depósito...');
+    this.toastVisible.set(true);
+
+    const result = await this.walletService.addDeposit({
+      amountUSD: this.amount(),
+      coin: this.coinMap[this.currency()] ?? FinanceCoin.COP,
+      token,
+      uid: user.id,
+    });
+
+    this.isProcessing.set(false);
+
+    if (!result.success) {
+      this.toastMessage.set(result.error ?? 'Error al procesar el depósito');
+      this.toastVisible.set(true);
+      setTimeout(() => this.toastVisible.set(false), 3000);
+      return;
+    }
+
+    await this.userStatusService.loadUserStatus();
+    this.router.navigate(['/wallet']);
   }
 }

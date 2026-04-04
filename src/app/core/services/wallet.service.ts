@@ -20,6 +20,42 @@ export enum TransactionReason {
   REFUND = 9,
 }
 
+export enum FinanceCoin {
+  COP = 1,
+  USDT = 2,
+  TRX = 3,
+  BNB = 4,
+  BTC = 5,
+}
+
+export enum FincanceNetworks {
+  Nequi = 1,
+  Daviplata = 2,
+  Plin = 3,
+  Yape = 4,
+  TRON = 5,
+  BSC = 6,
+  Bitcoin = 7,
+}
+
+export interface WithdrawalRequest {
+  amountCOP: number;
+  selectedCoin: FinanceCoin;
+  selectedNetwork: FincanceNetworks;
+  timestamp: number;
+  token: string;
+  uid: number;
+  walletAdress: string;
+}
+
+export interface DepositRequest {
+  amountUSD: number;
+  coin: FinanceCoin;
+  timestamp: number;
+  token: string;
+  uid: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -28,6 +64,90 @@ export class WalletService {
 
   private getBaseUrl(): string {
     return environment.apiBaseUrl;
+  }
+
+  async addWithdrawal(params: {
+    amountCOP: number;
+    selectedCoin: FinanceCoin;
+    selectedNetwork: FincanceNetworks;
+    token: string;
+    uid: number;
+    walletAdress: string;
+  }): Promise<{ success: boolean; error?: string; message?: string }> {
+    try {
+      const url = `${this.getBaseUrl()}Wallet/addWithdrawl`;
+      const body: WithdrawalRequest = {
+        amountCOP: params.amountCOP,
+        selectedCoin: params.selectedCoin,
+        selectedNetwork: params.selectedNetwork,
+        timestamp: Date.now(),
+        token: params.token,
+        uid: params.uid,
+        walletAdress: params.walletAdress,
+      };
+
+      const response = await this.http.post<ApiMessageResponse>(url, body).toPromise();
+
+      if (response) {
+        return { success: true, message: response.message };
+      }
+
+      return { success: false, error: 'No se recibió respuesta del servidor' };
+    } catch (error: unknown) {
+      const httpError = error as HttpErrorResponse;
+
+      const serverMessage = httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error
+        ? (httpError.error as ApiMessageResponse).message
+        : null;
+
+      if (httpError?.status === 400) {
+        return { success: false, error: serverMessage ?? 'Solicitud no válida' };
+      }
+      if (httpError?.status === 401) {
+        return { success: false, error: 'Sesión expirada. Inicia sesión nuevamente.' };
+      }
+      return { success: false, error: serverMessage ?? 'No se pudo procesar el retiro. Intenta de nuevo.' };
+    }
+  }
+
+  async addDeposit(params: {
+    amountUSD: number;
+    coin: FinanceCoin;
+    token: string;
+    uid: number;
+  }): Promise<{ success: boolean; error?: string; message?: string }> {
+    try {
+      const url = `${this.getBaseUrl()}Wallet/addDeposit`;
+      const body: DepositRequest = {
+        amountUSD: params.amountUSD,
+        coin: params.coin,
+        timestamp: Date.now(),
+        token: params.token,
+        uid: params.uid,
+      };
+
+      const response = await this.http.post<ApiMessageResponse>(url, body).toPromise();
+
+      if (response) {
+        return { success: true, message: response.message };
+      }
+
+      return { success: false, error: 'No se recibió respuesta del servidor' };
+    } catch (error: unknown) {
+      const httpError = error as HttpErrorResponse;
+
+      const serverMessage = httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error
+        ? (httpError.error as ApiMessageResponse).message
+        : null;
+
+      if (httpError?.status === 400) {
+        return { success: false, error: serverMessage ?? 'Solicitud no válida' };
+      }
+      if (httpError?.status === 401) {
+        return { success: false, error: 'Sesión expirada. Inicia sesión nuevamente.' };
+      }
+      return { success: false, error: serverMessage ?? 'No se pudo procesar el depósito. Intenta de nuevo.' };
+    }
   }
 
   async addTransaction(params: {
