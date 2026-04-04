@@ -1,25 +1,50 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, effect, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { BackendMission, Mission } from '../../models/mision.model';
+import { BackendMission, MisionReport, MisionState, VISIBLE_MISSION_STATES, Mission } from '../../models/mision.model';
 import { GlassTab } from '../../shared/ui'; // Added this import
 import { environment } from '../../../environments/environment';
 import { MotionEvent } from './types/motion-event';
 
-// Interface for completed missions from backend
-export interface CompletedMissionBackend {
-  id: number;
-  userId: number;
-  misionesId: number;
-  mision?: string | null;
-  created: string;
+// Default icon for missions when no specific icon is available
+const DEFAULT_MISSION_ICON = 'social/icons/Whatsapp_37229.png';
+
+// Backend sends numeric IDs, frontend uses string IDs for Mission.
+// This helper centralizes the conversion to prevent type drift.
+function toMissionId(n: number): string {
+  return String(n);
 }
 
+// Normalize category from backend (string | number | null) to frontend string | null.
+function normalizeCategory(cat: string | number | null | undefined): string | null {
+  if (cat === null || cat === undefined) return null;
+  return typeof cat === 'number' ? String(cat) : cat;
+}
+
+// Domain model for a completed mission record (parsed from backend MisionReport)
 export interface CompletedMission {
-  id: number;
+  id: string;
   userId: number;
-  misionesId: number;
-  mision?: string | null;
+  misionsId: number;
+  state: MisionState | null;
+  created: Date;
+  // Fields from MisionReport.mision — preserved as historical snapshot
+  misionName?: string | null;
+  misionDescription?: string | null;
+  misionReward?: number | null;
+  misionIcon?: string | null;
+  misionCategory?: string | number | null;
+}
+
+// Display model for mission history items (joins backend records with mission details)
+export interface MissionHistoryItem {
+  id: string;         // record id from backend
+  title: string;
+  description: string;
+  reward: number;
+  icon: string;
+  completed: boolean; // derived from state
+  category: string | null;
   created: Date;
 }
 
@@ -29,6 +54,8 @@ interface DailyReward {
   day: number;
   state: 'claimed' | 'available' | 'upcoming';
   icon: string;
+  reward: number;
+  title: string;
 }
 
 @Injectable({
@@ -44,16 +71,30 @@ export class MotionsService {
   private readonly completedMissionRecords = signal<CompletedMission[]>([]);
   private readonly loadingCompletedMissions = signal<boolean>(false);
 
-  // Daily rewards
-  private readonly dailyRewards = signal<DailyReward[]>([
-    { day: 1, state: 'claimed', icon: 'motions/daily/reclamed.webp' },
-    { day: 2, state: 'claimed', icon: 'motions/daily/reclamed.webp' },
-    { day: 3, state: 'available', icon: 'motions/daily/current.webp' },
-    { day: 4, state: 'upcoming', icon: 'motions/daily/comingsoon.webp' },
-    { day: 5, state: 'upcoming', icon: 'motions/daily/comingsoon.webp' },
-    { day: 6, state: 'upcoming', icon: 'motions/daily/comingsoon.webp' },
-    { day: 7, state: 'upcoming', icon: 'motions/daily/comingsoon.webp' },
+  // Daily reward states (mutable)
+  private readonly dailyRewardStates = signal<('claimed' | 'available' | 'upcoming')[]>([
+    'claimed', 'claimed', 'available', 'upcoming', 'upcoming', 'upcoming', 'upcoming',
   ]);
+
+  // Daily reward amount from backend (Category 4)
+  private readonly dailyRewardAmount = signal<number>(0);
+  private readonly dailyRewardTitle = signal<string>('Premio diario');
+
+  // Daily rewards — combines mutable states with backend reward data
+  private readonly dailyRewards = computed<DailyReward[]>(() => {
+    const states = this.dailyRewardStates();
+    const reward = this.dailyRewardAmount();
+    const title = this.dailyRewardTitle();
+    return states.map((state, i) => ({
+      day: i + 1,
+      state,
+      icon: state === 'claimed' ? 'motions/daily/reclamed.webp'
+        : state === 'available' ? 'motions/daily/current.webp'
+        : 'motions/daily/comingsoon.webp',
+      reward,
+      title,
+    }));
+  });
 
   // UI state (matching API categories: 0-whatsapp, 1-facebook, 2-tiktok, 3-youtube, 4-daily, 5-referral)
   private readonly missionTabKeys = ['Whatsapp', 'Facebook', 'TikTok', 'Youtube', 'Daily', 'Referral', 'History'];
@@ -90,13 +131,65 @@ export class MotionsService {
     return failed.reduce((sum, m) => sum + (Number(m.reward) || 0), 0);
   });
   readonly missionHistory$ = computed(() => [...this.completedMissions$(), ...this.failedMissions$()]);
-  readonly filteredHistory$ = computed(() => {
+  readonly filteredHistory$ = computed<MissionHistoryItem[]>(() => {
     const tab = this.activeHistoryTab();
+    const records = this.completedMissionRecords();
     const missions = this.missions();
-    if (tab === 'completadas') return missions.filter(m => m.completed);
-    return missions.filter(m => !m.completed);
+
+    // Build a Map for O(1) lookups instead of O(N*M)
+    const missionMap = new Map<string, Mission>();
+    for (const m of missions) {
+      missionMap.set(m.id, m);
+    }
+
+    // Filter by explicit tab values; fallback to all visible states for unknown tabs
+    const stateFilter: MisionState | null = tab === 'completadas'
+      ? MisionState.Completed
+      : tab === 'fallidas'
+        ? MisionState.Failed
+        : null;
+
+    // When tab is unknown, show all visible mission states instead of silently returning []
+    const visibleStates = stateFilter !== null
+      ? [stateFilter]
+      : VISIBLE_MISSION_STATES;
+
+    return records
+      .filter(r => r.state !== null && visibleStates.includes(r.state))
+      .map(r => {
+        const details = missionMap.get(toMissionId(r.misionsId));
+        return {
+          id: r.id,
+          title: details?.title ?? r.misionName ?? `Misión #${r.misionsId}`,
+          description: details?.description ?? r.misionDescription ?? '',
+          reward: details?.reward ?? r.misionReward ?? 0,
+          icon: details?.icon ?? r.misionIcon ?? DEFAULT_MISSION_ICON,
+          completed: r.state === MisionState.Completed,
+          category: normalizeCategory(details?.category ?? r.misionCategory),
+          created: r.created
+        };
+      });
   });
-  readonly dailyRewards$ = this.dailyRewards.asReadonly();
+
+  // Side-effect: log data integrity issues (effect is the correct place, not computed)
+  private readonly _integrityCheck = effect(() => {
+    const records = this.completedMissionRecords();
+    const missions = this.missions();
+    const missionMap = new Map<string, Mission>();
+    for (const m of missions) {
+      missionMap.set(m.id, m);
+    }
+
+    for (const r of records) {
+      if (r.state === null) {
+        console.warn(`[MotionsService] Mission record #${r.id} has null state — skipping from history`);
+      }
+      if (!missionMap.has(toMissionId(r.misionsId))) {
+        console.warn(`[MotionsService] No mission details found for misionsId=${r.misionsId} (record #${r.id})`);
+      }
+    }
+  });
+  readonly dailyRewards$ = this.dailyRewards;
   readonly activeTab$ = this.activeTab.asReadonly();
   readonly selectedMission$ = this.selectedMission.asReadonly();
   readonly showHistoryModal$ = this.showHistoryModal.asReadonly();
@@ -126,6 +219,12 @@ export class MotionsService {
       }
       const missions = response.map(b => this.mapBackendMissionToMission(b));
       this.missions.set(missions);
+
+      // If fetching daily missions (category 4), update daily reward config
+      if (categoryId === 4 && missions.length > 0) {
+        this.dailyRewardAmount.set(missions[0].reward);
+        this.dailyRewardTitle.set(missions[0].title);
+      }
     } catch (err) {
       console.error('Failed to fetch missions:', err);
       if (err instanceof HttpErrorResponse) {
@@ -147,7 +246,7 @@ export class MotionsService {
     this.error.set(null);
     try {
       const response = await firstValueFrom(
-        this.httpClient.get<CompletedMissionBackend[]>(
+        this.httpClient.get<MisionReport[]>(
           `${environment.apiBaseUrl}Misions/GetCompletedMisions`
         )
       );
@@ -195,12 +294,18 @@ export class MotionsService {
     };
   }
 
-  private mapCompletedMissionRecord(b: CompletedMissionBackend): CompletedMission {
+  private mapCompletedMissionRecord(b: MisionReport): CompletedMission {
+    const m = b.mision;
     return {
-      id: b.id,
+      id: toMissionId(b.id),
       userId: b.userId,
-      misionesId: b.misionesId,
-      mision: b.mision,
+      misionsId: b.misionsId,
+      state: b.state,
+      misionName: m?.name ?? null,
+      misionDescription: m?.description ?? null,
+      misionReward: m?.reward ?? null,
+      misionIcon: m?.icon ?? null,
+      misionCategory: m?.category ?? null,
       created: new Date(b.created)
     };
   }
@@ -309,19 +414,45 @@ export class MotionsService {
     return icons[tab] || '';
   }
 
-  claimDailyReward(reward: DailyReward) {
+  async claimDailyReward(reward: DailyReward): Promise<void> {
     if (reward.state === 'upcoming') {
       this.emitEvent({ type: 'missionFailed', error: 'Reward not available yet' });
       this.showToast('¡Aún no! Esta recompensa estará disponible pronto.', 'error');
-    } else if (reward.state === 'claimed') {
+      return;
+    }
+    if (reward.state === 'claimed') {
       this.emitEvent({ type: 'missionFailed', error: 'Reward already claimed' });
       this.showToast('¡Ya reclamaste este premio! Vuelve mañana.', 'error');
-    } else if (reward.state === 'available') {
-      this.emitEvent({ type: 'dailyRewardCollected', amount: 0 }); // amount not tracked
-      this.dailyRewards.update(rewards => rewards.map(r =>
-        r.day === reward.day ? { ...r, state: 'claimed', icon: 'motions/daily/reclamed.webp' } : r
-      ));
-      this.showToast(`¡Genial! Has reclamado tu recompensa del Día ${reward.day}.`, 'success');
+      return;
+    }
+
+    // Call backend to claim daily reward
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      this.showToast('No autorizado. Inicia sesión nuevamente.', 'error');
+      return;
+    }
+
+    try {
+      await firstValueFrom(
+        this.httpClient.post(
+          `${environment.apiBaseUrl}Misions/DailyMisionClaim`,
+          {
+            timestamp: Date.now(),
+            token,
+          }
+        )
+      );
+
+      // Update local state on success
+      this.emitEvent({ type: 'dailyRewardCollected', amount: reward.reward });
+      this.dailyRewardStates.update(states =>
+        states.map((s, i) => i === reward.day - 1 ? 'claimed' : s)
+      );
+      this.showToast(`¡Genial! Has reclamado tu recompensa del Día ${reward.day}: +${reward.reward} COP`, 'success');
+    } catch (err) {
+      console.error('Failed to claim daily reward:', err);
+      this.showToast('Error al reclamar la recompensa diaria. Intenta de nuevo.', 'error');
     }
   }
 

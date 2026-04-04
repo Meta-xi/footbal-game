@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Signal, signal, effect, ElementRef,
 import { Subscription } from 'rxjs';
 import { NgOptimizedImage, DecimalPipe } from '@angular/common';
 import { GlassModalComponent, GlassTabBarComponent, GlassTab } from '../../shared/ui';
-import { MotionsService } from './motions.service';
+import { MotionsService, MissionHistoryItem } from './motions.service';
 import { AudioService } from '../../services/audio.service';
 import { ConfettiService } from '../../services/confetti.service';
 import { Mission } from '../../models/mision.model';
@@ -11,6 +11,8 @@ interface DailyReward {
   day: number;
   state: 'claimed' | 'available' | 'upcoming';
   icon: string;
+  reward: number;
+  title: string;
 }
 
 @Component({
@@ -419,7 +421,7 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
   // Service-managed tab state (persists while app is open)
   readonly activeHistoryTab!: Signal<string>;
   readonly historyTabs!: GlassTab[];
-  readonly filteredHistory!: Signal<Mission[]>;
+  readonly filteredHistory!: Signal<MissionHistoryItem[]>;
   readonly dailyRewards!: Signal<DailyReward[]>;
   readonly toastData!: Signal<{ message: string, type: 'success' | 'error' | 'info' } | null>;
   readonly loading!: Signal<boolean>;
@@ -608,8 +610,8 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
     return this.motionsService.getTabIcon(tab);
   }
 
-  claimDailyReward(reward: DailyReward) {
-    this.motionsService.claimDailyReward(reward);
+  async claimDailyReward(reward: DailyReward) {
+    await this.motionsService.claimDailyReward(reward);
   }
 
   trackByMissionId(index: number, mission: Mission): string {
