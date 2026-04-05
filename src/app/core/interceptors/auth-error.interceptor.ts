@@ -10,11 +10,9 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error) => {
       if (error.status === 401 && req.url.startsWith(environment.apiBaseUrl)) {
-        // Clear auth state
+        // Clear auth state directly to avoid circular dependency with AuthService
         localStorage.removeItem('user');
         localStorage.removeItem('auth_token');
-
-        // Redirect to welcome/login
         router.navigate(['/welcome']);
       }
 

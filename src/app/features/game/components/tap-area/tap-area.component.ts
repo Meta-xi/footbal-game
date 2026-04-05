@@ -2,7 +2,6 @@ import { afterNextRender, ChangeDetectionStrategy, Component, computed, effect, 
 import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 import { TapService } from '../../../../core/services/tap.service';
-import { EnergyService } from '../../../../core/services/energy.service';
 import { UserStatusService } from '../../../../core/services/user-status.service';
 
 interface FloatingNumber {
@@ -89,7 +88,6 @@ export class TapAreaComponent {
 
   private userStatusService = inject(UserStatusService);
   private tapSvc = inject(TapService);
-  private energySvc = inject(EnergyService);
   private router = inject(Router);
 
   floatingNumbers = signal<FloatingNumber[]>([]);
@@ -123,23 +121,10 @@ export class TapAreaComponent {
   }
 
   tap(event: MouseEvent) {
-    // RESTRICCIÓN DE ENERGÍA DESHABILITADA TEMPORALMENTE
-    // const currentEnergy = this.energySvc.energy();
-    // if (currentEnergy <= 0) {
-    //   if (!this.noEnergyMessage()) {
-    //     this.noEnergyMessage.set('Energía Insuficiente');
-    //     setTimeout(() => this.noEnergyMessage.set(''), 2000);
-    //   }
-    //   return;
-    // }
-
     this.playPopSound();
 
-    // RESTRICCIÓN DE ENERGÍA DESHABILITADA TEMPORALMENTE
-    // this.energySvc.decrementEnergy(1);
     const earnedCoins = this.tapValue();
     this.tapSvc.addTap(1);
-    this.tapSvc.addCoins(earnedCoins);
 
     // Ball interaction (fluid 3D spring effect)
     if (this.ballImage) {

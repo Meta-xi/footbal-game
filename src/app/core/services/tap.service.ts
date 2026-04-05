@@ -1,5 +1,6 @@
 import { Injectable, inject, computed, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { EncryptionService } from './encryption.service';
 import { UserStatusService } from '../../core/services/user-status.service';
@@ -46,22 +47,6 @@ export class TapService {
   // Valor por tap calculado desde UserStatusService
   readonly tapValue = this.userStatusService.tapValue;
 
-  setCoins(coins: number) {
-    // Balance is now managed by API, this method is deprecated
-  }
-
-  getCoins(): number {
-    return this.coins();
-  }
-
-  addCoins(amount: number) {
-    // Balance is now managed by API, this method is deprecated
-  }
-
-  removeCoins(amount: number) {
-    // Balance is now managed by API, this method is deprecated
-  }
-
   async addTap(count: number = 1) {
     // Load pending taps from localStorage
     const storedPending = localStorage.getItem(this.PENDING_TAPS_KEY);
@@ -102,34 +87,26 @@ export class TapService {
       const token = await this.encryptionService.sha256(payload);
 
       const url = `${this.baseUrl}Game/addTooks`;
-      this.http.post(url, { amount: pendingCount, token, timestamp }).subscribe({
-        next: async () => {
-          console.log(`Sent ${pendingCount} taps to API`);
-          
-          // Refresh user status to update wallet
-          await this.userStatusService.loadUserStatus();
-          this.isFlushing = false;
-        },
-        error: (error: unknown) => {
-          // Restore pending taps on failure so they can be retried
-          this.pendingTaps.update(current => current + pendingCount);
-          localStorage.setItem(this.PENDING_TAPS_KEY, this.pendingTaps().toString());
-          this.isFlushing = false;
-          
-          const httpError = error as HttpErrorResponse;
-          if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
-            console.error('AddTooks failed:', (httpError.error as { message: string }).message);
-          } else {
-            console.error('AddTooks failed:', error);
-          }
-        }
-      });
+      await firstValueFrom(
+        this.http.post(url, { amount: pendingCount, token, timestamp })
+      );
+      console.log(`Sent ${pendingCount} taps to API`);
+
+      // Refresh user status to update wallet
+      await this.userStatusService.loadUserStatus();
+      this.isFlushing = false;
     } catch (error) {
-      // Restore pending taps on failure
+      // Restore pending taps on failure so they can be retried
       this.pendingTaps.update(current => current + pendingCount);
       localStorage.setItem(this.PENDING_TAPS_KEY, this.pendingTaps().toString());
       this.isFlushing = false;
-      console.error('Failed to generate token:', error);
+
+      const httpError = error as HttpErrorResponse;
+      if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
+        console.error('AddTooks failed:', (httpError.error as { message: string }).message);
+      } else {
+        console.error('AddTooks failed:', error);
+      }
     }
   }
 

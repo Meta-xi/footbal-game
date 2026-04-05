@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 /**
  * Encryption service using Web Crypto API for SHA256 hashing.
@@ -7,7 +8,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class EncryptionService {
-  private readonly secretKey = 'MiClaveSecreta123!';
+  private readonly secretKey = environment.tapSecretKey;
 
   /**
    * Computes SHA256 hash of the input string.

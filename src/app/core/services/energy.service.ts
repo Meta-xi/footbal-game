@@ -26,17 +26,6 @@ export class EnergyService {
 
   readonly error = computed(() => null);
 
-  decrementEnergy(amount: number) {
-    // Ya no se modifica localmente - la energía viene de la API
-    // El consumo de energía se maneja en el backend
-    console.warn('Energy decrement should be handled by API');
-  }
-
-  incrementEnergy(amount: number) {
-    // Ya no se modifica localmente - la energía viene de la API
-    console.warn('Energy increment should be handled by API');
-  }
-
   loadEnergy() {
     // Recargar el estado del usuario desde la API
     this.userStatusService.loadUserStatus();

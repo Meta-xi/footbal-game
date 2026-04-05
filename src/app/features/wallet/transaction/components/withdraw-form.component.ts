@@ -219,7 +219,7 @@ export class WithdrawFormComponent {
       setTimeout(() => this.transactionMessage.set(''), 3000);
       return;
     }
-    if (!this.selectedAccount() && !this.isCrypto()) {
+    if (!this.selectedAccount()) {
       this.transactionMessage.set('Especifica destino');
       setTimeout(() => this.transactionMessage.set(''), 3000);
       return;

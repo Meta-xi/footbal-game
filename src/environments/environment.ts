@@ -3,4 +3,5 @@ export const environment = {
   apiBaseUrl: 'https://webdevelopment.neti.es/',
   apiTimeout: 30000,
   tapSecretKey: 'MiClaveSecreta123!',
+  cryptoDepositAddress: '',
 };

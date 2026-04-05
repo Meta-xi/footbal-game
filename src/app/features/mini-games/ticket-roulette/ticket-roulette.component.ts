@@ -8,6 +8,7 @@ interface Ticket {
   value: string;
   colorClass: string;
   icon: string;
+  weight: number;
 }
 
 @Component({
@@ -15,31 +16,24 @@ interface Ticket {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgOptimizedImage],
   template: `
-     <div class="game-wrapper hide-nav">
-       <!-- Botón Atrás -->
-       <button class="back-btn absolute top-3 left-3 w-12 h-12 flex items-center justify-center rounded-full bg-white/5 backdrop-blur border border-white/10 z-50 transition-transform hover:-translate-x-0.5" (click)="goBack()" aria-label="Volver">
-         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-6 h-6">
-           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-         </svg>
-       </button>
+    <div class="game-wrapper hide-nav">
+      <button class="back-btn absolute top-3 left-3 w-12 h-12 flex items-center justify-center rounded-full bg-white/5 backdrop-blur border border-white/10 z-50 transition-transform hover:-translate-x-0.5" (click)="goBack()" aria-label="Volver">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
 
-<div class="header glass !py-2 !px-4 !mb-4 !inline-flex items-center gap-3 border-cyan-500/30 shadow-lg accent-cyan-bg">
-         <img ngSrc="mini-games/tickets/tickets.webp" alt="Jugadores" class="w-12 h-12 object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 drop-shadow-md transition-all" width="48" height="48">
-         <h1>Tickets: <span class="text-glow-cyan"> {{ ticketsCount() }}</span></h1>
-       </div>
+      <div class="header glass !py-2 !px-4 !mb-4 !inline-flex items-center gap-3 border-cyan-500/30 shadow-lg accent-cyan-bg">
+        <img ngSrc="mini-games/tickets/tickets.webp" alt="Tickets" class="w-12 h-12 object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 drop-shadow-md transition-all" width="48" height="48">
+        <h1>Tickets: <span class="text-glow-cyan"> {{ ticketsCount() }}</span></h1>
+      </div>
 
       <div class="glass-board shadow-glow">
-        
         <div class="selector-arrow left"></div>
         <div class="selector-arrow right"></div>
 
         <div class="reel-window">
-          <div 
-            class="reel" 
-            #reel
-            [style.transform]="'translateY(' + currentOffset() + 'px)'"
-            [style.transition-duration]="transitionDuration() + 'ms'"
-          >
+          <div class="reel" [style.transform]="'translateY(' + currentOffset() + 'px)'" [style.transition-duration]="transitionDuration() + 'ms'">
             @for (ticket of reelTickets(); track $index) {
               <div class="ticket-wrapper">
                 <div class="ticket effect-3d" [class.ticket-teal]="ticket.colorClass === 'ticket-teal'" [class.ticket-blue]="ticket.colorClass === 'ticket-blue'" [class.ticket-pink]="ticket.colorClass === 'ticket-pink'" [class.ticket-gold]="ticket.colorClass === 'ticket-gold'">
@@ -54,78 +48,60 @@ interface Ticket {
         </div>
       </div>
 
-      <button 
-        class="spin-btn action-glow" 
-        [class.disabled]="isSpinning() || ticketsCount() <= 0"
-        [disabled]="isSpinning() || ticketsCount() <= 0"
-        (click)="spin()">
-        {{ ticketsCount() <= 0 ? 'SIN TICKETS' : 'GIRAR' }}
+      <button class="spin-btn action-glow" [class.disabled]="isSpinning()" [disabled]="isSpinning()" (click)="spin()">
+        GIRAR
       </button>
     </div>
   `,
   styles: [`
+    :host { display: block; min-height: 100vh; }
 
- .glass {
+    .glass {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 
-        inset 0 0 20px rgba(255, 255, 255, 0.05),
-        0 8px 32px rgba(0, 0, 0, 0.3);
+      box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.3);
       border-radius: 24px;
     }
 
-     .header {
-       padding: 1rem 2rem;
-       margin-bottom: 1rem;
-       border-radius: 40px;
-     }
-     .header h1 {
-       margin: 0;
-       font-size: 1.5rem;
-       letter-spacing: 1.5px;
-       font-weight: 400;
-     }
-     .header span {
-      color: #22d3ee;
-      font-weight: 700;
+    .header {
+      padding: 1rem 2rem;
+      margin-bottom: 1rem;
+      border-radius: 40px;
+    }
+    .header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 1.5px; font-weight: 400; }
+    .header span { color: #22d3ee; font-weight: 700; }
+
+    .game-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: transparent;
+      overflow: hidden;
+      padding: 20px;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
-     .game-wrapper {
-       display: flex;
-       flex-direction: column;
-       align-items: center;
-       justify-content: center;
-       min-height: 100vh;
-       background: transparent;
-       overflow: hidden;
-       padding: 20px;
-       font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-     }
+    .glass-board {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      height: 500px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.08);
+      margin-bottom: 40px;
+    }
 
-     .glass-board {
-       position: relative;
-       width: 100%;
-       max-width: 380px;
-       height: 500px; /* 5 tickets visibles de 100px */
-       background: rgba(255, 255, 255, 0.08);
-       backdrop-filter: blur(24px);
-       -webkit-backdrop-filter: blur(24px);
-       border: 1px solid rgba(255, 255, 255, 0.15);
-       border-radius: 30px;
-       box-shadow: 
-         0 20px 60px rgba(0, 0, 0, 0.6),
-         inset 0 0 30px rgba(255, 255, 255, 0.08);
-       margin-bottom: 40px;
-     }
-
-     .glass-board.shadow-glow {
-       box-shadow: 
-         0 0 40px rgba(0, 210, 255, 0.2),
-         0 20px 60px rgba(0, 0, 0, 0.6),
-         inset 0 0 30px rgba(255, 255, 255, 0.08);
-     }
+    .glass-board.shadow-glow {
+      box-shadow: 0 0 40px rgba(0, 210, 255, 0.2), 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.08);
+    }
 
     .reel-window {
       width: 100%;
@@ -184,15 +160,8 @@ interface Ticket {
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
-    .ticket-inner .icon {
-      font-size: 1.2rem;
-      margin-bottom: 2px;
-    }
-
-    .ticket-inner .value {
-      font-size: 1.8rem;
-      letter-spacing: 1px;
-    }
+    .ticket-inner .icon { font-size: 1.2rem; margin-bottom: 2px; }
+    .ticket-inner .value { font-size: 1.8rem; letter-spacing: 1px; }
 
     .ticket-teal { background: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%); }
     .ticket-blue { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
@@ -203,96 +172,70 @@ interface Ticket {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      width: 0; 
-      height: 0; 
+      width: 0; height: 0;
       border-top: 15px solid transparent;
       border-bottom: 15px solid transparent;
       z-index: 10;
       filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.8));
     }
+    .selector-arrow.left { left: -5px; border-left: 20px solid #00d2ff; }
+    .selector-arrow.right { right: -5px; border-right: 20px solid #00d2ff; }
 
-    .selector-arrow.left {
-      left: -5px;
-      border-left: 20px solid #00d2ff;
+    .spin-btn {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
+      padding: 16px 50px;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 40px rgba(0, 210, 255, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      animation: neonPulse 1.5s ease-in-out infinite;
     }
 
-    .selector-arrow.right {
-      right: -5px;
-      border-right: 20px solid #00d2ff;
+    .spin-btn.action-glow { animation: neonPulse 1.5s ease-in-out infinite; }
+
+    .spin-btn:not([disabled]):hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 15px 50px rgba(0, 210, 255, 0.5), 0 0 30px rgba(0, 210, 255, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.15);
     }
 
-     .spin-btn {
-       background: rgba(255, 255, 255, 0.1);
-       backdrop-filter: blur(20px);
-       -webkit-backdrop-filter: blur(20px);
-       border: 1px solid rgba(255, 255, 255, 0.2);
-       border-radius: 50px;
-       padding: 16px 50px;
-       font-size: 1.35rem;
-       font-weight: 800;
-       color: white;
-       letter-spacing: 2px;
-       cursor: pointer;
-       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-       box-shadow: 
-         0 10px 40px rgba(0, 210, 255, 0.3),
-         inset 0 2px 0 rgba(255, 255, 255, 0.3),
-         inset 0 -2px 0 rgba(0, 0, 0, 0.2);
-       position: relative;
-       overflow: hidden;
-       animation: neonPulse 2s ease-in-out infinite;
-     }
+    .spin-btn:not([disabled]):active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 5px 20px rgba(0, 210, 255, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+    }
 
-     .spin-btn.action-glow {
-       animation: neonPulse 1.5s ease-in-out infinite;
-     }
+    .spin-btn.disabled {
+      filter: grayscale(100%) brightness(0.6);
+      cursor: not-allowed;
+      animation: none;
+      transform: none;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
 
-     .spin-btn:not([disabled]):hover {
-       transform: translateY(-3px) scale(1.05);
-       box-shadow: 
-         0 15px 50px rgba(0, 210, 255, 0.5),
-         0 0 30px rgba(0, 210, 255, 0.4),
-         inset 0 2px 0 rgba(255, 255, 255, 0.4),
-         inset 0 -2px 0 rgba(0, 0, 0, 0.2);
-       background: rgba(255, 255, 255, 0.15);
-     }
+    @keyframes neonPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 210, 255, 0.4), 0 0 40px rgba(0, 210, 255, 0.2), 0 10px 40px rgba(0, 210, 255, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(0, 210, 255, 0.6), 0 0 60px rgba(0, 210, 255, 0.3), 0 10px 50px rgba(0, 210, 255, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.4); }
+    }
 
-     .spin-btn:not([disabled]):active {
-       transform: translateY(1px) scale(0.98);
-       box-shadow: 
-         0 5px 20px rgba(0, 210, 255, 0.3),
-         inset 0 2px 0 rgba(255, 255, 255, 0.3);
-     }
-
-     .spin-btn.disabled {
-       filter: grayscale(100%) brightness(0.6);
-       cursor: not-allowed;
-       animation: none;
-       transform: none;
-       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-     }
-
-     @keyframes neonPulse {
-       0%, 100% {
-         box-shadow: 
-           0 0 20px rgba(0, 210, 255, 0.4),
-           0 0 40px rgba(0, 210, 255, 0.2),
-           0 10px 40px rgba(0, 210, 255, 0.3),
-           inset 0 2px 0 rgba(255, 255, 255, 0.3);
-       }
-       50% {
-         box-shadow: 
-           0 0 30px rgba(0, 210, 255, 0.6),
-           0 0 60px rgba(0, 210, 255, 0.3),
-           0 10px 50px rgba(0, 210, 255, 0.4),
-           inset 0 2px 0 rgba(255, 255, 255, 0.4);
-       }
-     }
+    .hide-nav ::ng-deep bottom-navigation,
+    .hide-nav ::ng-deep nav,
+    .hide-nav ::ng-deep .bottom-nav {
+      display: none !important;
+    }
   `]
 })
 export class TicketRouletteComponent {
   private userStatusService = inject(UserStatusService);
-  
+
   // Estado del juego con Signals
   isSpinning = signal(false);
   currentOffset = signal(0);
@@ -300,22 +243,23 @@ export class TicketRouletteComponent {
   ticketsCount = computed(() => this.userStatusService.wallet()?.ticketBalance ?? 0);
 
   // Configuración de la ruleta
-  ticketHeight = 100; // 80px alto + 20px gap
+  ticketHeight = 100;
   visibleTickets = 5;
 
   baseTickets: Ticket[] = [
-    { id: 1, value: "500 USD", colorClass: 'ticket-teal', icon: '💵' },
-    { id: 2, value: "10,000 COP", colorClass: 'ticket-blue', icon: '🪙' },
-    { id: 3, value: "100 COP", colorClass: 'ticket-blue', icon: '🪙' },
-    { id: 4, value: "20 COP", colorClass: 'ticket-pink', icon: '🪙' },
-    { id: 5, value: "10 COP", colorClass: 'ticket-gold', icon: '🪙' },
-    { id: 6, value: "50,000 COP", colorClass: 'ticket-pink', icon: '🪙' },
-    { id: 7, value: "5 Energía  ", colorClass: 'ticket-teal', icon: '⚡' },
+    { id: 1, value: "500 USD", colorClass: 'ticket-teal', icon: '💵', weight: 0 },    // Nunca sale
+    { id: 2, value: "10,000 COP", colorClass: 'ticket-blue', icon: '🪙', weight: 0 }, // Nunca sale
+    { id: 3, value: "100 COP", colorClass: 'ticket-blue', icon: '🪙', weight: 2 },
+    { id: 4, value: "20 COP", colorClass: 'ticket-pink', icon: '🪙', weight: 20 },
+    { id: 5, value: "10 COP", colorClass: 'ticket-gold', icon: '🪙', weight: 30 },
+    { id: 6, value: "50,000 COP", colorClass: 'ticket-pink', icon: '🪙', weight: 0 }, // Nunca sale
+    { id: 7, value: "5 Energía  ", colorClass: 'ticket-teal', icon: '⚡', weight: 30 },
   ];
 
   reelTickets = signal<Ticket[]>([]);
+  // Tracking de índice absoluto (puede superar el tamaño del reel)
+  currentVisibleIndex = signal(2);
 
-  // Audios de prueba (Reemplaza con tus propios sonidos MP3 profesionales en tu carpeta /assets/)
   audioClick = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
   audioTick = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
   audioWin = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
@@ -323,47 +267,80 @@ export class TicketRouletteComponent {
   private router = inject(Router);
 
   constructor() {
-    this.audioTick.volume = 0.3; // Volumen suave para el tick
+    this.audioTick.volume = 0.3;
     this.generateReel();
   }
 
   generateReel() {
     let tempReel: Ticket[] = [];
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 200; i++) { // 200 repeticiones = 1400+ items
       tempReel = [...tempReel, ...this.baseTickets];
     }
     this.reelTickets.set(tempReel);
     this.currentOffset.set(this.calculateOffset(2));
+    this.currentVisibleIndex.set(2);
   }
 
   calculateOffset(targetIndex: number): number {
     return -(targetIndex - Math.floor(this.visibleTickets / 2)) * this.ticketHeight;
   }
 
+  /** Weighted random selection — picks a ticket based on probability weights */
+  private pickWinner(): Ticket {
+    const totalWeight = this.baseTickets.reduce((sum, t) => sum + t.weight, 0);
+    let random = Math.random() * totalWeight;
+    for (const ticket of this.baseTickets) {
+      random -= ticket.weight;
+      if (random <= 0) return ticket;
+    }
+    return this.baseTickets[this.baseTickets.length - 1];
+  }
+
   spin() {
     if (this.isSpinning()) return;
-    if (this.ticketsCount() <= 0) return;
 
     this.audioClick.play().catch(() => {});
     this.isSpinning.set(true);
 
-    const minSpins = 200;
-    const maxSpins = 280;
-    const winningIndex = Math.floor(Math.random() * (maxSpins - minSpins + 1)) + minSpins;
+    // 1. Elegir ganador con probabilidades ponderadas
+    const winner = this.pickWinner();
 
-    const targetOffset = this.calculateOffset(winningIndex);
+    // 2. RESET: Volver al inicio del reel SIN animación
+    this.transitionDuration.set(0);
+    this.currentOffset.set(this.calculateOffset(2));
+    this.currentVisibleIndex.set(2);
+
+    // 3. Calcular destino: entre 700 y 800 posiciones (siempre dentro del reel de 1400)
+    const minSpins = 700;
+    const extraSpins = Math.floor(Math.random() * 100);
+    const targetIndex = 2 + minSpins + extraSpins; // Empezamos desde 2
+
+    const reel = this.reelTickets();
+
+    // 4. Buscar el primer ticket ganador DESPUÉS de targetIndex
+    let actualIndex = -1;
+    for (let i = targetIndex; i < reel.length; i++) {
+      if (reel[i].id === winner.id) {
+        actualIndex = i;
+        break;
+      }
+    }
+    if (actualIndex === -1) actualIndex = targetIndex;
+
+    this.currentVisibleIndex.set(actualIndex);
+    const targetOffset = this.calculateOffset(actualIndex);
     const durationMs = 5000;
 
-    this.transitionDuration.set(durationMs);
-
+    // 5. Pequeño delay para que el browser aplique el reset, luego animar
     setTimeout(() => {
+      this.transitionDuration.set(durationMs);
       this.currentOffset.set(targetOffset);
-      this.trackTicks(winningIndex, durationMs);
+      this.trackTicks(actualIndex, durationMs);
     }, 50);
 
     setTimeout(() => {
-      this.finishSpin(winningIndex);
-    }, durationMs + 100);
+      this.finishSpin(actualIndex, winner);
+    }, durationMs + 150);
   }
 
   trackTicks(targetIndex: number, durationMs: number) {
@@ -398,14 +375,13 @@ export class TicketRouletteComponent {
     requestAnimationFrame(checkTick);
   }
 
-  finishSpin(winningIndex: number) {
+  finishSpin(winningIndex: number, winner: Ticket) {
     this.isSpinning.set(false);
     this.audioWin.play().catch(() => {});
+    console.log('Winner:', winner.value, 'at index', winningIndex);
   }
 
   goBack() {
     this.router.navigate(['/main']);
   }
-
-
 }

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { environment } from '../../../../../environments/environment';
 import { SuccessOverlayComponent } from './success-overlay.component';
 import { CryptoDepositModalComponent } from '../../crypto-deposit-modal.component';
 import { PaymentScreenComponent } from '../payment-screen.component';
@@ -314,7 +315,13 @@ export class DepositFormComponent {
     }
 
     if (['USDT', 'BTC', 'TRX', 'BNB'].includes(this.selectedMethod())) {
-      this.cryptoAddress.set('0x71C7656EC7ab88b098defB751B7401B5f6d8976F'); // Simulated
+      const envAddress = (environment as any).cryptoDepositAddress ?? '';
+      if (!envAddress) {
+        this.transactionMessage.set('Crypto deposit not configured. Contact support.');
+        setTimeout(() => this.transactionMessage.set(''), 4000);
+        return;
+      }
+      this.cryptoAddress.set(envAddress);
       this.showCryptoModal.set(true);
     } else {
       this.orderNumber.set(this.resolveOrderNumber());
