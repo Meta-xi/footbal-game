@@ -43,8 +43,8 @@ interface BallBox {
       </div>
 
        <button class="play-btn glass !px-6 !py-3 !text-base bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 shadow-lg shadow-blue-500/30 border border-white/20 hover:shadow-blue-500/50 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-               (click)="startGame()" [disabled]="gameState === 'playing' || balance() <= 0">
-         {{ balance() <= 0 ? 'SIN TICKETS' : (gameState === 'idle' ? 'JUGAR (Costo: 1 ticket)' : '⚽ TOCA UN BALÓN ⚽') }}
+               (click)="startGame()" [disabled]="gameState === 'playing'">
+         {{ gameState === 'idle' ? 'JUGAR' : '⚽ TOCA UN BALÓN ⚽' }}
        </button>
 
       @if (gameState === 'won' || gameState === 'lost') {
@@ -256,7 +256,7 @@ export class BoxComponent {
   
   // Balance inicial desde wallet, mutable durante el juego
   balance = signal(0);
-  boxes: BallBox[] = [];
+  boxes = signal<BallBox[]>([]);
   gameState: 'idle' | 'playing' | 'won' | 'lost' = 'idle';
   prizeWon = signal(0);
 
@@ -280,40 +280,50 @@ export class BoxComponent {
   }
 
   initBoxes() {
-    this.boxes = Array.from({ length: 9 }, (_, i) => ({
+    this.boxes.set(Array.from({ length: 9 }, (_, i) => ({
       id: i,
       hasPrize: false,
       prizeValue: 0,
       opened: false
-    }));
+    })));
   }
 
   startGame() {
-    if (this.balance() <= 0) return;
-    this.balance.update(v => v - 1);
+    if (this.gameState === 'playing') return;
     this.gameState = 'playing';
     this.prizeWon.set(0);
-    this.initBoxes();
     this.playAudioSynth('start');
 
     // 3 premios fijos: 20, 50, 80 COP
     const prizes = [20, 50, 80];
     const shuffled = prizes.sort(() => Math.random() - 0.5);
-    let prizeIndex = 0;
+    const newBoxes = Array.from({ length: 9 }, (_, i) => ({
+      id: i,
+      hasPrize: false,
+      prizeValue: 0,
+      opened: false
+    }));
 
+    let prizeIndex = 0;
     while (prizeIndex < 3) {
       const randomIndex = Math.floor(Math.random() * 9);
-      if (!this.boxes[randomIndex].hasPrize) {
-        this.boxes[randomIndex].hasPrize = true;
-        this.boxes[randomIndex].prizeValue = shuffled[prizeIndex];
+      if (!newBoxes[randomIndex].hasPrize) {
+        newBoxes[randomIndex].hasPrize = true;
+        newBoxes[randomIndex].prizeValue = shuffled[prizeIndex];
         prizeIndex++;
       }
     }
+
+    this.boxes.set(newBoxes);
   }
 
   openBox(box: BallBox) {
     if (this.gameState !== 'playing' || box.opened) return;
-    box.opened = true;
+    this.boxes.update(boxes =>
+      boxes.map(b =>
+        b.id === box.id ? { ...b, opened: true } : b
+      )
+    );
     if (box.hasPrize) {
       this.gameState = 'won';
       this.prizeWon.set(box.prizeValue);
