@@ -5,6 +5,7 @@ import { GlassModalComponent, GlassTabBarComponent, GlassTab } from '../../share
 import { MotionsService, MissionHistoryItem } from './motions.service';
 import { AudioService } from '../../services/audio.service';
 import { ConfettiService } from '../../services/confetti.service';
+import { ErrorHandlerService } from '../../core/services/error-handler.service';
 import { Mission } from '../../models/mision.model';
 
 interface DailyReward {
@@ -355,28 +356,8 @@ interface DailyReward {
             }
           </div>
         </div>
-      </app-glass-modal>
-
-      <!-- Toast Notification (Professional Glass) -->
-      @if (toastData(); as toast) {
-        <div class="fixed top-[env(safe-area-inset-top,1.5rem)] inset-x-0 z-[100] flex justify-center p-4 pointer-events-none mt-2">
-          <div class="animate-slide-down-toast backdrop-blur-2xl border flex items-center gap-3.5 px-5 py-3.5 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.3)] w-full max-w-[340px]"
-               [class]="toast.type === 'success' ? 'bg-emerald-950/60 border-emerald-500/20' : toast.type === 'error' ? 'bg-rose-950/60 border-rose-500/20' : 'bg-black/60 border-white/10'">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                 [class]="toast.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : toast.type === 'error' ? 'bg-rose-500/20 text-rose-400' : 'bg-white/20 text-white'">
-               @if (toast.type === 'success') {
-                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-               } @else if (toast.type === 'error') {
-                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-               } @else {
-                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-               }
-            </div>
-            <span class="text-[13px] font-medium tracking-wide text-white/95 leading-snug">{{ toast.message }}</span>
-          </div>
-        </div>
-      }
-    </section>
+       </app-glass-modal>
+     </section>
   `,
   styles: [`
     :host { display: block; }
@@ -421,10 +402,9 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
   // Service-managed tab state (persists while app is open)
   readonly activeHistoryTab!: Signal<string>;
   readonly historyTabs!: GlassTab[];
-  readonly filteredHistory!: Signal<MissionHistoryItem[]>;
-  readonly dailyRewards!: Signal<DailyReward[]>;
-  readonly toastData!: Signal<{ message: string, type: 'success' | 'error' | 'info' } | null>;
-  readonly loading!: Signal<boolean>;
+   readonly filteredHistory!: Signal<MissionHistoryItem[]>;
+   readonly dailyRewards!: Signal<DailyReward[]>;
+   readonly loading!: Signal<boolean>;
   readonly error!: Signal<string | null>;
   readonly imageError = signal(false);
   readonly indicatorWidth = signal(0);
@@ -437,9 +417,10 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
   private scrollListener?: () => void;
   private buttonChangesEffect?: import('@angular/core').EffectRef;
 
-  private readonly motionsService = inject(MotionsService);
-  private readonly audioService = inject(AudioService);
-  private readonly confettiService = inject(ConfettiService);
+   private readonly motionsService = inject(MotionsService);
+   private readonly audioService = inject(AudioService);
+   private readonly confettiService = inject(ConfettiService);
+   private readonly errorHandler = inject(ErrorHandlerService);
 
   constructor() {
     this.missionTabKeys = this.motionsService.getMissionTabKeys();
@@ -455,19 +436,18 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
     this.missionHistory = this.motionsService.missionHistory$;
     this.activeHistoryTab = this.motionsService.activeHistoryTab$;
     this.historyTabs = this.motionsService.historyTabs;
-    this.filteredHistory = this.motionsService.filteredHistory$;
-    this.dailyRewards = this.motionsService.dailyRewards$;
-    this.toastData = this.motionsService.toastData$;
-    this.loading = this.motionsService.loading$;
-    this.error = this.motionsService.error$;
+     this.filteredHistory = this.motionsService.filteredHistory$;
+     this.dailyRewards = this.motionsService.dailyRewards$;
+     this.loading = this.motionsService.loading$;
+     this.error = this.motionsService.error$;
 
-    // Effect must be in constructor for valid injection context (NG0203 fix)
-    effect(() => {
-      const errorMsg = this.error();
-      if (errorMsg) {
-        this.motionsService.showToast(errorMsg, 'error');
-      }
-    });
+      // Effect must be in constructor for valid injection context (NG0203 fix)
+      effect(() => {
+        const errorMsg = this.error();
+        if (errorMsg) {
+          this.errorHandler.showToast(errorMsg, 'error');
+        }
+      });
 
     // Update indicator position when activeIndex changes
     effect(() => {

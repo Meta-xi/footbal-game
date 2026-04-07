@@ -5,6 +5,7 @@ import { BackendMission, MisionReport, MisionState, VISIBLE_MISSION_STATES, Miss
 import { GlassTab } from '../../shared/ui'; // Added this import
 import { environment } from '../../../environments/environment';
 import { MotionEvent } from './types/motion-event';
+import { ErrorHandlerService } from '../../core/services/error-handler.service';
 
 // Default icon for missions when no specific icon is available
 const DEFAULT_MISSION_ICON = 'social/icons/Whatsapp_37229.png';
@@ -98,12 +99,11 @@ export class MotionsService {
 
   // UI state (matching API categories: 0-whatsapp, 1-facebook, 2-tiktok, 3-youtube, 4-daily, 5-referral)
   private readonly missionTabKeys = ['Whatsapp', 'Facebook', 'TikTok', 'Youtube', 'Daily', 'Referral', 'History'];
-  private readonly activeTab = signal<string>('Daily');
-  private readonly selectedMission = signal<Mission | null>(null);
-  private readonly showHistoryModal = signal<boolean>(false);
-  private readonly toastData = signal<{ message: string, type: 'success' | 'error' | 'info' } | null>(null);
-  // Session-persistent tab state for mission history modal (resets on app restart)
-  private readonly activeHistoryTab = signal<string>('completadas');
+   private readonly activeTab = signal<string>('Daily');
+   private readonly selectedMission = signal<Mission | null>(null);
+   private readonly showHistoryModal = signal<boolean>(false);
+   // Session-persistent tab state for mission history modal (resets on app restart)
+   private readonly activeHistoryTab = signal<string>('completadas');
   readonly activeHistoryTab$ = this.activeHistoryTab.asReadonly();
   readonly historyTabs: GlassTab[] = [
     { id: 'completadas', label: 'Completadas' },
@@ -189,16 +189,16 @@ export class MotionsService {
       }
     }
   });
-  readonly dailyRewards$ = this.dailyRewards;
-  readonly activeTab$ = this.activeTab.asReadonly();
-  readonly selectedMission$ = this.selectedMission.asReadonly();
-  readonly showHistoryModal$ = this.showHistoryModal.asReadonly();
-  readonly toastData$ = this.toastData.asReadonly();
-  readonly completedMissionRecords$ = this.completedMissionRecords.asReadonly();
-  readonly loadingCompletedMissions$ = this.loadingCompletedMissions.asReadonly();
+   readonly dailyRewards$ = this.dailyRewards;
+   readonly activeTab$ = this.activeTab.asReadonly();
+   readonly selectedMission$ = this.selectedMission.asReadonly();
+   readonly showHistoryModal$ = this.showHistoryModal.asReadonly();
+   readonly completedMissionRecords$ = this.completedMissionRecords.asReadonly();
+   readonly loadingCompletedMissions$ = this.loadingCompletedMissions.asReadonly();
 
-  // Backend integration
-  private readonly httpClient = inject(HttpClient);
+   // Backend integration & services
+   private readonly httpClient = inject(HttpClient);
+   private readonly errorHandler = inject(ErrorHandlerService);
 
   async fetchMissions(categoryId?: number | null): Promise<void> {
     this.loading.set(true);
@@ -260,20 +260,20 @@ export class MotionsService {
       if (err instanceof HttpErrorResponse) {
         if (err.status === 400) {
           this.error.set('Solicitud incorrecta. Verifica los datos.');
-          this.showToast('Error: Solicitud incorrecta.', 'error');
+          this.errorHandler.showToast('Error: Solicitud incorrecta.', 'error');
         } else if (err.status === 401) {
           this.error.set('No autorizado. Inicia sesión nuevamente.');
-          this.showToast('Error: No autorizado.', 'error');
+          this.errorHandler.showToast('Error: No autorizado.', 'error');
         } else if (err.status >= 500) {
           this.error.set('Servidor no disponible. Intenta más tarde.');
-          this.showToast('Error del servidor. Intenta más tarde.', 'error');
+          this.errorHandler.showToast('Error del servidor. Intenta más tarde.', 'error');
         } else {
           this.error.set('Error al cargar misiones completadas. Intenta de nuevo.');
-          this.showToast('Error al cargar misiones completadas.', 'error');
+          this.errorHandler.showToast('Error al cargar misiones completadas.', 'error');
         }
       } else {
         this.error.set('Error al cargar misiones completadas. Intenta de nuevo.');
-        this.showToast('Error al cargar misiones completadas.', 'error');
+        this.errorHandler.showToast('Error al cargar misiones completadas.', 'error');
       }
     } finally {
       this.loadingCompletedMissions.set(false);
@@ -416,19 +416,19 @@ export class MotionsService {
   async claimDailyReward(reward: DailyReward): Promise<void> {
     if (reward.state === 'upcoming') {
       this.emitEvent({ type: 'missionFailed', error: 'Reward not available yet' });
-      this.showToast('¡Aún no! Esta recompensa estará disponible pronto.', 'error');
+      this.errorHandler.showToast('¡Aún no! Esta recompensa estará disponible pronto.', 'error');
       return;
     }
     if (reward.state === 'claimed') {
       this.emitEvent({ type: 'missionFailed', error: 'Reward already claimed' });
-      this.showToast('¡Ya reclamaste este premio! Vuelve mañana.', 'error');
+      this.errorHandler.showToast('¡Ya reclamaste este premio! Vuelve mañana.', 'error');
       return;
     }
 
     // Call backend to claim daily reward
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      this.showToast('No autorizado. Inicia sesión nuevamente.', 'error');
+      this.errorHandler.showToast('No autorizado. Inicia sesión nuevamente.', 'error');
       return;
     }
 
@@ -448,10 +448,10 @@ export class MotionsService {
       this.dailyRewardStates.update(states =>
         states.map((s, i) => i === reward.day - 1 ? 'claimed' : s)
       );
-      this.showToast(`¡Genial! Has reclamado tu recompensa del Día ${reward.day}: +${reward.reward} COP`, 'success');
+      this.errorHandler.showToast(`¡Genial! Has reclamado tu recompensa del Día ${reward.day}: +${reward.reward} COP`, 'success');
     } catch (err) {
       console.error('Failed to claim daily reward:', err);
-      this.showToast('Error al reclamar la recompensa diaria. Intenta de nuevo.', 'error');
+      this.errorHandler.showToast('Error al reclamar la recompensa diaria. Intenta de nuevo.', 'error');
     }
   }
 
@@ -461,18 +461,18 @@ export class MotionsService {
     const mission = missions.find(m => m.id === String(missionId));
     if (!mission) {
       this.emitEvent({ type: 'missionFailed', missionId, error: 'Mission not found' });
-      this.showToast('Misión no encontrada.', 'error');
+      this.errorHandler.showToast('Misión no encontrada.', 'error');
       return;
     }
     if (mission.completed) {
       this.emitEvent({ type: 'missionFailed', missionId, error: 'Mission already completed' });
-      this.showToast('Esta misión ya fue completada.', 'error');
+      this.errorHandler.showToast('Esta misión ya fue completada.', 'error');
       return;
     }
 
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      this.showToast('No autorizado. Inicia sesión nuevamente.', 'error');
+      this.errorHandler.showToast('No autorizado. Inicia sesión nuevamente.', 'error');
       return;
     }
 
@@ -493,27 +493,21 @@ export class MotionsService {
         m.id === String(missionId) ? { ...m, completed: true } : m
       ));
       this.emitEvent({ type: 'missionClaimed', missionId, amount: Number(mission.reward) });
-      this.showToast(`¡Misión completada! Recompensa: +${mission.reward} COP`, 'success');
+      this.errorHandler.showToast(`¡Misión completada! Recompensa: +${mission.reward} COP`, 'success');
     } catch (err) {
       console.error('Failed to activate mission:', err);
-      this.showToast('Error al activar la misión. Intenta de nuevo.', 'error');
+      this.errorHandler.showToast('Error al activar la misión. Intenta de nuevo.', 'error');
     }
   }
 
   // Fail a mission (simulate error)
   failMission(missionId: number, error: string) {
     this.emitEvent({ type: 'missionFailed', missionId, error });
-    this.showToast(`Error en misión: ${error}`, 'error');
+    this.errorHandler.showToast(`Error en misión: ${error}`, 'error');
   }
 
 
 
-
-
-  showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
-    this.toastData.set({ message, type });
-    setTimeout(() => this.toastData.set(null), 3000);
-  }
 
 
 }

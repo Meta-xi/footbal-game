@@ -3,22 +3,16 @@ import { Router } from '@angular/router';
 import { WalletService, FinanceCoin } from '../../../core/services/wallet.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserStatusService } from '../../../core/services/user-status.service';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 
 @Component({
   selector: 'app-payment-screen',
   imports: [],
   template: `
-    <section class="fixed inset-0 z-[100] flex flex-col w-full overflow-hidden payment-bg">
-      <div class="absolute inset-0 bg-[#010208]/40 backdrop-blur-2xl pointer-events-none"></div>
+       <section class="fixed inset-0 z-[100] flex flex-col w-full overflow-hidden payment-bg">
+       <div class="absolute inset-0 bg-[#010208]/40 backdrop-blur-2xl pointer-events-none"></div>
 
-      <!-- Toast -->
-      @if (toastVisible()) {
-        <div class="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-indigo-500/20 backdrop-blur-3xl border border-indigo-500/30 rounded-2xl px-5 py-2.5 text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] animate-bounce-subtle shadow-[0_20px_40px_rgba(99,102,241,0.2)]">
-          {{ toastMessage() }}
-        </div>
-      }
-
-      <!-- Header -->
+       <!-- Header -->
       <header class="w-full relative z-10 pt-safe-top px-5 h-14 flex items-center justify-between">
         <button (click)="onGoBack()" class="w-10 h-10 bg-white/[0.04] backdrop-blur-3xl border border-white/10 rounded-xl flex items-center justify-center active:scale-90 transition-all group">
           <svg class="w-4.5 h-4.5 text-white/40 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
@@ -153,20 +147,19 @@ export class PaymentScreenComponent {
   private walletService = inject(WalletService);
   private authService = inject(AuthService);
   private userStatusService = inject(UserStatusService);
+  private errorHandler = inject(ErrorHandlerService);
 
   currency = input.required<string>();
   amount = input.required<number>();
   orderNumber = input.required<string>();
-  qrImage = input.required<string>();
-  goBack = output<void>();
+   qrImage = input.required<string>();
+   goBack = output<void>();
 
-  reference = signal('');
-  copied = signal(false);
-  toastVisible = signal(false);
-  toastMessage = signal('');
-  isProcessing = signal(false);
+   reference = signal('');
+   copied = signal(false);
+   isProcessing = signal(false);
 
-  isValidReference = computed(() => this.reference().length >= 6);
+   isValidReference = computed(() => this.reference().length >= 6);
 
   displayAmount = computed(() => this.amount().toLocaleString('es-CO'));
 
@@ -187,42 +180,35 @@ export class PaymentScreenComponent {
     this.goBack.emit();
   }
 
-  async onCopy() {
-    await navigator.clipboard.writeText(this.orderNumber());
-    this.copied.set(true);
-    this.showToast('Copiado');
-    setTimeout(() => this.copied.set(false), 2000);
-  }
+   async onCopy() {
+     await navigator.clipboard.writeText(this.orderNumber());
+     this.copied.set(true);
+     this.errorHandler.showSuccessToast('Copiado');
+     setTimeout(() => this.copied.set(false), 2000);
+   }
 
-  async onPaste() {
-    try {
-      const text = await navigator.clipboard.readText();
-      this.reference.set(text);
-      this.showToast('Pegado');
-    } catch {
-      this.showToast('No se pudo pegar');
-    }
-  }
+   async onPaste() {
+     try {
+       const text = await navigator.clipboard.readText();
+       this.reference.set(text);
+       this.errorHandler.showSuccessToast('Pegado');
+     } catch {
+       this.errorHandler.showErrorToast('No se pudo pegar');
+     }
+   }
 
-  private showToast(message: string) {
-    this.toastMessage.set(message);
-    this.toastVisible.set(true);
-    setTimeout(() => this.toastVisible.set(false), 2000);
-  }
-
-  async onConfirm() {
+   async onConfirm() {
     if (!this.isValidReference()) return;
 
-    const user = this.authService.user();
-    const token = this.authService.authToken();
-    if (!user?.id || !token) {
-      this.showToast('Sesión expirada');
-      return;
-    }
+     const user = this.authService.user();
+     const token = this.authService.authToken();
+     if (!user?.id || !token) {
+       this.errorHandler.showErrorToast('Sesión expirada');
+       return;
+     }
 
-    this.isProcessing.set(true);
-    this.toastMessage.set('Procesando depósito...');
-    this.toastVisible.set(true);
+     this.isProcessing.set(true);
+     this.errorHandler.showToast('Procesando depósito...', 'info');
 
     const result = await this.walletService.addDeposit({
       amountUSD: this.amount(),
@@ -231,14 +217,12 @@ export class PaymentScreenComponent {
       uid: user.id,
     });
 
-    this.isProcessing.set(false);
+     this.isProcessing.set(false);
 
-    if (!result.success) {
-      this.toastMessage.set(result.error ?? 'Error al procesar el depósito');
-      this.toastVisible.set(true);
-      setTimeout(() => this.toastVisible.set(false), 3000);
-      return;
-    }
+     if (!result.success) {
+       this.errorHandler.showErrorToast(result.error ?? 'Error al procesar el depósito');
+       return;
+     }
 
     await this.userStatusService.loadUserStatus();
     this.router.navigate(['/wallet']);
