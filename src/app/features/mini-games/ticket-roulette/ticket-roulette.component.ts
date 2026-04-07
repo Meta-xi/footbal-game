@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserStatusService } from '../../../core/services/user-status.service';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 
 interface Ticket {
   id: number;
@@ -235,6 +236,7 @@ interface Ticket {
 })
 export class TicketRouletteComponent {
   private userStatusService = inject(UserStatusService);
+  private errorHandler = inject(ErrorHandlerService);
 
   // Estado del juego con Signals
   isSpinning = signal(false);
@@ -378,6 +380,7 @@ export class TicketRouletteComponent {
   finishSpin(winningIndex: number, winner: Ticket) {
     this.isSpinning.set(false);
     this.audioWin.play().catch(() => {});
+    this.errorHandler.showSuccessToast(`¡Ganaste ${winner.value}!`);
     console.log('Winner:', winner.value, 'at index', winningIndex);
   }
 

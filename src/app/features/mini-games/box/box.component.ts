@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserStatusService } from '../../../core/services/user-status.service';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 
 interface BallBox {
   id: number;
@@ -43,15 +44,9 @@ interface BallBox {
       </div>
 
        <button class="play-btn glass !px-6 !py-3 !text-base bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 shadow-lg shadow-blue-500/30 border border-white/20 hover:shadow-blue-500/50 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-               (click)="startGame()" [disabled]="gameState === 'playing' || balance() === 0">
-         {{ balance() === 0 ? 'Sin tickets' : (gameState === 'idle' ? 'JUGAR' : '⚽ TOCA UN BALÓN ⚽') }}
-       </button>
-
-      @if (gameState === 'won' || gameState === 'lost') {
-        <div class="banner glass !p-4 !text-xl" [class.banner-win]="gameState === 'won'">
-          <h2>{{ gameState === 'won' ? '¡GANASTE ' + prizeWon() + ' COP!' : '¡BALÓN VACÍA! PERDISTE' }}</h2>
-        </div>
-      }
+                (click)="startGame()" [disabled]="gameState === 'playing' || balance() === 0">
+          {{ balance() === 0 ? 'Sin tickets' : (gameState === 'idle' ? 'JUGAR' : '⚽ TOCA UN BALÓN ⚽') }}
+        </button>
     </div>
   `,
   styleUrls: ['./box.component.scss'],
@@ -59,6 +54,7 @@ interface BallBox {
 })
 export class BoxComponent {
   private userStatusService = inject(UserStatusService);
+  private errorHandler = inject(ErrorHandlerService);
   
   // Balance inicial desde wallet, mutable durante el juego
   balance = signal(0);
@@ -136,9 +132,11 @@ export class BoxComponent {
       this.balance.update(v => v + box.prizeValue);
       this.playAudioSynth('win');
       this.triggerConfetti();
+      this.errorHandler.showSuccessToast(`¡GANASTE ${box.prizeValue} COP!`);
     } else {
       this.gameState = 'lost';
       this.playAudioSynth('lose');
+      this.errorHandler.showErrorToast('¡Balón vacío! Perdiste');
     }
   }
 

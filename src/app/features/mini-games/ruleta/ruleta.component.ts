@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import confetti from 'canvas-confetti';
 import { UserStatusService } from '../../../core/services/user-status.service';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 
 interface Prize {
   amount: string;
@@ -324,6 +325,7 @@ interface Prize {
 export class RuletaComponent implements OnDestroy {
   private router = inject(Router);
   private userStatusService = inject(UserStatusService);
+  private errorHandler = inject(ErrorHandlerService);
   
   readonly ticketsCount = computed(() => this.userStatusService.wallet()?.ticketBalance ?? 0);
   
@@ -415,6 +417,7 @@ export class RuletaComponent implements OnDestroy {
       this.isSpinning.set(false);
       this.playAudio(this.spinEndAudio);
       this.triggerConfetti();
+      this.errorHandler.showSuccessToast(`¡Ganaste ${this.prizes[winningIndex].amount}!`);
     }, 4900);
   }
 
