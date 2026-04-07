@@ -29,25 +29,24 @@ import { Router } from '@angular/router';
         <!-- Middle Section - Featured Content -->
         <div class="flex flex-col items-center gap-2.5 md:gap-3.5 animate-fade-in-up animation-delay-200 w-full max-w-md px-1">
           
-          <!-- Promo Card - Liquid Glass Compact -->
-          <div class="w-full liquid-glass-card p-4 md:p-5 rounded-2xl">
+           <!-- Promo Card - Liquid Glass Compact -->
+           <div class="w-full lg-card-module p-4 md:p-5 rounded-2xl">
             <div class="flex items-center justify-between gap-3">
               <div class="flex-1">
                 <h2 class="text-sm md:text-lg font-bold text-white mb-0.5">
                   Bono de Bienvenida
                 </h2>
-                <p class="text-xs text-cyan-300 font-semibold mb-2">
-                  Obtén recompensas al registrarte
-                </p>
-                 <div class="flex flex-col gap-1 text-slate-300 text-[10px]">
+                 <p class="text-xs font-medium text-amber-300">
+                   Obtén recompensas al registrarte
+                 </p>
+                 <div class="flex flex-col gap-1 text-xs text-amber-300">
                    <div class="flex items-center gap-1.5">
-                     <svg class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                     </svg>
-                     <span class="font-semibold">+500 Monedas</span>
-                   </div>
-                   <div class="flex items-center gap-1.5">
-                     <span class="font-semibold text-cyan-300">+5 tickets</span>
+                   <img src="shared/balance/coin.webp" alt="Monedas" class="w-5 h-5 flex-shrink-0">
+                   <span class="font-medium">+500 Monedas</span>
+                 </div>
+                 <div class="flex items-center gap-1.5">
+                   <img src="mini-games/tickets/tickets.webp" alt="Tickets" class="w-5 h-5 flex-shrink-0">
+                   <span class="font-medium text-cyan-300">+5 tickets</span>
                    </div>
                  </div>
               </div>
@@ -57,22 +56,22 @@ import { Router } from '@angular/router';
 
           <!-- Benefits Grid - Compact Liquid Glass Cards -->
           <div class="w-full grid grid-cols-2 gap-2 md:gap-3">
-            <div class="lg-module-card p-2 md:p-3 text-center hover:scale-[1.02] active:scale-95">
+            <div class="lg-module-card p-2 md:p-3 text-center">
               <div class="text-2xl md:text-3xl mb-1 md:mb-2">💎</div>
               <p class="text-[10px] md:text-xs font-semibold text-white">Jugadores VIP</p>
               <p class="text-[8px] md:text-[9px] text-blue-300 mt-0.5">Más rentables</p>
             </div>
-            <div class="lg-module-card p-2 md:p-3 text-center hover:scale-[1.02] active:scale-95">
+            <div class="lg-module-card p-2 md:p-3 text-center">
               <div class="text-2xl md:text-3xl mb-1 md:mb-2">⚡</div>
               <p class="text-[10px] md:text-xs font-semibold text-white">Boosts de Poder</p>
               <p class="text-[8px] md:text-[9px] text-purple-300 mt-0.5">Incrementa ganancias</p>
             </div>
-            <div class="lg-module-card p-2 md:p-3 text-center hover:scale-[1.02] active:scale-95">
+            <div class="lg-module-card p-2 md:p-3 text-center">
               <div class="text-2xl md:text-3xl mb-1 md:mb-2">🤝</div>
               <p class="text-[10px] md:text-xs font-semibold text-white">Programa de Referidos</p>
               <p class="text-[8px] md:text-[9px] text-emerald-300 mt-0.5">Gana comisión</p>
             </div>
-            <div class="lg-module-card p-2 md:p-3 text-center hover:scale-[1.02] active:scale-95">
+            <div class="lg-module-card p-2 md:p-3 text-center">
               <div class="text-2xl md:text-3xl mb-1 md:mb-2">🏆</div>
               <p class="text-[10px] md:text-xs font-semibold text-white">Rankings Globales</p>
               <p class="text-[8px] md:text-[9px] text-orange-300 mt-0.5">Compite por premios</p>
