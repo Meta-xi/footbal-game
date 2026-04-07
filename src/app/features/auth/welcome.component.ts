@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-welcome',
@@ -40,12 +39,17 @@ import { AuthService } from '../../core/services/auth.service';
                 <p class="text-xs text-cyan-300 font-semibold mb-2">
                   Obtén recompensas al registrarte
                 </p>
-                <div class="flex items-center gap-1.5 text-slate-300 text-[10px]">
-                  <svg class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                  <span class="font-semibold">+500 Monedas</span>
-                </div>
+                 <div class="flex flex-col gap-1 text-slate-300 text-[10px]">
+                   <div class="flex items-center gap-1.5">
+                     <svg class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                     </svg>
+                     <span class="font-semibold">+500 Monedas</span>
+                   </div>
+                   <div class="flex items-center gap-1.5">
+                     <span class="font-semibold text-cyan-300">+5 tickets</span>
+                   </div>
+                 </div>
               </div>
               <div class="text-4xl md:text-5xl">🎁</div>
             </div>
@@ -109,16 +113,7 @@ import { AuthService } from '../../core/services/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WelcomeComponent {
-  private authService = inject(AuthService);
   private router = inject(Router);
-
-  identifier = '';
-  password = signal('');
-  referralCode = signal('');
-  acceptTerms = signal(false);
-  isLoading = signal(false);
-  showPassword = signal(false);
-  error = signal<string | null>(null);
 
   goToRegister() {
     this.router.navigate(['/login'], { queryParams: { tab: 'register' } });
@@ -128,11 +123,7 @@ export class WelcomeComponent {
     this.router.navigate(['/login']);
   }
 
-  goToGuest() {
-    this.router.navigate(['/main']);
-  }
-
-  goBack() {
-    this.router.navigate(['/welcome']);
-  }
+   goToGuest() {
+     this.router.navigate(['/main']);
+   }
 }
