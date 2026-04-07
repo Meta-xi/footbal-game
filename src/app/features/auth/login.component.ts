@@ -28,7 +28,7 @@ import { AuthService } from '../../core/services/auth.service';
         <!-- Logo/Title -->
         <div class="text-center mb-6">
           <h1 class="text-3xl font-black text-white tracking-tighter text-glow-cyan">
-            Game Football
+            FIFA' Empire
           </h1>
           <p class="text-xs font-medium text-white/70 uppercase tracking-widest mt-1">
             {{ activeTab() === 'login' ? 'Acceder' : 'Registrar' }}

@@ -14,6 +14,7 @@ import { UserStatusService } from '../../../core/services/user-status.service';
 interface Prize {
   amount: string;
   icon: string;
+  neverAward?: boolean;
 }
 
 @Component({
@@ -327,21 +328,21 @@ export class RuletaComponent implements OnDestroy {
   private readonly spinEndAudio = this.createAudio('/sounds/010707105_prev.mp3', 0.6);
 
   readonly prizes: Prize[] = [
-    { amount: '200', icon: 'game/balls/ball-lv1.webp' },
-    { amount: '500', icon: 'game/balls/ball-lv2.webp' },
-    { amount: '800', icon: 'game/balls/ball-lv3.webp' },
-    { amount: '1000', icon: 'game/balls/ball-lv4.webp' },
-    { amount: '1500', icon: 'game/balls/ball-lv5.webp' },
-    { amount: '2000', icon: 'game/balls/ball-lv6.webp' },
-    { amount: '5000', icon: 'game/balls/ball-lv7.webp' },
-    { amount: '10000', icon: 'game/balls/ball-lv8.webp' }
+    { amount: '10,000 COP', icon: 'shared/balance/coin.webp', neverAward: true },
+    { amount: '100 COP', icon: 'shared/balance/coin.webp', neverAward: false },
+    { amount: '30 COP', icon: 'shared/balance/coin.webp', neverAward: false },
+    { amount: '5,000 COP', icon: 'shared/balance/coin.webp', neverAward: true },
+    { amount: '50 Energía', icon: 'game/energy/thunder.png', neverAward: false },
+    { amount: '150 COP', icon: 'shared/balance/coin.webp', neverAward: false },
+    { amount: '6,000 COP', icon: 'shared/balance/coin.webp', neverAward: true },
+    { amount: '30 Toques', icon: 'game/balls/ball-lv1.webp', neverAward: false }
   ];
   readonly lights = Array.from({ length: 24 }, (_, index) => index);
   readonly isSpinning = signal(false);
   readonly rotation = signal(0);
   readonly currentPrizeIndex = signal(0);
 
-  readonly currentPrize = computed(() => `${this.prizes[this.currentPrizeIndex()].amount} COP`);
+  readonly currentPrize = computed(() => this.prizes[this.currentPrizeIndex()].amount);
   readonly liveMessage = computed(() =>
     this.isSpinning() ? 'La ruleta está girando.' : `Resultado: ${this.currentPrize()}.`
   );
@@ -381,16 +382,28 @@ export class RuletaComponent implements OnDestroy {
       return;
     }
 
-    this.playAudio(this.spinStartAudio);
-    this.isSpinning.set(true);
-    
-    const currentRotationNormalized = this.rotation() % 360;
-    const winningIndex = Math.floor(Math.random() * this.prizes.length);
-    const segmentAngle = 360 / this.prizes.length;
-    const segmentCenter = winningIndex * segmentAngle + segmentAngle / 2;
-    const landingAngle = 360 - segmentCenter;
-    const extraTurns = 15 + Math.floor(Math.random() * 8);
-    const targetRotation = currentRotationNormalized + extraTurns * 360 + landingAngle;
+     this.playAudio(this.spinStartAudio);
+     this.isSpinning.set(true);
+     
+     const currentRotationNormalized = this.rotation() % 360;
+     let winningIndex = Math.floor(Math.random() * this.prizes.length);
+     // Evitar premios que nunca se otorgan
+     if (this.prizes[winningIndex].neverAward) {
+       let attempts = 0;
+       while (this.prizes[winningIndex].neverAward && attempts < 100) {
+         winningIndex = Math.floor(Math.random() * this.prizes.length);
+         attempts++;
+       }
+       if (this.prizes[winningIndex].neverAward) {
+         this.isSpinning.set(false);
+         return;
+       }
+     }
+     const segmentAngle = 360 / this.prizes.length;
+     const segmentCenter = winningIndex * segmentAngle + segmentAngle / 2;
+     const landingAngle = 360 - segmentCenter;
+     const extraTurns = 15 + Math.floor(Math.random() * 8);
+     const targetRotation = currentRotationNormalized + extraTurns * 360 + landingAngle;
 
     this.rotation.set(targetRotation);
 
