@@ -317,7 +317,7 @@ export class WalletComponent {
 
   readonly depositMethods: Deposit[] = [
     { title: 'Colombia', desc: 'Depósitos instantáneos', icon: 'wallet/main/col.webp' },
-    { title: 'Perú', desc: 'Depósitos instantáneos', icon: 'wallet/main/peru.png' },
+    { title: 'Paypal', desc: 'Depósitos instantáneos', icon: 'wallet/main/paypal.webp' },
     { title: 'Cryptos', desc: 'Depósitos vía criptomonedas', icon: 'wallet/main/bynance.png' },
   ];
 
@@ -327,7 +327,7 @@ export class WalletComponent {
     const icons: Record<string, string> = {
       'Colombia': 'wallet/main/col.webp',
       'Cryptos': 'wallet/main/bynance.png',
-      'Perú': 'wallet/main/peru.png',
+      'Paypal': 'wallet/main/paypal.webp',
     };
     return icons[title] || 'wallet/main/wallet-main.png';
   }
@@ -336,7 +336,7 @@ export class WalletComponent {
     const gradients: Record<string, string> = {
       'Colombia': 'linear-gradient(to right, rgba(20,184,166,0.20) 0%, rgba(20,184,166,0.18) 25%, rgba(20,184,166,0.08) 55%, transparent 75%)',
       'Cryptos': 'linear-gradient(to right, rgba(245,158,11,0.20) 0%, rgba(245,158,11,0.18) 25%, rgba(245,158,11,0.08) 55%, transparent 75%)',
-      'Perú': 'linear-gradient(to right, rgba(239,68,68,0.20) 0%, rgba(239,68,68,0.18) 25%, rgba(239,68,68,0.08) 55%, transparent 75%)',
+      'Paypal': 'linear-gradient(to right, rgba(239,68,68,0.20) 0%, rgba(239,68,68,0.18) 25%, rgba(239,68,68,0.08) 55%, transparent 75%)',
     };
     return gradients[title] ?? 'rgba(255,255,255,0.05)';
   }
@@ -345,7 +345,7 @@ export class WalletComponent {
     const colors: Record<string, string> = {
       'Colombia': 'rgba(20,184,166,0.30)',
       'Cryptos': 'rgba(245,158,11,0.30)',
-      'Perú': 'rgba(239,68,68,0.30)',
+      'Paypal': 'rgba(239,68,68,0.30)',
     };
     return colors[title] ?? 'rgba(255,255,255,0.10)';
   }
@@ -384,11 +384,16 @@ export class WalletComponent {
     const tab = this.activeTab();
     if (tab !== 'depositar' && tab !== 'retirar') return;
 
+    // Paypal va directo a transacción sin sheet
+    if (item.title === 'Paypal') {
+      this.navigateToTransaction(item.title, tab);
+      return;
+    }
+
     if (!this.isSheetOpen()) {
       this.selectedDeposit.set(item);
       if (item.title === 'Colombia') this.sheetContent.set('colombia');
       else if (item.title === 'Cryptos') this.sheetContent.set(tab === 'retirar' ? 'cryptos-withdraw' : 'cryptos');
-      else if (item.title === 'Perú') this.sheetContent.set('peru');
       else this.sheetContent.set('default');
       this.isSheetOpen.set(true);
     } else {

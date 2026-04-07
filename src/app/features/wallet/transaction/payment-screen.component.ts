@@ -173,6 +173,7 @@ export class PaymentScreenComponent {
   private coinMap: Record<string, FinanceCoin> = {
     'Nequi': FinanceCoin.COP, 'Daviplata': FinanceCoin.COP,
     'Plin': FinanceCoin.COP, 'Yape': FinanceCoin.COP,
+    'Paypal': FinanceCoin.COP,
     'USDT': FinanceCoin.USDT, 'TRX': FinanceCoin.TRX,
     'BNB': FinanceCoin.BNB, 'BTC': FinanceCoin.BTC,
   };

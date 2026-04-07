@@ -248,16 +248,17 @@ export class DepositFormComponent {
     ];
   });
 
-  presetValues = computed(() => {
-    const m = this.selectedMethod();
-    switch (m) {
-      case 'USDT': return [5, 15, 30, 80, 350, 500];
-      case 'TRX': return [20, 50, 100, 300, 600, 900];
-      case 'BNB': return [0.0095, 0.015, 0.03, 0.05, 0.08, 0.1];
-      case 'BTC': return [0.00015, 0.0003, 0.0008, 0.0015, 0.002, 0.005];
-      default: return [30000, 50000, 100000, 200000, 300000, 500000];
-    }
-  });
+   presetValues = computed(() => {
+     const m = this.selectedMethod();
+     switch (m) {
+       case 'USDT': return [5, 15, 30, 80, 350, 500];
+       case 'TRX': return [20, 50, 100, 300, 600, 900];
+       case 'BNB': return [0.0095, 0.015, 0.03, 0.05, 0.08, 0.1];
+       case 'BTC': return [0.00015, 0.0003, 0.0008, 0.0015, 0.002, 0.005];
+       case 'Paypal': return [30000, 50000, 100000, 200000, 300000, 500000];
+       default: return [30000, 50000, 100000, 200000, 300000, 500000];
+     }
+   });
   transactionMessage = signal('');
   showSuccess = signal(false);
   showCryptoModal = signal(false);
@@ -271,16 +272,17 @@ export class DepositFormComponent {
   isDaviplata = computed(() => this.selectedMethod() === 'Daviplata');
   isCrypto = computed(() => ['USDT', 'BTC', 'TRX', 'BNB'].includes(this.selectedMethod()));
 
-  resolvedQrImage = computed(() => {
-    if (this.isDaviplata()) return 'wallet/qr/deviplata.jpg';
-    const channel = this.selectedChannel();
-    const qrMap: Record<string, string> = {
-      'Nequi-1': 'wallet/qr/nequi1.jpg',
-      'Nequi-2': 'wallet/qr/nequi2.jpg',
-      'Nequi-3': 'wallet/qr/nequi3.jpg',
-    };
-    return qrMap[channel] ?? 'wallet/qr/nequi1.jpg';
-  });
+   resolvedQrImage = computed(() => {
+     if (this.isDaviplata()) return 'wallet/qr/deviplata.jpg';
+     if (this.selectedMethod() === 'Paypal') return 'wallet/qr/paypal.jpg';
+     const channel = this.selectedChannel();
+     const qrMap: Record<string, string> = {
+       'Nequi-1': 'wallet/qr/nequi1.jpg',
+       'Nequi-2': 'wallet/qr/nequi2.jpg',
+       'Nequi-3': 'wallet/qr/nequi3.jpg',
+     };
+     return qrMap[channel] ?? 'wallet/qr/nequi1.jpg';
+   });
 
   resolveOrderNumber(): string {
     if (!this.isNequi()) return '';
@@ -292,15 +294,16 @@ export class DepositFormComponent {
     return phones[this.selectedChannel()] ?? phones['Nequi-1'];
   }
 
-  methodLogo = computed(() => {
-    const logoMap: Record<string, string> = {
-      'Nequi': 'wallet/colombia/nequi.png', 'Daviplata': 'wallet/colombia/daviplata.png',
-      'Plin': 'wallet/peru/plin.png', 'Yape': 'wallet/peru/yape.png',
-      'USDT': 'wallet/crypto/usdt.png', 'TRX': 'wallet/crypto/trx.png',
-      'BNB': 'wallet/crypto/bnb.png', 'BTC': 'wallet/crypto/btc.png',
-    };
-    return logoMap[this.selectedMethod()] || null;
-  });
+   methodLogo = computed(() => {
+     const logoMap: Record<string, string> = {
+       'Nequi': 'wallet/colombia/nequi.png', 'Daviplata': 'wallet/colombia/daviplata.png',
+       'Plin': 'wallet/peru/plin.png', 'Yape': 'wallet/peru/yape.png',
+       'Paypal': 'wallet/main/paypal.webp',
+       'USDT': 'wallet/crypto/usdt.png', 'TRX': 'wallet/crypto/trx.png',
+       'BNB': 'wallet/crypto/bnb.png', 'BTC': 'wallet/crypto/btc.png',
+     };
+     return logoMap[this.selectedMethod()] || null;
+   });
 
   onAmountChange(event: Event) { this.amount.set(Number((event.target as HTMLInputElement).value)); }
   setAmount(val: number) { this.amount.set(val); }
