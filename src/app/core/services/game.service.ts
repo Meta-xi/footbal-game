@@ -3,6 +3,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ApiMessageResponse } from '../../models/user.model';
 import { UserStatusService } from './user-status.service';
+import { AuthService } from './auth.service';
+import { EncryptionService } from './encryption.service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +12,9 @@ import { UserStatusService } from './user-status.service';
 export class GameService {
   private http = inject(HttpClient);
   private userStatusService = inject(UserStatusService);
+  private authService = inject(AuthService);
+  private encryptionService = inject(EncryptionService);
+  private readonly secretKey = environment.tapSecretKey;
 
   private getBaseUrl(): string {
     return environment.apiBaseUrl;
@@ -18,14 +23,44 @@ export class GameService {
   async addTooks(coins: number): Promise<{ success: boolean; error?: string }> {
     try {
       const url = `${this.getBaseUrl()}Game/addTooks`;
-      await this.http.post(url, { coins }).toPromise();
+      
+      // Generate token and timestamp following the same pattern as casinoPlay
+      const user = this.authService.user();
+      const userId = user ? (user.id || user.Id) : null;
+      
+      // Ensure userId is present - same as casinoPlay
+      if (!userId) {
+        await this.userStatusService.loadUserStatus();
+        const refreshedUser = this.authService.user();
+        const refreshedUserId = refreshedUser ? (refreshedUser.id || refreshedUser.Id) : null;
+        
+        if (!refreshedUserId) {
+          return { success: false, error: 'User not authenticated' };
+        }
+      }
+      
+      const timestamp = Math.floor(Date.now() / 1000);
+      const finalUserId = userId || (this.authService.user()?.id || this.authService.user()?.Id);
+      const payload = `${finalUserId}:${timestamp}:${this.secretKey}`;
+      const token = await this.encryptionService.sha256(payload);
+      
+      await this.http.post(url, { coins, token, timestamp }).toPromise();
 
       // Refresh user status after successful operation
       await this.userStatusService.loadUserStatus();
 
       return { success: true };
     } catch (error: unknown) {
+      // Always refresh user status on failure to stay in sync
+      await this.userStatusService.loadUserStatus();
+      
       const httpError = error as HttpErrorResponse;
+      if (httpError?.status === 401) {
+        return { success: false, error: 'Unauthorized' };
+      }
+      if (httpError?.status === 400) {
+        return { success: false, error: 'Bad request' };
+      }
       if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
         return { success: false, error: (httpError.error as ApiMessageResponse).message };
       }
@@ -34,23 +69,101 @@ export class GameService {
     }
   }
 
-  async casinoPlay(earn: number, tickets: number): Promise<{ success: boolean; error?: string; message?: string }> {
+  /**
+   * Deduct a ticket before playing a mini-game.
+   * This ensures the user has tickets available and proactively deducts them.
+   */
+  async deductTicket(): Promise<{ success: boolean; error?: string }> {
     try {
       const url = `${this.getBaseUrl()}Game/casinoPlay`;
-      const response = await this.http.post<ApiMessageResponse>(url, { earn, tickets }).toPromise();
-
-      if (response) {
-        // Refresh user status after successful operation
-        await this.userStatusService.loadUserStatus();
-        
-        return { success: true, message: response.message };
+      
+      // Generate token and timestamp
+      const user = this.authService.user();
+      const userId = user ? (user.id || user.Id) : null;
+      if (!userId) {
+        return { success: false, error: 'User not authenticated' };
       }
+      
+      const timestamp = Math.floor(Date.now() / 1000);
+      const payload = `${userId}:${timestamp}:${this.secretKey}`;
+      const token = await this.encryptionService.sha256(payload);
+      
+      // Call casinoPlay with 0 earn (just deducts ticket)
+      const response = await this.http.post<ApiMessageResponse>(url, { 
+        earn: 0, 
+        tickets: 1,
+        token,
+        timestamp
+      }).toPromise();
 
-      return { success: false, error: 'Casino play failed' };
+      // Refresh user status to reflect the deducted ticket
+      await this.userStatusService.loadUserStatus();
+      
+      return { success: true };
     } catch (error: unknown) {
       const httpError = error as HttpErrorResponse;
       if (httpError?.status === 401) {
         return { success: false, error: 'Unauthorized' };
+      }
+      if (httpError?.status === 400) {
+        return { success: false, error: 'No tickets available' };
+      }
+      if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
+        return { success: false, error: (httpError.error as ApiMessageResponse).message };
+      }
+      console.error('DeductTicket failed:', error);
+      return { success: false, error: 'Failed to deduct ticket' };
+    }
+  }
+
+  async casinoPlay(earn: number, tickets: number): Promise<{ success: boolean; error?: string; message?: string }> {
+    try {
+      const url = `${this.getBaseUrl()}Game/casinoPlay`;
+      
+      // Generate token and timestamp - ensure userId is present
+      const user = this.authService.user();
+      const userId = user ? (user.id || user.Id) : null;
+      
+      if (!userId) {
+        // Try to refresh user status in case session was restored
+        await this.userStatusService.loadUserStatus();
+        const refreshedUser = this.authService.user();
+        const refreshedUserId = refreshedUser ? (refreshedUser.id || refreshedUser.Id) : null;
+        
+        if (!refreshedUserId) {
+          return { success: false, error: 'User not authenticated' };
+        }
+      }
+      
+      const timestamp = Math.floor(Date.now() / 1000);
+      const finalUserId = userId || (this.authService.user()?.id || this.authService.user()?.Id);
+      const payload = `${finalUserId}:${timestamp}:${this.secretKey}`;
+      const token = await this.encryptionService.sha256(payload);
+      
+      const response = await this.http.post<ApiMessageResponse>(url, { 
+        earn, 
+        tickets,
+        token,
+        timestamp
+      }).toPromise();
+
+      // Refresh user status after successful operation
+      await this.userStatusService.loadUserStatus();
+      
+      return { success: true, message: response?.message || 'Success' };
+    } catch (error: unknown) {
+      // Always refresh user status on failure to stay in sync with backend
+      await this.userStatusService.loadUserStatus();
+      
+      const httpError = error as HttpErrorResponse;
+      if (httpError?.status === 401) {
+        return { success: false, error: 'Unauthorized' };
+      }
+      if (httpError?.status === 400) {
+        return { success: false, error: 'Invalid request' };
+      }
+      if (httpError?.status === 500) {
+        return { success: false, error: 'Server error' };
       }
       if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
         return { success: false, error: (httpError.error as ApiMessageResponse).message };
@@ -92,17 +205,42 @@ export class GameService {
   async updateEnergyState(energy: number): Promise<{ success: boolean; error?: string; message?: string }> {
     try {
       const url = `${this.getBaseUrl()}Game/updateEnergyState`;
-      const response = await this.http.post<ApiMessageResponse>(url, { energy }).toPromise();
-
-      if (response) {
-        return { success: true, message: response.message };
+      
+      // Generate token and timestamp for security
+      const user = this.authService.user();
+      const userId = user ? (user.id || user.Id) : null;
+      
+      if (!userId) {
+        await this.userStatusService.loadUserStatus();
+        const refreshedUser = this.authService.user();
+        const refreshedUserId = refreshedUser ? (refreshedUser.id || refreshedUser.Id) : null;
+        
+        if (!refreshedUserId) {
+          return { success: false, error: 'User not authenticated' };
+        }
       }
+      
+      const timestamp = Math.floor(Date.now() / 1000);
+      const finalUserId = userId || (this.authService.user()?.id || this.authService.user()?.Id);
+      const payload = `${finalUserId}:${timestamp}:${this.secretKey}`;
+      const token = await this.encryptionService.sha256(payload);
+      
+      const response = await this.http.post<ApiMessageResponse>(url, { energy, token, timestamp }).toPromise();
 
-      return { success: false, error: 'Failed to update energy' };
+      // Refresh user status to sync energy balance
+      await this.userStatusService.loadUserStatus();
+
+      return { success: true, message: response?.message || 'Energy updated' };
     } catch (error: unknown) {
+      // Always refresh user status on failure to stay in sync
+      await this.userStatusService.loadUserStatus();
+      
       const httpError = error as HttpErrorResponse;
       if (httpError?.status === 401) {
         return { success: false, error: 'Unauthorized' };
+      }
+      if (httpError?.status === 400) {
+        return { success: false, error: 'Bad request' };
       }
       if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
         return { success: false, error: (httpError.error as ApiMessageResponse).message };

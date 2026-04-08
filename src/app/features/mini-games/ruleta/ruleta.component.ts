@@ -11,6 +11,7 @@ import { NgOptimizedImage } from '@angular/common';
 import confetti from 'canvas-confetti';
 import { UserStatusService } from '../../../core/services/user-status.service';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { GameService } from '../../../core/services/game.service';
 
 interface Prize {
   amount: string;
@@ -326,6 +327,7 @@ export class RuletaComponent implements OnDestroy {
   private router = inject(Router);
   private userStatusService = inject(UserStatusService);
   private errorHandler = inject(ErrorHandlerService);
+  private gameService = inject(GameService);
   
   readonly ticketsCount = computed(() => this.userStatusService.wallet()?.ticketBalance ?? 0);
   
@@ -384,41 +386,67 @@ export class RuletaComponent implements OnDestroy {
       return;
     }
     if (this.ticketsCount() <= 0) {
+      this.errorHandler.showErrorToast('No tienes tickets disponibles');
       return;
     }
 
-     this.playAudio(this.spinStartAudio);
-     this.isSpinning.set(true);
-     
-     const currentRotationNormalized = this.rotation() % 360;
-     let winningIndex = Math.floor(Math.random() * this.prizes.length);
-     // Evitar premios que nunca se otorgan
-     if (this.prizes[winningIndex].neverAward) {
-       let attempts = 0;
-       while (this.prizes[winningIndex].neverAward && attempts < 100) {
-         winningIndex = Math.floor(Math.random() * this.prizes.length);
-         attempts++;
-       }
-       if (this.prizes[winningIndex].neverAward) {
-         this.isSpinning.set(false);
-         return;
-       }
-     }
-     const segmentAngle = 360 / this.prizes.length;
-     const segmentCenter = winningIndex * segmentAngle + segmentAngle / 2;
-     const landingAngle = 360 - segmentCenter;
-     const extraTurns = 15 + Math.floor(Math.random() * 8);
-     const targetRotation = currentRotationNormalized + extraTurns * 360 + landingAngle;
+    // Deduct ticket proactively before spinning
+    this.gameService.deductTicket().then(result => {
+      if (!result.success) {
+        this.errorHandler.showErrorToast(result.error || 'No se pudo usar el ticket');
+        return;
+      }
 
-    this.rotation.set(targetRotation);
+      this.playAudio(this.spinStartAudio);
+      this.isSpinning.set(true);
+      
+      const currentRotationNormalized = this.rotation() % 360;
+      let winningIndex = Math.floor(Math.random() * this.prizes.length);
+      // Evitar premios que nunca se otorgan
+      if (this.prizes[winningIndex].neverAward) {
+        let attempts = 0;
+        while (this.prizes[winningIndex].neverAward && attempts < 100) {
+          winningIndex = Math.floor(Math.random() * this.prizes.length);
+          attempts++;
+        }
+        if (this.prizes[winningIndex].neverAward) {
+          this.isSpinning.set(false);
+          return;
+        }
+      }
+      const segmentAngle = 360 / this.prizes.length;
+      const segmentCenter = winningIndex * segmentAngle + segmentAngle / 2;
+      const landingAngle = 360 - segmentCenter;
+      const extraTurns = 15 + Math.floor(Math.random() * 8);
+      const targetRotation = currentRotationNormalized + extraTurns * 360 + landingAngle;
 
-    window.setTimeout(() => {
-      this.currentPrizeIndex.set(winningIndex);
-      this.isSpinning.set(false);
-      this.playAudio(this.spinEndAudio);
-      this.triggerConfetti();
-      this.errorHandler.showSuccessToast(`¡Ganaste ${this.prizes[winningIndex].amount}!`);
-    }, 4900);
+      this.rotation.set(targetRotation);
+
+      window.setTimeout(() => {
+        this.currentPrizeIndex.set(winningIndex);
+        this.isSpinning.set(false);
+        this.playAudio(this.spinEndAudio);
+        this.triggerConfetti();
+        
+        // Llamar al backend para registrar la ganancia (ticket ya fue deducido)
+        const prizeValue = this.parsePrizeValue(this.prizes[winningIndex].amount);
+        this.gameService.casinoPlay(prizeValue, 0).then(result => {
+          if (result.success) {
+            // userStatusService.loadUserStatus() ya se llama en casinoPlay
+            this.errorHandler.showSuccessToast(`¡Ganaste ${this.prizes[winningIndex].amount}!`);
+          } else {
+            this.errorHandler.showErrorToast(result.error || 'Error al registrar premio');
+          }
+        });
+      }, 4900);
+    });
+  }
+
+  private parsePrizeValue(value: string): number {
+    // Extraer número del string (ej: "10,000 COP" -> 10000, "50 Energía" -> 50)
+    const cleaned = value.replace(/,/g, '');
+    const match = cleaned.match(/(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
   }
 
   private triggerConfetti(): void {

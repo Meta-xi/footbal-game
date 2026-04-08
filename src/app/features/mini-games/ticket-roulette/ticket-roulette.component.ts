@@ -3,6 +3,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserStatusService } from '../../../core/services/user-status.service';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { GameService } from '../../../core/services/game.service';
 
 interface Ticket {
   id: number;
@@ -237,12 +238,17 @@ interface Ticket {
 export class TicketRouletteComponent {
   private userStatusService = inject(UserStatusService);
   private errorHandler = inject(ErrorHandlerService);
+  private gameService = inject(GameService);
+
+  // Tickets leídos del estado del jugador
+  ticketsCount = computed(() => this.userStatusService.wallet()?.ticketBalance ?? 0);
 
   // Estado del juego con Signals
   isSpinning = signal(false);
   currentOffset = signal(0);
   transitionDuration = signal(0);
-  ticketsCount = computed(() => this.userStatusService.wallet()?.ticketBalance ?? 0);
+  reelTickets = signal<Ticket[]>([]);
+  currentVisibleIndex = signal(2);
 
   // Configuración de la ruleta
   ticketHeight = 100;
@@ -257,10 +263,6 @@ export class TicketRouletteComponent {
     { id: 6, value: "50,000 COP", colorClass: 'ticket-pink', icon: '🪙', weight: 0 }, // Nunca sale
     { id: 7, value: "5 Energía  ", colorClass: 'ticket-teal', icon: '⚡', weight: 30 },
   ];
-
-  reelTickets = signal<Ticket[]>([]);
-  // Tracking de índice absoluto (puede superar el tamaño del reel)
-  currentVisibleIndex = signal(2);
 
   audioClick = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
   audioTick = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
@@ -301,48 +303,62 @@ export class TicketRouletteComponent {
   spin() {
     if (this.isSpinning()) return;
 
-    this.audioClick.play().catch(() => {});
-    this.isSpinning.set(true);
-
-    // 1. Elegir ganador con probabilidades ponderadas
-    const winner = this.pickWinner();
-
-    // 2. RESET: Volver al inicio del reel SIN animación
-    this.transitionDuration.set(0);
-    this.currentOffset.set(this.calculateOffset(2));
-    this.currentVisibleIndex.set(2);
-
-    // 3. Calcular destino: entre 700 y 800 posiciones (siempre dentro del reel de 1400)
-    const minSpins = 700;
-    const extraSpins = Math.floor(Math.random() * 100);
-    const targetIndex = 2 + minSpins + extraSpins; // Empezamos desde 2
-
-    const reel = this.reelTickets();
-
-    // 4. Buscar el primer ticket ganador DESPUÉS de targetIndex
-    let actualIndex = -1;
-    for (let i = targetIndex; i < reel.length; i++) {
-      if (reel[i].id === winner.id) {
-        actualIndex = i;
-        break;
-      }
+    // Verificar que hay tickets disponibles primero
+    if (this.ticketsCount() <= 0) {
+      this.errorHandler.showErrorToast('No tienes tickets disponibles');
+      return;
     }
-    if (actualIndex === -1) actualIndex = targetIndex;
 
-    this.currentVisibleIndex.set(actualIndex);
-    const targetOffset = this.calculateOffset(actualIndex);
-    const durationMs = 5000;
+    // Deduct ticket proactively before spinning
+    this.gameService.deductTicket().then(result => {
+      if (!result.success) {
+        this.errorHandler.showErrorToast(result.error || 'No se pudo usar el ticket');
+        return;
+      }
 
-    // 5. Pequeño delay para que el browser aplique el reset, luego animar
-    setTimeout(() => {
-      this.transitionDuration.set(durationMs);
-      this.currentOffset.set(targetOffset);
-      this.trackTicks(actualIndex, durationMs);
-    }, 50);
+      this.audioClick.play().catch(() => {});
+      this.isSpinning.set(true);
 
-    setTimeout(() => {
-      this.finishSpin(actualIndex, winner);
-    }, durationMs + 150);
+      // 1. Elegir ganador con probabilidades ponderadas
+      const winner = this.pickWinner();
+
+      // 2. RESET: Volver al inicio del reel SIN animación
+      this.transitionDuration.set(0);
+      this.currentOffset.set(this.calculateOffset(2));
+      this.currentVisibleIndex.set(2);
+
+      // 3. Calcular destino: entre 700 y 800 posiciones (siempre dentro del reel de 1400)
+      const minSpins = 700;
+      const extraSpins = Math.floor(Math.random() * 100);
+      const targetIndex = 2 + minSpins + extraSpins; // Empezamos desde 2
+
+      const reel = this.reelTickets();
+
+      // 4. Buscar el primer ticket ganador DESPUÉS de targetIndex
+      let actualIndex = -1;
+      for (let i = targetIndex; i < reel.length; i++) {
+        if (reel[i].id === winner.id) {
+          actualIndex = i;
+          break;
+        }
+      }
+      if (actualIndex === -1) actualIndex = targetIndex;
+
+      this.currentVisibleIndex.set(actualIndex);
+      const targetOffset = this.calculateOffset(actualIndex);
+      const durationMs = 5000;
+
+      // 5. Pequeño delay para que el browser aplique el reset, luego animar
+      setTimeout(() => {
+        this.transitionDuration.set(durationMs);
+        this.currentOffset.set(targetOffset);
+        this.trackTicks(actualIndex, durationMs);
+      }, 50);
+
+      setTimeout(() => {
+        this.finishSpin(actualIndex, winner);
+      }, durationMs + 150);
+    });
   }
 
   trackTicks(targetIndex: number, durationMs: number) {
@@ -380,8 +396,27 @@ export class TicketRouletteComponent {
   finishSpin(winningIndex: number, winner: Ticket) {
     this.isSpinning.set(false);
     this.audioWin.play().catch(() => {});
-    this.errorHandler.showSuccessToast(`¡Ganaste ${winner.value}!`);
+    
+    // Llamar al backend para registrar la ganancia (ticket ya fue deducido en spin)
+    // Parsear el valor del premio (ej: "500 USD" -> 500, "5 Energía" -> 5)
+    const prizeValue = this.parsePrizeValue(winner.value);
+    
+    this.gameService.casinoPlay(prizeValue, 0).then(result => {
+      if (result.success) {
+        // userStatusService.loadUserStatus() ya se llama en casinoPlay
+        this.errorHandler.showSuccessToast(`¡Ganaste ${winner.value}!`);
+      } else {
+        this.errorHandler.showErrorToast(result.error || 'Error al registrar premio');
+      }
+    });
+    
     console.log('Winner:', winner.value, 'at index', winningIndex);
+  }
+
+  private parsePrizeValue(value: string): number {
+    // Extraer número del string (ej: "500 USD" -> 500, "5 Energía" -> 5, "100 COP" -> 100)
+    const match = value.match(/(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
   }
 
   goBack() {

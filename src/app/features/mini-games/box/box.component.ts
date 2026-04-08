@@ -3,6 +3,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserStatusService } from '../../../core/services/user-status.service';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { GameService } from '../../../core/services/game.service';
 
 interface BallBox {
   id: number;
@@ -55,6 +56,7 @@ interface BallBox {
 export class BoxComponent {
   private userStatusService = inject(UserStatusService);
   private errorHandler = inject(ErrorHandlerService);
+  private gameService = inject(GameService);
   
   // Balance inicial desde wallet, mutable durante el juego
   balance = signal(0);
@@ -92,31 +94,48 @@ export class BoxComponent {
 
   startGame() {
     if (this.gameState === 'playing') return;
-    this.gameState = 'playing';
-    this.prizeWon.set(0);
-    this.playAudioSynth('start');
-
-    // 3 premios fijos: 20, 50, 80 COP
-    const prizes = [20, 50, 80];
-    const shuffled = prizes.sort(() => Math.random() - 0.5);
-    const newBoxes = Array.from({ length: 9 }, (_, i) => ({
-      id: i,
-      hasPrize: false,
-      prizeValue: 0,
-      opened: false
-    }));
-
-    let prizeIndex = 0;
-    while (prizeIndex < 3) {
-      const randomIndex = Math.floor(Math.random() * 9);
-      if (!newBoxes[randomIndex].hasPrize) {
-        newBoxes[randomIndex].hasPrize = true;
-        newBoxes[randomIndex].prizeValue = shuffled[prizeIndex];
-        prizeIndex++;
-      }
+    
+    // Verificar que hay tickets disponibles primero
+    const currentTickets = this.userStatusService.wallet()?.ticketBalance ?? 0;
+    if (currentTickets <= 0) {
+      this.errorHandler.showErrorToast('No tienes tickets disponibles');
+      return;
     }
 
-    this.boxes.set(newBoxes);
+    // Deduct ticket proactively before starting
+    this.gameService.deductTicket().then(result => {
+      if (!result.success) {
+        this.errorHandler.showErrorToast(result.error || 'No se pudo usar el ticket');
+        return;
+      }
+      
+      // Ticket deducted successfully, now start the game
+      this.gameState = 'playing';
+      this.prizeWon.set(0);
+      this.playAudioSynth('start');
+
+      // 3 premios fijos: 20, 50, 80 COP
+      const prizes = [20, 50, 80];
+      const shuffled = prizes.sort(() => Math.random() - 0.5);
+      const newBoxes = Array.from({ length: 9 }, (_, i) => ({
+        id: i,
+        hasPrize: false,
+        prizeValue: 0,
+        opened: false
+      }));
+
+      let prizeIndex = 0;
+      while (prizeIndex < 3) {
+        const randomIndex = Math.floor(Math.random() * 9);
+        if (!newBoxes[randomIndex].hasPrize) {
+          newBoxes[randomIndex].hasPrize = true;
+          newBoxes[randomIndex].prizeValue = shuffled[prizeIndex];
+          prizeIndex++;
+        }
+      }
+
+      this.boxes.set(newBoxes);
+    });
   }
 
   openBox(box: BallBox) {
@@ -129,7 +148,17 @@ export class BoxComponent {
     if (box.hasPrize) {
       this.gameState = 'won';
       this.prizeWon.set(box.prizeValue);
-      this.balance.update(v => v + box.prizeValue);
+      
+      // Llamar al backend para registrar la ganancia (ticket ya fue deducido en startGame)
+      this.gameService.casinoPlay(box.prizeValue, 0).then(result => {
+        if (result.success) {
+          // Solo actualizar balance después de confirmación del backend
+          this.balance.update(v => v + box.prizeValue);
+        } else {
+          this.errorHandler.showErrorToast(result.error || 'Error al registrar premio');
+        }
+      });
+      
       this.playAudioSynth('win');
       this.triggerConfetti();
       this.errorHandler.showSuccessToast(`¡GANASTE ${box.prizeValue} COP!`);
