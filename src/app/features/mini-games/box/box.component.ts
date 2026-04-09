@@ -165,7 +165,7 @@ export class BoxComponent {
     } else {
       this.gameState = 'lost';
       this.playAudioSynth('lose');
-      this.errorHandler.showErrorToast('¡Balón vacío! Perdiste');
+      this.errorHandler.showToast('¡Balón vacío! Perdiste', 'error');
     }
   }
 

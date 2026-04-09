@@ -25,6 +25,15 @@ import { AuthService } from '../../core/services/auth.service';
 
       <!-- Main Content Compact -->
       <main class="relative z-20 flex-1 flex flex-col px-5 justify-center -mt-10">
+        <!-- Logo Icon -->
+        <div class="text-center mb-4">
+          <img 
+            src="/backgrounds/login.webp" 
+            alt="FIFA Empire Logo" 
+            class="w-20 h-20 mx-auto object-contain"
+          />
+        </div>
+
         <!-- Logo/Title -->
         <div class="text-center mb-6">
           <h1 class="text-3xl font-black text-white tracking-tighter text-glow-cyan">
