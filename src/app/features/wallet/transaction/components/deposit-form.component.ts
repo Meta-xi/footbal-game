@@ -255,7 +255,7 @@ export class DepositFormComponent {
        case 'TRX': return [20, 50, 100, 300, 600, 900];
        case 'BNB': return [0.0095, 0.015, 0.03, 0.05, 0.08, 0.1];
        case 'BTC': return [0.00015, 0.0003, 0.0008, 0.0015, 0.002, 0.005];
-       case 'Paypal': return [30000, 50000, 100000, 200000, 300000, 500000];
+        case 'Paypal': return [5, 15, 25, 50, 100, 350];
        default: return [30000, 50000, 100000, 200000, 300000, 500000];
      }
    });

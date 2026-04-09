@@ -36,6 +36,7 @@ export enum FincanceNetworks {
   TRON = 5,
   BSC = 6,
   Bitcoin = 7,
+  Paypal = 8,
 }
 
 export interface WithdrawalRequest {

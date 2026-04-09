@@ -40,7 +40,7 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
               <span class="text-[7px] font-black text-white/20 uppercase tracking-[0.25em]">Monto</span>
               <div class="flex items-baseline gap-1.5">
                 <span class="text-2xl font-black text-white tracking-tight">$ {{ displayAmount() }}</span>
-                <span class="text-[10px] font-black text-white/30 uppercase tracking-wider">COP</span>
+                <span class="text-[10px] font-black text-white/30 uppercase tracking-wider">{{ currencyLabel() }}</span>
               </div>
             </div>
             @if (orderNumber()) {
@@ -162,6 +162,8 @@ export class PaymentScreenComponent {
    isValidReference = computed(() => this.reference().length >= 6);
 
   displayAmount = computed(() => this.amount().toLocaleString('es-CO'));
+
+  currencyLabel = computed(() => this.currency() === 'Paypal' ? 'USD' : 'COP');
 
   private coinMap: Record<string, FinanceCoin> = {
     'Nequi': FinanceCoin.COP, 'Daviplata': FinanceCoin.COP,

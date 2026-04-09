@@ -66,6 +66,12 @@ import { BalanceComponent } from '../../../../shared/components/balance/balance.
                 <span class="text-[9px] font-bold text-white/30 uppercase tracking-wider">El retiro será efectuado al cambio actual de COP/{{ currency() }}</span>
               </div>
             }
+            @if (currency() === 'Paypal') {
+              <div class="flex items-start gap-1.5">
+                <span class="text-[7px] text-white/15 mt-0.5">●</span>
+                <span class="text-[9px] font-bold text-white/30 uppercase tracking-wider">El retiro se hará al cambio de COP/USD</span>
+              </div>
+            }
           </div>
         </div>
 
@@ -154,6 +160,7 @@ export class WithdrawFormComponent {
     const logoMap: Record<string, string> = {
       'Nequi': 'wallet/colombia/nequi.png', 'Daviplata': 'wallet/colombia/daviplata.png',
       'Plin': 'wallet/peru/plin.png', 'Yape': 'wallet/peru/yape.png',
+      'Paypal': 'wallet/main/paypal.webp',
       'USDT': 'wallet/crypto/usdt.png', 'TRX': 'wallet/crypto/trx.png',
       'BNB': 'wallet/crypto/bnb.png', 'BTC': 'wallet/crypto/btc.png',
     };
@@ -163,6 +170,7 @@ export class WithdrawFormComponent {
   private coinMap: Record<string, FinanceCoin> = {
     'Nequi': FinanceCoin.COP, 'Daviplata': FinanceCoin.COP,
     'Plin': FinanceCoin.COP, 'Yape': FinanceCoin.COP,
+    'Paypal': FinanceCoin.COP,
     'USDT': FinanceCoin.USDT, 'TRX': FinanceCoin.TRX,
     'BNB': FinanceCoin.BNB, 'BTC': FinanceCoin.BTC,
   };
@@ -170,6 +178,7 @@ export class WithdrawFormComponent {
   private networkMap: Record<string, FincanceNetworks> = {
     'Nequi': FincanceNetworks.Nequi, 'Daviplata': FincanceNetworks.Daviplata,
     'Plin': FincanceNetworks.Plin, 'Yape': FincanceNetworks.Yape,
+    'Paypal': FincanceNetworks.Paypal,
     'USDT': FincanceNetworks.TRON, 'TRX': FincanceNetworks.TRON,
     'BNB': FincanceNetworks.BSC, 'BTC': FincanceNetworks.Bitcoin,
   };
