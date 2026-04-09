@@ -35,8 +35,12 @@ interface Prize {
         </svg>
       </button>
 
-       <header class="w-full max-w-md px-4 pt-6 pb-8 text-center">
-         <h1 class="mt-2 text-white text-4xl font-black tracking-[0.08em] leading-tight">SUPER LUCKY SPIN</h1>
+       <header class="w-full max-w-md px-4 pt-6 pb-4 text-center">
+         <div class="header glass !p-2 !mb-3 inline-flex items-center gap-3 border-yellow-500/30 shadow-lg accent-amber">
+           <img ngSrc="mini-games/tickets/tickets.webp" alt="Tickets" class="w-10 h-10 object-contain opacity-80 drop-shadow-md" width="40" height="40">
+           <h1 class="text-lg font-bold">Tickets: <span class="text-glow-yellow">{{ ticketsCount() }}</span></h1>
+         </div>
+         <h1 class="mt-2 text-white text-3xl font-black tracking-[0.08em] leading-tight">SUPER LUCKY SPIN</h1>
          <p class="mt-1.5 text-sm text-white/75">Gira la ruleta y gana una recompensa aleatoria</p>
        </header>
 
@@ -91,6 +95,9 @@ interface Prize {
         >
           {{ isSpinning() ? 'GIRANDO...' : (ticketsCount() <= 0 ? 'SIN TICKETS' : 'GIRAR RULETA') }}
         </button>
+        <p class="mt-3 text-center text-white/60 text-sm font-medium tracking-wide">
+          Prueba tu suerte, gira la ruleta y gana.
+        </p>
       </section>
 
       <p class="sr-only" aria-live="polite">{{ liveMessage() }}</p>
