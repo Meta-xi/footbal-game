@@ -27,11 +27,11 @@ import { AuthService } from '../../core/services/auth.service';
       <main class="relative z-20 flex-1 flex flex-col px-5 justify-center -mt-10">
         <!-- Logo Icon -->
         <div class="text-center mb-4">
-          <img 
-            src="/backgrounds/login.webp" 
-            alt="FIFA Empire Logo" 
-            class="w-20 h-20 mx-auto object-contain"
-          />
+           <img 
+             src="/backgrounds/login.webp" 
+             alt="FIFA Empire Logo" 
+             class="w-32 h-32 mx-auto object-contain"
+           />
         </div>
 
         <!-- Logo/Title -->
