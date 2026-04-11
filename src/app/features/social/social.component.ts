@@ -243,26 +243,35 @@ export class SocialComponent implements OnInit {
     const shareText = '¡Únete a Football Game y gana premios! ';
     const shareUrl = `${shareText}${url}`;
 
-    // Intentar Web Share API primero
+    // Verificar si estamos en Telegram Mini App
+    const tg = (window as any).Telegram?.WebApp;
+    if (tg?.openTelegramLink) {
+      // En Telegram: usar share de Telegram
+      const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`;
+      tg.openTelegramLink(telegramShareUrl);
+      return;
+    }
+
+    // Verificar si Web Share API está disponible y funciona
     if (navigator.share) {
       try {
-        await navigator.share({ 
-          url: shareUrl,
-          title: 'Football Game',
-          text: shareText
-        });
-        return;
-      } catch {
+        // Probar si puede compartir
+        if (navigator.canShare?.({ url: shareUrl, text: shareText, title: 'Football Game' })) {
+          await navigator.share({ 
+            url: shareUrl,
+            title: 'Football Game',
+            text: shareText
+          });
+          return;
+        }
+      } catch (err) {
+        console.log('Web Share failed, falling back');
         // Fallback si falla
       }
     }
 
-    // Fallback 1: Copiar al portapapeles
+    // Fallback: Copiar al portapapeles y mostrar toast
     await this.copyToClipboard(url);
-    
-    // Fallback 2: Abrir WhatsApp directo (más confiable en móvil)
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareUrl)}`;
-    window.open(whatsappUrl, '_blank');
   }
 
   async copyReferralLink(): Promise<void> {
