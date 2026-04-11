@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
+import { ErrorHandlerService } from '../../core/services/error-handler.service';
 
 @Component({
   selector: 'app-login',
@@ -58,13 +59,6 @@ import { AuthService } from '../../core/services/auth.service';
              Registrar
            </button>
          </div>
-
-        <!-- Error Alert -->
-        @if (error()) {
-          <div class="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-300 text-[10px] font-medium text-center animate-pulse">
-            {{ error() }}
-          </div>
-        }
 
         <!-- Form -->
         <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
@@ -187,6 +181,7 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private errorHandler = inject(ErrorHandlerService);
 
   activeTab = signal<'login' | 'register'>('login');
   username = '';
@@ -198,7 +193,6 @@ export class LoginComponent {
   countryPrefix = '+57'; // Default: Colombia
   isLoading = signal(false);
   showPassword = signal(false);
-  error = signal<string | null>(null);
   referrealId = signal<string | null>(null);
 
   // Filter to only allow numbers in phone input
@@ -244,11 +238,10 @@ export class LoginComponent {
 
   async onLogin() {
     if (!this.phone || !this.pass) {
-      this.error.set('Campos requeridos vacíos');
+      this.errorHandler.showToast('Campos requeridos vacíos', 'error');
       return;
     }
     this.isLoading.set(true);
-    this.error.set(null);
     try {
       // Full phone number with country prefix (for username)
       const cleanPrefix = this.countryPrefix.replace(/-/g, '');
@@ -259,10 +252,10 @@ export class LoginComponent {
       if (result.success) {
         this.router.navigate(['/main']);
       } else {
-        this.error.set(result.error || 'Credenciales inválidas');
+        this.errorHandler.showToast(result.error || 'Credenciales inválidas', 'error');
       }
     } catch (err) {
-      this.error.set('Credenciales inválidas');
+      this.errorHandler.showToast('Credenciales inválidas', 'error');
     } finally {
       this.isLoading.set(false);
     }
@@ -271,24 +264,23 @@ export class LoginComponent {
   async onRegister() {
     // Validate required fields: phone and pass
     if (!this.phone || !this.pass) {
-      this.error.set('Todos los campos son requeridos');
+      this.errorHandler.showToast('Todos los campos son requeridos', 'error');
       return;
     }
 
     // Validate passwords match
     if (this.pass !== this.confirmPass) {
-      this.error.set('Las contraseñas no coinciden');
+      this.errorHandler.showToast('Las contraseñas no coinciden', 'error');
       return;
     }
 
     // Validate terms acceptance
     if (!this.acceptTerms) {
-      this.error.set('Debes aceptar los términos y condiciones');
+      this.errorHandler.showToast('Debes aceptar los términos y condiciones', 'error');
       return;
     }
 
     this.isLoading.set(true);
-    this.error.set(null);
     try {
       // Full phone number with country prefix (used as username)
       const cleanPrefix = this.countryPrefix.replace(/-/g, '');
@@ -305,10 +297,10 @@ export class LoginComponent {
       if (result.success) {
         this.router.navigate(['/main']);
       } else {
-        this.error.set(result.error || 'Error en registro');
+        this.errorHandler.showToast(result.error || 'Error en registro', 'error');
       }
     } catch (err) {
-      this.error.set('Error en registro');
+      this.errorHandler.showToast('Error en registro', 'error');
     } finally {
       this.isLoading.set(false);
     }
