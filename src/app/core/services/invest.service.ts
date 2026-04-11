@@ -15,42 +15,90 @@ export class InvestService {
   private http = inject(HttpClient);
 
   // ============== Players State ==============
-  private _players = signal<InvestApiPlayer[]>([]);
+  private _availablePlayers = signal<InvestApiPlayer[]>([]);
+  private _vipPlayers = signal<InvestApiPlayer[]>([]);
+  private _boughtPlayers = signal<InvestApiPlayer[]>([]);
 
-  readonly availablePlayers = computed(() => this._players().filter(p => !p.isVIP));
-  readonly vipPlayers = computed(() => this._players().filter(p => p.isVIP));
+  readonly availablePlayers = computed(() => this._availablePlayers());
+  readonly vipPlayers = computed(() => this._vipPlayers());
+  readonly boughtPlayers = computed(() => this._boughtPlayers());
 
   constructor() {
-    this.loadPlayers();
+    this.loadAvailablePlayers();
+    this.loadVipPlayers();
+    this.loadBoughtPlayers();
   }
 
   // ============== Players Methods ==============
-  async loadPlayers(): Promise<void> {
-    const result = await this.getPlayers();
+  private addImageUrl(players: InvestApiPlayer[]): InvestApiPlayer[] {
+    return players.map(p => ({
+      ...p,
+      imagen: `${this.getBaseUrl()}images/players/${p.id}.webp`,
+    }));
+  }
+
+  async loadAvailablePlayers(): Promise<void> {
+    const result = await this.getPlayers({ isBuyed: false, isVIP: false });
     if (result.success && result.players) {
-      const withImages = result.players.map(p => ({
-        ...p,
-        imagen: `${this.getBaseUrl()}images/players/${p.id}.webp`,
-      }));
-      this._players.set(withImages);
+      this._availablePlayers.set(this.addImageUrl(result.players));
     }
   }
 
+  async loadVipPlayers(): Promise<void> {
+    const result = await this.getPlayers({ isBuyed: false, isVIP: true });
+    if (result.success && result.players) {
+      this._vipPlayers.set(this.addImageUrl(result.players));
+    }
+  }
+
+  async loadBoughtPlayers(): Promise<void> {
+    const result = await this.getPlayers({ isBuyed: true });
+    if (result.success && result.players) {
+      this._boughtPlayers.set(this.addImageUrl(result.players));
+    }
+  }
+
+  // Legacy method for backward compatibility
+  async loadPlayers(): Promise<void> {
+    await this.loadAvailablePlayers();
+    await this.loadVipPlayers();
+  }
+
   // ============== API Methods ==============
-  private pendingGetPlayers: Promise<{ success: boolean; error?: string; players?: InvestApiPlayer[] }> | null = null;
+  private pendingGetPlayers: Map<string, Promise<{ success: boolean; error?: string; players?: InvestApiPlayer[] }>> = new Map();
 
   private getBaseUrl(): string {
     return environment.apiBaseUrl;
   }
 
-  async getPlayers(): Promise<{ success: boolean; error?: string; players?: InvestApiPlayer[] }> {
-    if (this.pendingGetPlayers) {
-      return this.pendingGetPlayers;
+  /**
+   * Get players with optional query filters
+   * @param filters - Optional filter parameters
+   */
+  async getPlayers(filters: {
+    id?: number;
+    name?: string;
+    isVIP?: boolean;
+    isBuyed?: boolean;
+  } = {}): Promise<{ success: boolean; error?: string; players?: InvestApiPlayer[] }> {
+    // Build cache key from filters
+    const cacheKey = JSON.stringify(filters);
+    
+    if (this.pendingGetPlayers.has(cacheKey)) {
+      return this.pendingGetPlayers.get(cacheKey)!;
     }
 
-    const url = `${this.getBaseUrl()}Invest/getPlayers`;
+    // Build query string
+    const params = new URLSearchParams();
+    if (filters.id !== undefined) params.set('id', filters.id.toString());
+    if (filters.name) params.set('name', filters.name);
+    if (filters.isVIP !== undefined) params.set('isVIP', filters.isVIP.toString());
+    if (filters.isBuyed !== undefined) params.set('isBuyed', filters.isBuyed.toString());
 
-    this.pendingGetPlayers = withRetry(
+    const queryString = params.toString();
+    const url = `${this.getBaseUrl()}Invest/getPlayers${queryString ? '?' + queryString : ''}`;
+
+    const promise = withRetry(
       () => this.http.get<InvestApiPlayer[]>(url).toPromise(),
       { maxAttempts: 3, baseDelayMs: 500 }
     ).then(response => {
@@ -65,10 +113,11 @@ export class InvestService {
       }
       return { success: false, error: 'Failed to get players' };
     }).finally(() => {
-      this.pendingGetPlayers = null;
+      this.pendingGetPlayers.delete(cacheKey);
     });
 
-    return this.pendingGetPlayers;
+    this.pendingGetPlayers.set(cacheKey, promise);
+    return promise;
   }
 
   async buyPlayer(articleId: number, timestamp: number, token: string, uid: number): Promise<{ success: boolean; error?: string; message?: string }> {

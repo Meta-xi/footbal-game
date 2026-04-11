@@ -5,6 +5,7 @@ export interface InvestApiPlayer {
   id: number;
   name: string;
   isVIP: boolean;
+  isBuyed?: boolean;
   price: number;
   days: number;
   interest: number;

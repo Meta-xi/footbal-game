@@ -80,9 +80,17 @@ import { ErrorHandlerService } from '../../core/services/error-handler.service';
                     </div>
                   }
                 } @else if (activeTab() === 'comprados') {
-                  <div class="lg-panel p-20 text-center opacity-40">
-                    <p class="text-white font-black text-[10px] uppercase tracking-[0.4em] leading-relaxed">Sin Jugadores Comprados</p>
-                  </div>
+                  @if (boughtPlayers().length > 0) {
+                    <div class="grid grid-cols-2 gap-4">
+                        @for (boughtPlayer of boughtPlayers(); track boughtPlayer.id) {
+                          <app-product-card [product]="boughtPlayer" (buy)="openPlayerDetails($event)" class="animate-fade-up" />
+                        }
+                    </div>
+                  } @else {
+                    <div class="lg-panel p-20 text-center opacity-40">
+                        <p class="text-white font-black text-[10px] uppercase tracking-[0.4em] leading-relaxed">Sin Jugadores Comprados</p>
+                    </div>
+                  }
                 }
             </div>
         </div>
@@ -124,7 +132,7 @@ export class InvestLayoutComponent {
   private errorHandler = inject(ErrorHandlerService);
 
   constructor() {
-    this.investService.loadPlayers();
+    // Los players se cargan automáticamente en el constructor del servicio
   }
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
@@ -144,6 +152,7 @@ export class InvestLayoutComponent {
 
   availablePlayers = this.investService.availablePlayers;
   vipPlayers = this.investService.vipPlayers;
+  boughtPlayers = this.investService.boughtPlayers;
 
   openPlayerDetails(player: InvestApiPlayer) {
     this.selectedPlayer.set(player);
@@ -174,6 +183,10 @@ export class InvestLayoutComponent {
     if (result.success) {
       this.errorHandler.showSuccessToast(result.message ?? '¡Fichaje confirmado!');
       this.closeDetailsModal();
+      // Recargar todos los players
+      await this.investService.loadAvailablePlayers();
+      await this.investService.loadVipPlayers();
+      await this.investService.loadBoughtPlayers();
       this.userStatusService.loadUserStatus();
     } else {
       this.errorHandler.showToast(result.error ?? 'No se pudo completar el fichaje.', 'error');
