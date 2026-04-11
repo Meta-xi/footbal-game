@@ -44,9 +44,6 @@ interface Prize {
         <h1>Tickets: <span class="text-glow-yellow"> {{ ticketsCount() }}</span></h1>
       </div>
 
-      <h1 class="text-white text-3xl font-black tracking-[0.08em] leading-tight mb-1">SUPER LUCKY SPIN</h1>
-      <p class="text-sm text-white/75 mb-4">Gira la ruleta y gana una recompensa aleatoria</p>
-
       <div class="roulette-shell lg-panel lg-shimmer lg-accent-ring" role="group" aria-label="Ruleta de premios">
         <div class="pointer" aria-hidden="true"></div>
 
