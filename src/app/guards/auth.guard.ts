@@ -14,5 +14,5 @@ export const authGuard: CanActivateFn = () => {
   }
 
   // Redirect to welcome if not authenticated
-  return router.createUrlTree(['/welcome']);
+  return router.createUrlTree(['/login']);
 };
