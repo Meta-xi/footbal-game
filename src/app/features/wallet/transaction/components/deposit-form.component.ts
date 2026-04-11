@@ -76,7 +76,9 @@ import { PaymentScreenComponent } from '../payment-screen.component';
 
         <!-- Canal de Pago -->
         <div class="flex flex-col gap-3">
-          <span class="text-[9px] font-black text-white/20 uppercase tracking-widest px-1">Canal de Pago</span>
+          <span class="text-[9px] font-black text-white/20 uppercase tracking-widest px-1">
+            {{ isUSDT() ? 'Selecciona la Red' : 'Canal de Pago' }}
+          </span>
 
           @if (isNequi()) {
             <!-- Nequi: 3 channel cards -->
@@ -103,6 +105,36 @@ import { PaymentScreenComponent } from '../payment-screen.component';
                     {{ channel.label }}
                   </span>
                   @if (selectedChannel() === channel.id) {
+                    <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_6px_rgba(20,184,166,0.8)]"></span>
+                  }
+                </button>
+              }
+            </div>
+          } @else if (isUSDT()) {
+            <!-- USDT: 2 network cards -->
+            <div class="grid grid-cols-2 gap-3">
+              @for (net of usdtNetworks; track net.id) {
+                <button
+                  (click)="selectedNetwork.set(net.id)"
+                  class="relative flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border backdrop-blur-2xl transition-all duration-300 active:scale-95 overflow-hidden"
+                  [style.background]="selectedNetwork() === net.id
+                    ? 'linear-gradient(to right, rgba(20,184,166,0.28) 0%, rgba(20,184,166,0.18) 25%, rgba(20,184,166,0.08) 55%, transparent 75%)'
+                    : 'rgba(255,255,255,0.04)'"
+                  [style.border-color]="selectedNetwork() === net.id ? 'rgba(20,184,166,0.40)' : 'rgba(255,255,255,0.08)'"
+                  [style.box-shadow]="selectedNetwork() === net.id ? '0 0 20px rgba(20,184,166,0.15), 0 0 40px rgba(20,184,166,0.08)' : 'none'">
+                  <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors duration-300"
+                    [style.background]="selectedNetwork() === net.id ? 'rgba(20,184,166,0.20)' : 'rgba(255,255,255,0.05)'">
+                    @if (net.id === 'TRC20') {
+                      <img src="wallet/crypto/usdt-trc20.PNG" alt="TRC20" class="w-6 h-6 object-contain" />
+                    } @else {
+                      <img src="wallet/crypto/usdt-bep20.PNG" alt="BEP20" class="w-6 h-6 object-contain" />
+                    }
+                  </div>
+                  <span class="text-[9px] font-black uppercase tracking-widest leading-tight text-center transition-colors duration-300"
+                    [style.color]="selectedNetwork() === net.id ? 'rgb(204,251,241)' : 'rgba(255,255,255,0.35)'">
+                    {{ net.label }}
+                  </span>
+                  @if (selectedNetwork() === net.id) {
                     <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_6px_rgba(20,184,166,0.8)]"></span>
                   }
                 </button>
@@ -234,6 +266,12 @@ export class DepositFormComponent {
 
   amount = signal(0);
   selectedChannel = signal<string>('Nequi-1');
+  selectedNetwork = signal<string>('TRC20');
+
+  readonly usdtNetworks = [
+    { id: 'TRC20', label: 'USDT (TRC20)' },
+    { id: 'BEP20', label: 'USDT (BEP20)' }
+  ];
 
   readonly paymentChannels = computed(() => {
     const m = this.selectedMethod();
@@ -265,6 +303,7 @@ export class DepositFormComponent {
   selectedMethod = computed(() => this.currency() || 'NEQUI');
   isNequi = computed(() => this.selectedMethod() === 'Nequi');
   isDaviplata = computed(() => this.selectedMethod() === 'Daviplata');
+  isUSDT = computed(() => this.selectedMethod() === 'USDT');
   isCrypto = computed(() => ['USDT', 'BTC', 'TRX', 'BNB'].includes(this.selectedMethod()));
 
    resolvedQrImage = computed(() => {
