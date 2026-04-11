@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed, input } f
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { SuccessOverlayComponent } from './success-overlay.component';
 import { CryptoDepositModalComponent } from '../../crypto-deposit-modal.component';
 import { PaymentScreenComponent } from '../payment-screen.component';
@@ -32,12 +33,6 @@ import { PaymentScreenComponent } from '../payment-screen.component';
           [logo]="methodLogo()!"
           (close)="showCryptoModal.set(false)"
         />
-      }
-
-      @if (transactionMessage() && !showSuccess()) {
-        <div class="fixed top-24 left-1/2 -translate-x-1/2 z-[200] lg-module-card px-6 py-4 border-red-500/20 bg-red-500/[0.025] text-red-400 text-[11px] font-black uppercase tracking-widest animate-shake whitespace-nowrap">
-          {{ transactionMessage() }}
-        </div>
       }
 
       <header class="w-full relative z-10 pt-safe-top mt-8 px-6 flex justify-between items-center py-6 mb-4">
@@ -232,6 +227,7 @@ import { PaymentScreenComponent } from '../payment-screen.component';
 })
 export class DepositFormComponent {
   private router = inject(Router);
+  private errorHandler = inject(ErrorHandlerService);
 
   currency = input.required<string>();
   network = input<string>('');
@@ -258,8 +254,7 @@ export class DepositFormComponent {
         case 'Paypal': return [10, 25, 50, 80, 150, 400];
        default: return [30000, 50000, 100000, 200000, 300000, 500000];
      }
-   });
-  transactionMessage = signal('');
+    });
   showSuccess = signal(false);
   showCryptoModal = signal(false);
   showPaymentScreen = signal(false);
@@ -310,18 +305,18 @@ export class DepositFormComponent {
 
   goBack() { this.router.navigate(['/wallet']); }
 
+  minAmount = computed(() => this.presetValues()[0]);
+
   async onDeposit() {
-    if (this.amount() < 30000 && !['USDT', 'BTC', 'TRX', 'BNB'].includes(this.selectedMethod())) {
-      this.transactionMessage.set('Monto mínimo: $30,000');
-      setTimeout(() => this.transactionMessage.set(''), 3000);
+    if (this.amount() < this.minAmount()) {
+      this.errorHandler.showToast(`Monto mínimo: ${this.minAmount().toLocaleString('es-CO')}`, 'error');
       return;
     }
 
     if (['USDT', 'BTC', 'TRX', 'BNB'].includes(this.selectedMethod())) {
       const envAddress = (environment as any).cryptoDepositAddress ?? '';
       if (!envAddress) {
-        this.transactionMessage.set('Crypto deposit not configured. Contact support.');
-        setTimeout(() => this.transactionMessage.set(''), 4000);
+        this.errorHandler.showToast('Crypto deposit not configured. Contact support.', 'error');
         return;
       }
       this.cryptoAddress.set(envAddress);
