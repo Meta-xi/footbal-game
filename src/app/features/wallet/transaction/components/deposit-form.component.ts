@@ -309,7 +309,8 @@ export class DepositFormComponent {
 
   async onDeposit() {
     if (this.amount() < this.minAmount()) {
-      this.errorHandler.showToast(`Monto mínimo: ${this.minAmount().toLocaleString('es-CO')}`, 'error');
+      const amount = this.isCrypto() ? this.minAmount() : this.minAmount().toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
+      this.errorHandler.showToast(`Monto mínimo ${amount} ${this.selectedMethod()}`, 'error');
       return;
     }
 
