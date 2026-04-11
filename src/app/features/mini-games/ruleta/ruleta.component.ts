@@ -52,11 +52,11 @@ interface Prize {
               [style.transform]="prizeTransform(i)"
             >
               <div class="prize-content">
-<img
+                <img
                    [ngSrc]="prize.iconPath"
                    [alt]="prize.amount"
-                   width="40"
-                   height="40"
+                   width="48"
+                   height="48"
                    class="prize-icon"
                  />
                 <span class="prize-text">{{ prize.amount }}</span>
@@ -232,7 +232,7 @@ interface Prize {
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding-top: 48px;
+      padding-top: 42px;
       pointer-events: none;
       transform-origin: center center;
     }
@@ -247,15 +247,15 @@ interface Prize {
     }
 
     .prize-icon {
-      width: 28px;
-      height: 28px;
+      width: 36px;
+      height: 36px;
       object-fit: contain;
       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
       z-index: 2;
     }
 
     .prize-text {
-      font-size: 10px;
+      font-size: 11px;
       line-height: 1;
       white-space: nowrap;
       font-weight: 900;
