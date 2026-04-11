@@ -130,13 +130,6 @@ import { AuthService } from '../../core/services/auth.service';
               </div>
 
               <div class="space-y-2">
-                <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Código de Referido (Opcional)</label>
-                <input type="text" [(ngModel)]="refId" name="reg-refid"
-                       class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                       placeholder="Ingresa tu código de referido">
-              </div>
-
-              <div class="space-y-2">
                 <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Contraseña</label>
                 <input type="password" [(ngModel)]="pass" name="reg-pass"
                        class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
@@ -169,8 +162,7 @@ export class LoginComponent {
   name = '';
   phone = '';
   pass = '';
-  refId = '';
-  countryPrefix = '+54'; // Default: Argentina
+  countryPrefix = '+57'; // Default: Colombia
   isLoading = signal(false);
   showPassword = signal(false);
   error = signal<string | null>(null);

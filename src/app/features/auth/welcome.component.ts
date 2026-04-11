@@ -86,11 +86,11 @@ import { Router } from '@angular/router';
           <button
             (click)="goToRegister()"
             class="group relative w-full py-2.5 md:py-2.5 rounded-xl overflow-hidden transition-all duration-300 active:scale-[0.98] cursor-pointer"
-            style="background: linear-gradient(to right, rgba(16,185,129,0.45) 0%, rgba(16,185,129,0.25) 40%, transparent 75%); border: 1px solid rgba(16,185,129,0.55);"
+            style="background: linear-gradient(to right, rgba(0,212,255,0.45) 0%, rgba(0,212,255,0.20) 40%, transparent 75%); border: 1px solid rgba(0,212,255,0.55);"
           >
             <!-- Hover glow effect -->
             <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                 style="background: linear-gradient(to right, rgba(16,185,129,0.55) 0%, rgba(16,185,129,0.30) 40%, transparent 70%);"></div>
+                 style="background: linear-gradient(to right, rgba(0,212,255,0.55) 0%, rgba(0,212,255,0.30) 40%, transparent 70%);"></div>
             
             <!-- Shine sweep effect -->
             <div class="absolute inset-0 opacity-0 group-hover:opacity-100 overflow-hidden">
@@ -110,11 +110,11 @@ import { Router } from '@angular/router';
           <button
             (click)="goToLogin()"
             class="group relative w-full py-2 md:py-2 rounded-xl overflow-hidden transition-all duration-300 active:scale-[0.98] cursor-pointer"
-            style="background: linear-gradient(to right, rgba(245,158,11,0.40) 0%, rgba(245,158,11,0.20) 40%, transparent 75%); border: 1px solid rgba(245,158,11,0.50);"
+            style="background: linear-gradient(to right, rgba(255,208,96,0.45) 0%, rgba(255,208,96,0.20) 40%, transparent 75%); border: 1px solid rgba(255,208,96,0.55);"
           >
             <!-- Hover glow effect -->
             <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                 style="background: linear-gradient(to right, rgba(245,158,11,0.50) 0%, rgba(245,158,11,0.25) 40%, transparent 70%);"></div>
+                 style="background: linear-gradient(to right, rgba(255,208,96,0.55) 0%, rgba(255,208,96,0.30) 40%, transparent 70%);"></div>
             
             <!-- Shine sweep effect -->
             <div class="absolute inset-0 opacity-0 group-hover:opacity-100 overflow-hidden">
@@ -133,11 +133,11 @@ import { Router } from '@angular/router';
           <button
             (click)="goToGuest()"
             class="group relative w-full py-2 md:py-2 rounded-xl overflow-hidden transition-all duration-300 active:scale-[0.98] cursor-pointer"
-            style="background: linear-gradient(to right, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.06) 40%, transparent 75%); border: 1px solid rgba(255,255,255,0.20);"
+            style="background: linear-gradient(to right, rgba(0,212,255,0.12) 0%, rgba(0,212,255,0.05) 40%, transparent 75%); border: 1px solid rgba(0,212,255,0.15);"
           >
             <!-- Hover glow effect -->
             <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                 style="background: linear-gradient(to right, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.08) 40%, transparent 70%);"></div>
+                 style="background: linear-gradient(to right, rgba(0,212,255,0.18) 0%, rgba(0,212,255,0.08) 40%, transparent 70%);"></div>
             
             <!-- Shine sweep effect -->
             <div class="absolute inset-0 opacity-0 group-hover:opacity-100 overflow-hidden">
