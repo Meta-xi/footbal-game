@@ -10,6 +10,7 @@ interface Ticket {
   value: string;
   colorClass: string;
   icon: string;
+  iconPath: string;
   weight: number;
 }
 
@@ -40,7 +41,7 @@ interface Ticket {
               <div class="ticket-wrapper">
                 <div class="ticket effect-3d" [class.ticket-teal]="ticket.colorClass === 'ticket-teal'" [class.ticket-blue]="ticket.colorClass === 'ticket-blue'" [class.ticket-pink]="ticket.colorClass === 'ticket-pink'" [class.ticket-gold]="ticket.colorClass === 'ticket-gold'">
                   <div class="ticket-inner">
-                    <span class="icon">{{ ticket.icon }}</span>
+                    <img [ngSrc]="ticket.iconPath" [alt]="ticket.value" class="ticket-icon" width="32" height="32">
                     <span class="value">{{ ticket.value }}</span>
                   </div>
                 </div>
@@ -163,6 +164,7 @@ interface Ticket {
     }
 
     .ticket-inner .icon { font-size: 1.2rem; margin-bottom: 2px; }
+    .ticket-inner .ticket-icon { width: 28px; height: 28px; object-fit: contain; margin-bottom: 2px; }
     .ticket-inner .value { font-size: 1.8rem; letter-spacing: 1px; }
 
     .ticket-teal { background: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%); }
@@ -255,13 +257,13 @@ export class TicketRouletteComponent {
   visibleTickets = 5;
 
   baseTickets: Ticket[] = [
-    { id: 1, value: "500 USD", colorClass: 'ticket-teal', icon: '💵', weight: 0 },    // Nunca sale
-    { id: 2, value: "10,000 COP", colorClass: 'ticket-blue', icon: '🪙', weight: 0 }, // Nunca sale
-    { id: 3, value: "100 COP", colorClass: 'ticket-blue', icon: '🪙', weight: 2 },
-    { id: 4, value: "20 COP", colorClass: 'ticket-pink', icon: '🪙', weight: 20 },
-    { id: 5, value: "10 COP", colorClass: 'ticket-gold', icon: '🪙', weight: 30 },
-    { id: 6, value: "50,000 COP", colorClass: 'ticket-pink', icon: '🪙', weight: 0 }, // Nunca sale
-    { id: 7, value: "5 Energía  ", colorClass: 'ticket-teal', icon: '⚡', weight: 30 },
+    { id: 1, value: "500 USD", colorClass: 'ticket-teal', icon: '💵', iconPath: 'mini-games/tickets/usdIcon.webp', weight: 0 },    // Nunca sale
+    { id: 2, value: "10,000 COP", colorClass: 'ticket-blue', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 0 }, // Nunca sale
+    { id: 3, value: "100 COP", colorClass: 'ticket-blue', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 2 },
+    { id: 4, value: "20 COP", colorClass: 'ticket-pink', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 20 },
+    { id: 5, value: "10 COP", colorClass: 'ticket-gold', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 30 },
+    { id: 6, value: "50,000 COP", colorClass: 'ticket-pink', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 0 }, // Nunca sale
+    { id: 7, value: "5 Energía  ", colorClass: 'ticket-teal', icon: '⚡', iconPath: 'game/energy/thunder.webp', weight: 30 },
   ];
 
   audioClick = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');

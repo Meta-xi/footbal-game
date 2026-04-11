@@ -9,7 +9,7 @@ import { GlassSheetComponent } from '../../../../../shared/ui/glass-sheet/glass-
 
 // Las 3 skills siempre son las mismas
 const SKILLS = [
-    { id: 1, name: 'Energy Plus', description: '+50 energía instantánea', type: 'instant', icon: 'game/energy/thunder.png' },
+    { id: 1, name: 'Energy Plus', description: '+50 energía instantánea', type: 'instant', icon: 'game/energy/thunder.webp' },
     { id: 4, name: 'Max Energy', description: '+100 energía máxima permanente', type: 'permanent', icon: 'game/energy/aumento.png' },
     { id: 5, name: 'Tap Power', description: '+1 valor por toque permanente', type: 'permanent', icon: 'game/energy/touch.png' },
 ];
@@ -354,11 +354,11 @@ export class BoostComponent implements OnInit {
 
     getBoostIcon(id: number): string {
         const icons: Record<number, string> = {
-            1: 'game/energy/thunder.png',
+            1: 'game/energy/thunder.webp',
             4: 'game/energy/aumento.png',
             5: 'game/energy/touch.png',
         };
-        return icons[id] || 'game/energy/thunder.png';
+        return icons[id] || 'game/energy/thunder.webp';
     }
 
     goBack(): void {

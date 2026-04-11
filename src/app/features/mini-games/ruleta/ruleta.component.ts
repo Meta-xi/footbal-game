@@ -373,7 +373,7 @@ export class RuletaComponent implements OnDestroy {
     { amount: '100 COP', icon: 'shared/balance/coin.webp', neverAward: false },
     { amount: '30 COP', icon: 'shared/balance/coin.webp', neverAward: false },
     { amount: '5,000 COP', icon: 'shared/balance/coin.webp', neverAward: true },
-    { amount: '50 Energía', icon: 'game/energy/thunder.png', neverAward: false },
+    { amount: '50 Energía', icon: 'game/energy/thunder.webp', neverAward: false },
     { amount: '150 COP', icon: 'shared/balance/coin.webp', neverAward: false },
     { amount: '6,000 COP', icon: 'shared/balance/coin.webp', neverAward: true },
     { amount: '30 Toques', icon: 'game/balls/ball-lv1.webp', neverAward: false }
