@@ -71,10 +71,10 @@ import { AuthService } from '../../core/services/auth.service';
           @if (activeTab() === 'login') {
             <form (ngSubmit)="onLogin()" class="space-y-3">
               <div class="space-y-2">
-                 <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Email o Número</label>
-                <input type="text" [(ngModel)]="identifier" name="ident" 
+                 <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Nombre de Usuario</label>
+                <input type="text" [(ngModel)]="username" name="ident" 
                        class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                       placeholder="usuario@email.com">
+                       placeholder="Tu nombre de usuario">
               </div>
 
               <div class="space-y-2">
@@ -99,58 +99,37 @@ import { AuthService } from '../../core/services/auth.service';
           } @else {
             <form (ngSubmit)="onRegister()" class="space-y-3">
               <div class="space-y-2">
-                <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Nombre</label>
-                <input type="text" [(ngModel)]="name" name="reg-name" 
+                <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Nombre de Usuario</label>
+                <input type="text" [(ngModel)]="name" name="reg-username" 
                        class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                       placeholder="Tu nombre">
+                       placeholder="Tu nombre de usuario">
               </div>
 
               <div class="space-y-2">
-                <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Correo electrónico</label>
-                <input type="email" [(ngModel)]="email" name="reg-email" 
+                <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Teléfono</label>
+                <input type="tel" [(ngModel)]="phone" name="reg-phone" 
                        class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                       placeholder="tu.correo@ejemplo.com">
+                       placeholder="Tu número de teléfono">
               </div>
 
               <div class="space-y-2">
-                <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Número telefónico</label>
-                <input type="tel" [(ngModel)]="phoneNumber" name="reg-phone" 
+                <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Código de Referido (Opcional)</label>
+                <input type="text" [(ngModel)]="refId" name="reg-refid"
                        class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                       placeholder="+XX YYY ZZZZ">
+                       placeholder="Ingresa tu código de referido">
               </div>
 
               <div class="space-y-2">
                 <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Contraseña</label>
                 <input type="password" [(ngModel)]="pass" name="reg-pass"
                        class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                       placeholder="Mínimo 8 caracteres">
+                       placeholder="Tu contraseña">
               </div>
 
-              <div class="space-y-2">
-                <label class="text-[8px] font-bold text-white/30 uppercase tracking-wider ml-1">Repetir Contraseña</label>
-                <input type="password" [(ngModel)]="repeatPass" name="reg-repeat-pass"
-                       class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                       placeholder="Repite tu contraseña">
-              </div>
-
-              <div class="flex items-center gap-3">
-                <input type="checkbox" id="terms" [ngModel]="terms()" (ngModelChange)="terms.set($event)" name="terms" class="hidden" />
-                <label for="terms" class="flex items-center gap-3 cursor-pointer select-none">
-                  <div [class]="checkboxClass()">
-                    @if (terms()) {
-                    <svg class="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                    </svg>
-                    }
-                  </div>
-                  <span class="text-[11px] text-white/70 hover:text-white transition-colors">Acepto los términos</span>
-                </label>
-              </div>
-
-               <button type="submit" [disabled]="isLoading() || !terms()" 
-                       class="w-full lg-btn-primary py-2.5 px-4 text-sm uppercase tracking-wider active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed text-glow-cyan">
-                 {{ isLoading() ? 'Creando...' : 'Crear cuenta' }}
-               </button>
+               <button type="submit" [disabled]="isLoading()" 
+                         class="w-full lg-btn-primary py-2.5 px-4 text-sm uppercase tracking-wider active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed text-glow-cyan">
+                   {{ isLoading() ? 'Creando...' : 'Crear cuenta' }}
+                 </button>
             </form>
           }
          </div>
@@ -169,23 +148,14 @@ export class LoginComponent {
   private route = inject(ActivatedRoute);
 
   activeTab = signal<'login' | 'register'>('login');
-  identifier = '';
+  username = '';
   name = '';
-  email = '';
-  phoneNumber = '';
+  phone = '';
   pass = '';
-  repeatPass = '';
-  terms = signal(false);
+  refId = '';
   isLoading = signal(false);
   showPassword = signal(false);
   error = signal<string | null>(null);
-
-  checkboxClass = computed(() => {
-    const base = 'relative w-5 h-5 rounded-lg border-2 transition-all duration-200 flex items-center justify-center';
-    const state = this.terms() ? 'border-emerald-400 bg-emerald-600/20' : 'border-white/20 bg-white/5';
-    const hover = 'hover:border-white/40';
-    return `${base} ${state} ${hover}`;
-  });
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -196,14 +166,14 @@ export class LoginComponent {
   }
 
   async onLogin() {
-    if (!this.identifier || !this.pass) {
+    if (!this.username || !this.pass) {
       this.error.set('Campos requeridos vacíos');
       return;
     }
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      const result = await this.authService.login(this.identifier, this.pass);
+      const result = await this.authService.login(this.username, this.pass);
       if (result.success) {
         this.router.navigate(['/main']);
       } else {
@@ -217,26 +187,23 @@ export class LoginComponent {
   }
 
   async onRegister() {
-    if (!this.name || !this.email || !this.phoneNumber || !this.pass || !this.repeatPass) {
+    // Validate required fields: name (username), phone, pass (password)
+    if (!this.name || !this.phone || !this.pass) {
       this.error.set('Todos los campos son requeridos');
       return;
     }
-    if (this.pass !== this.repeatPass) {
-      this.error.set('Las contraseñas no coinciden');
-      return;
-    }
-    if (!this.terms()) {
-      this.error.set('Acepta los términos');
-      return;
-    }
+
     this.isLoading.set(true);
     this.error.set(null);
     try {
+      // refId is optional, so we can pass null or undefined if not provided by a field
+      const refId = undefined; // Or null, depending on backend preference for optional unset values
+
       const result = await this.authService.register(
-        this.email, // Usamos el email como identificador principal
-        this.pass,
-        this.name, // Nombre de usuario
-        this.phoneNumber // Número de teléfono
+        this.name, // username
+        this.pass, // password
+        this.phone, // phone
+        refId // refId (optional)
       );
       if (result.success) {
         this.router.navigate(['/main']);
