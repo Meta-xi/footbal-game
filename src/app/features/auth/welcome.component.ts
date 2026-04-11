@@ -80,27 +80,75 @@ import { Router } from '@angular/router';
         </div>
 
         <!-- Bottom Section - CTA Buttons -->
-        <div class="w-full flex flex-col gap-2.5 animate-fade-in-up animation-delay-400 max-w-md mb-6 md:mb-8 px-1">
+        <div class="w-full flex flex-col gap-2 animate-fade-in-up animation-delay-400 max-w-md mb-5 md:mb-6 px-1">
+          
+          <!-- Primary CTA - Registrate y Juega -->
           <button
             (click)="goToRegister()"
-            class="w-full py-2.5 md:py-3 lg-btn-primary text-sm md:text-base"
+            class="group relative w-full py-2.5 md:py-2.5 rounded-xl overflow-hidden transition-all duration-300 active:scale-[0.98] cursor-pointer"
+            style="background: linear-gradient(to right, rgba(16,185,129,0.45) 0%, rgba(16,185,129,0.25) 40%, transparent 75%); border: 1px solid rgba(16,185,129,0.55);"
           >
-            Registrate y Juega
+            <!-- Hover glow effect -->
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                 style="background: linear-gradient(to right, rgba(16,185,129,0.55) 0%, rgba(16,185,129,0.30) 40%, transparent 70%);"></div>
+            
+            <!-- Shine sweep effect -->
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 overflow-hidden">
+              <div class="absolute -top-full left-0 w-[150%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full duration-700 ease-out skew-x-12"></div>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative flex items-center justify-center gap-2">
+              <span class="text-sm md:text-sm font-bold text-emerald-100 tracking-wide drop-shadow-lg">Registrate y Juega</span>
+              <svg class="w-4 h-4 text-emerald-300 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+              </svg>
+            </div>
           </button>
 
+          <!-- Secondary CTA - Tengo una cuenta -->
           <button
             (click)="goToLogin()"
-            class="w-full py-2.5 md:py-3 lg-btn-outline text-sm md:text-base"
+            class="group relative w-full py-2 md:py-2 rounded-xl overflow-hidden transition-all duration-300 active:scale-[0.98] cursor-pointer"
+            style="background: linear-gradient(to right, rgba(245,158,11,0.40) 0%, rgba(245,158,11,0.20) 40%, transparent 75%); border: 1px solid rgba(245,158,11,0.50);"
           >
-            Tengo una cuenta
+            <!-- Hover glow effect -->
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                 style="background: linear-gradient(to right, rgba(245,158,11,0.50) 0%, rgba(245,158,11,0.25) 40%, transparent 70%);"></div>
+            
+            <!-- Shine sweep effect -->
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 overflow-hidden">
+              <div class="absolute -top-full left-0 w-[150%] h-full bg-gradient-to-r from-transparent via-white/15 to-transparent transform -translate-x-full group-hover:translate-x-full duration-700 ease-out skew-x-12"></div>
+            </div>
+            
+            <div class="relative flex items-center justify-center gap-2">
+              <span class="text-xs md:text-sm font-semibold text-amber-100 drop-shadow-md">Tengo una cuenta</span>
+              <svg class="w-3.5 h-3.5 text-amber-300 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
           </button>
 
+          <!-- Ghost CTA - Entrar como invitado -->
           <button
             (click)="goToGuest()"
-            class="w-full py-2.5 md:py-3 lg-btn-ghost text-sm md:text-base"
+            class="group relative w-full py-2 md:py-2 rounded-xl overflow-hidden transition-all duration-300 active:scale-[0.98] cursor-pointer"
+            style="background: linear-gradient(to right, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.06) 40%, transparent 75%); border: 1px solid rgba(255,255,255,0.20);"
           >
-            Entrar como invitado
+            <!-- Hover glow effect -->
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                 style="background: linear-gradient(to right, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.08) 40%, transparent 70%);"></div>
+            
+            <!-- Shine sweep effect -->
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 overflow-hidden">
+              <div class="absolute -top-full left-0 w-[150%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent transform -translate-x-full group-hover:translate-x-full duration-700 ease-out skew-x-12"></div>
+            </div>
+            
+            <div class="relative flex items-center justify-center gap-2">
+              <span class="text-xs md:text-sm font-medium text-white/70 group-hover:text-white/95 transition-colors drop-shadow">Entrar como invitado</span>
+            </div>
           </button>
+          
         </div>
       </div>
     </div>

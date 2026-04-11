@@ -14,8 +14,12 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { GameService } from '../../../core/services/game.service';
 
 interface Prize {
+  id: number;
   amount: string;
+  colorClass: string;
   icon: string;
+  iconPath: string;
+  weight: number;
   neverAward?: boolean;
 }
 
@@ -60,13 +64,13 @@ interface Prize {
               [style.transform]="prizeTransform(i)"
             >
               <div class="prize-content" [style.transform]="prizeCounterRotate(i)">
-                <img
-                  [ngSrc]="prize.icon"
-                  [alt]="prize.amount"
-                  width="40"
-                  height="40"
-                  class="prize-icon"
-                />
+<img
+                   [ngSrc]="prize.iconPath"
+                   [alt]="prize.amount"
+                   width="40"
+                   height="40"
+                   class="prize-icon"
+                 />
                 <span class="prize-text">{{ prize.amount }}</span>
               </div>
             </div>
@@ -369,14 +373,14 @@ export class RuletaComponent implements OnDestroy {
   private readonly spinEndAudio = this.createAudio('/sounds/010707105_prev.mp3', 0.6);
 
   readonly prizes: Prize[] = [
-    { amount: '10,000 COP', icon: 'shared/balance/coin.webp', neverAward: true },
-    { amount: '100 COP', icon: 'shared/balance/coin.webp', neverAward: false },
-    { amount: '30 COP', icon: 'shared/balance/coin.webp', neverAward: false },
-    { amount: '5,000 COP', icon: 'shared/balance/coin.webp', neverAward: true },
-    { amount: '50 Energía', icon: 'game/energy/thunder.webp', neverAward: false },
-    { amount: '150 COP', icon: 'shared/balance/coin.webp', neverAward: false },
-    { amount: '6,000 COP', icon: 'shared/balance/coin.webp', neverAward: true },
-    { amount: '30 Toques', icon: 'game/balls/ball-lv1.webp', neverAward: false }
+    { id: 1, amount: '10,000 COP', colorClass: 'ticket-blue', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 0, neverAward: true },
+    { id: 2, amount: '100 COP', colorClass: 'ticket-blue', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 2, neverAward: false },
+    { id: 3, amount: '30 COP', colorClass: 'ticket-blue', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 5, neverAward: false },
+    { id: 4, amount: '5,000 COP', colorClass: 'ticket-pink', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 0, neverAward: true },
+    { id: 5, amount: '50 Energía', colorClass: 'ticket-teal', icon: '⚡', iconPath: 'game/energy/thunder.webp', weight: 15, neverAward: false },
+    { id: 6, amount: '150 COP', colorClass: 'ticket-gold', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 8, neverAward: false },
+    { id: 7, amount: '6,000 COP', colorClass: 'ticket-pink', icon: '🪙', iconPath: 'mini-games/tickets/coin-fromt.webp', weight: 0, neverAward: true },
+    { id: 8, amount: '30 Toques', colorClass: 'ticket-teal', icon: '✋', iconPath: 'game/energy/touch.webp', weight: 10, neverAward: false }
   ];
   readonly lights = Array.from({ length: 24 }, (_, index) => index);
   readonly isSpinning = signal(false);
