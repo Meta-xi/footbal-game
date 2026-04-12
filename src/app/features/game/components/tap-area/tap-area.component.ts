@@ -121,7 +121,7 @@ export class TapAreaComponent {
     // SEGURIDAD: Verificar energía ANTES de cualquier acción
     const energia = this.energySvc.energy() ?? 0;
     if (energia <= 0) {
-      this.errorHandler.showErrorToast('⚡ Sin energía');
+      this.errorHandler.showToast('⚡ Sin energía', 'error');
       return;
     }
 
