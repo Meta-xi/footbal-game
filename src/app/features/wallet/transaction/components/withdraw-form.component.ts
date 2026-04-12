@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed, input, vi
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserStatusService } from '../../../../core/services/user-status.service';
-import { WalletService, FinanceCoin, FincanceNetworks } from '../../../../core/services/wallet.service';
+import { WalletService, FinanceMethod, FincanceNetworks } from '../../../../core/services/wallet.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SuccessOverlayComponent } from './success-overlay.component';
 import { BalanceComponent } from '../../../../shared/components/balance/balance.component';
@@ -167,12 +167,12 @@ export class WithdrawFormComponent {
     return logoMap[this.currency()] || null;
   });
 
-  private coinMap: Record<string, FinanceCoin> = {
-    'Nequi': FinanceCoin.COP, 'Daviplata': FinanceCoin.COP,
-    'Plin': FinanceCoin.COP, 'Yape': FinanceCoin.COP,
-    'Paypal': FinanceCoin.COP,
-    'USDT': FinanceCoin.USDT, 'TRX': FinanceCoin.TRX,
-    'BNB': FinanceCoin.BNB, 'BTC': FinanceCoin.BTC,
+  private methodMap: Record<string, FinanceMethod> = {
+    'Nequi': FinanceMethod.COP, 'Daviplata': FinanceMethod.COP,
+    'Plin': FinanceMethod.COP, 'Yape': FinanceMethod.COP,
+    'Paypal': FinanceMethod.COP,
+    'USDT': FinanceMethod.USDT, 'TRX': FinanceMethod.TRX,
+    'BNB': FinanceMethod.BNB, 'BTC': FinanceMethod.BTC,
   };
 
   private networkMap: Record<string, FincanceNetworks> = {
@@ -246,7 +246,7 @@ export class WithdrawFormComponent {
 
     const result = await this.walletService.addWithdrawal({
       amountCOP: amount,
-      selectedCoin: this.coinMap[this.currency()] ?? FinanceCoin.COP,
+      selectedCoin: this.methodMap[this.currency()] ?? FinanceMethod.COP,
       selectedNetwork: this.networkMap[this.currency()] ?? FincanceNetworks.Nequi,
       token,
       uid: user.id,

@@ -20,7 +20,7 @@ export enum TransactionReason {
   REFUND = 9,
 }
 
-export enum FinanceCoin {
+export enum FinanceMethod {
   COP = 1,
   USDT = 2,
   TRX = 3,
@@ -41,7 +41,7 @@ export enum FincanceNetworks {
 
 export interface WithdrawalRequest {
   amountCOP: number;
-  selectedCoin: FinanceCoin;
+  selectedCoin: FinanceMethod;
   selectedNetwork: FincanceNetworks;
   timestamp: number;
   token: string;
@@ -51,7 +51,7 @@ export interface WithdrawalRequest {
 
 export interface DepositRequest {
   amountUSD: number;
-  method: FinanceCoin;
+  method: FinanceMethod;
   timestamp: number;
   token: string;
   uid: number;
@@ -68,9 +68,9 @@ export class WalletService {
     return environment.apiBaseUrl;
   }
 
-  async addWithdrawal(params: {
+async addWithdrawal(params: {
     amountCOP: number;
-    selectedCoin: FinanceCoin;
+    selectedCoin: FinanceMethod;
     selectedNetwork: FincanceNetworks;
     token: string;
     uid: number;
@@ -114,7 +114,7 @@ export class WalletService {
 
   async addDeposit(params: {
     amountUSD: number;
-    method: FinanceCoin;
+    method: FinanceMethod;
     token: string;
     uid: number;
     transactionId: string;
