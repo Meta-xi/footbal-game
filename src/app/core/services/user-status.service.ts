@@ -108,6 +108,9 @@ export class UserStatusService {
   }
 
   async loadUserStatus(pendingTaps?: number): Promise<void> {
+    // Evitar llamadas concurrentes
+    if (this.isLoading()) return;
+    
     this.isLoading.set(true);
     this.error.set(null);
 

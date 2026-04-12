@@ -95,34 +95,28 @@ export class TapService {
   // Method to manually flush pending taps (called from NavigationSyncService)
   async flushPendingTaps(): Promise<void> {
     // Proteger contra carrera: si ya está flusheando o pasaron menos de 2s, salir
-    if (this.isFlushing && Date.now() - this.lastFlushTime < 2000) return;
-    this.isFlushing = true;
-    this.lastFlushTime = Date.now();
+    if (this.isFlushing) return;
+    if (Date.now() - this.lastFlushTime < 2000) return;
+    
+    const pendingCount = this.pendingTaps();
+    if (pendingCount === 0) return;
 
     const user = this.authService.user();
     const userId = user ? (user.id || user.Id) : null;
     if (!userId) {
       console.error('User not logged in', user);
-      this.isFlushing = false;
       return;
     }
 
-    const pendingCount = this.pendingTaps();
-    if (pendingCount === 0) {
-      this.isFlushing = false;
-      return;
-    }
-
-    // Reset pending taps immediately to prevent race condition
-    localStorage.setItem(this.PENDING_TAPS_KEY, '0');
-    this.pendingTaps.set(0);
+    // Iniciar flush - marcar como en progreso
+    this.isFlushing = true;
+    this.lastFlushTime = Date.now();
 
     const timestamp = Math.floor(Date.now() / 1000);
     const payload = `${userId}:${timestamp}:${this.secretKey}`;
     
     // AUDITORÍA: Registrar acción financiera antes del call HTTP
     console.log(`[AUDIT] addTooks:`, { userId, amount: pendingCount, timestamp });
-    localStorage.setItem(`audit_log_${Date.now()}`, JSON.stringify({ action: 'addTooks', params: { userId, amount: pendingCount, timestamp }, time: Date.now() }));
     
     try {
       const token = await this.encryptionService.sha256(payload);
@@ -133,21 +127,22 @@ export class TapService {
       );
       console.log(`Sent ${pendingCount} taps to API`);
 
+      // Solo resetear DESPUÉS de exitoso respuesta
+      this.pendingTaps.set(0);
+      localStorage.setItem(this.PENDING_TAPS_KEY, '0');
+
       // Refresh user status to update wallet
       await this.userStatusService.loadUserStatus();
-      this.isFlushing = false;
     } catch (error) {
-      // Restore pending taps on failure so they can be retried
-      this.pendingTaps.update(current => current + pendingCount);
-      localStorage.setItem(this.PENDING_TAPS_KEY, this.pendingTaps().toString());
-      this.isFlushing = false;
-
+      // NO restaurar aquí porque pendingTaps nunca se reseteó
       const httpError = error as HttpErrorResponse;
       if (httpError?.error && typeof httpError.error === 'object' && 'message' in httpError.error) {
         console.error('AddTooks failed:', (httpError.error as { message: string }).message);
       } else {
         console.error('AddTooks failed:', error);
       }
+    } finally {
+      this.isFlushing = false;
     }
   }
 

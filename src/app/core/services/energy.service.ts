@@ -85,7 +85,10 @@ export class EnergyService {
       }
     } catch (error) {
       console.error('EnergyService: Failed to load maxEnergy', error);
-      this._maxEnergy.set(500);
+      // Solo set fallback si es el valor inicial (0)
+      if (this._maxEnergy() === 0) {
+        this._maxEnergy.set(500);
+      }
     } finally {
       this._isLoadingMaxEnergy = false;
     }
@@ -115,7 +118,10 @@ export class EnergyService {
       }
     } catch (error) {
       console.error('EnergyService: Failed to load tapPower', error);
-      this._tapPower.set(1);
+      // Solo set fallback si es el valor inicial (0)
+      if (this._tapPower() === 0) {
+        this._tapPower.set(1);
+      }
     } finally {
       this._isLoadingTapPower = false;
     }
