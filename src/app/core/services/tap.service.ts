@@ -162,4 +162,9 @@ export class TapService {
   getTotalTaps(): number {
     return this.totalTaps();
   }
+
+  // Getter público para pending taps (usado por NavigationSyncService)
+  pendingTapsCount(): number {
+    return this.pendingTaps();
+  }
 }

@@ -56,21 +56,20 @@ export class NavigationSyncService {
 
     this.lastSyncTime = now;
 
-    // Get pending taps from localStorage (same key as TapService)
-    const storedPending = localStorage.getItem('pendingTaps');
-    const pendingCount = storedPending ? parseInt(storedPending, 10) : 0;
+    // Get pending taps directly from TapService signal (not localStorage)
+    const pendingCount = this.tapService.pendingTapsCount();
+    console.log(`NavigationSync: Pending taps count: ${pendingCount}`);
 
     // Only sync if there are pending taps
     if (pendingCount > 0) {
       console.log(`NavigationSync: Syncing ${pendingCount} pending taps on route change`);
       
-      // Paso 1: Enviar pendingTaps a /Game/addTooks
+      // Flush pending taps to backend
       await this.tapService.flushPendingTaps();
       
       console.log('NavigationSync: Pending taps sent, sync complete');
     } else {
       console.log('NavigationSync: No pending taps to sync, skipping');
-      // No se dispara ninguna actualización si no hay pendingTaps
     }
   }
 }
