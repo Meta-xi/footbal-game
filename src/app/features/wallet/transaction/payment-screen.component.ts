@@ -165,7 +165,7 @@ export class PaymentScreenComponent {
 
   currencyLabel = computed(() => this.currency() === 'Paypal' ? 'USD' : 'COP');
 
-  private coinMap: Record<string, FinanceCoin> = {
+   private methodMap: Record<string, FinanceCoin> = {
     'Nequi': FinanceCoin.COP, 'Daviplata': FinanceCoin.COP,
     'Plin': FinanceCoin.COP, 'Yape': FinanceCoin.COP,
     'Paypal': FinanceCoin.COP,
@@ -210,13 +210,14 @@ export class PaymentScreenComponent {
      }
 
      this.isProcessing.set(true);
-     this.errorHandler.showToast('Procesando depósito...', 'info');
+     this.errorHandler.showToast('Depósito confirmado y procesándose', 'success');
 
     const result = await this.walletService.addDeposit({
       amountUSD: this.amount(),
-      coin: this.coinMap[this.currency()] ?? FinanceCoin.COP,
+      method: this.methodMap[this.currency()] ?? FinanceCoin.COP,
       token,
       uid: user.id,
+      transactionId: this.reference(),
     });
 
      this.isProcessing.set(false);

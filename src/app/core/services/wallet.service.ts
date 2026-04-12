@@ -51,10 +51,11 @@ export interface WithdrawalRequest {
 
 export interface DepositRequest {
   amountUSD: number;
-  coin: FinanceCoin;
+  method: FinanceCoin;
   timestamp: number;
   token: string;
   uid: number;
+  transactionId: string; 
 }
 
 @Injectable({
@@ -113,18 +114,20 @@ export class WalletService {
 
   async addDeposit(params: {
     amountUSD: number;
-    coin: FinanceCoin;
+    method: FinanceCoin;
     token: string;
     uid: number;
+    transactionId: string;
   }): Promise<{ success: boolean; error?: string; message?: string }> {
     try {
       const url = `${this.getBaseUrl()}Wallet/addDeposit`;
       const body: DepositRequest = {
         amountUSD: params.amountUSD,
-        coin: params.coin,
+        method: params.method,
         timestamp: Date.now(),
         token: params.token,
         uid: params.uid,
+        transactionId: params.transactionId,
       };
 
       const response = await this.http.post<ApiMessageResponse>(url, body).toPromise();
