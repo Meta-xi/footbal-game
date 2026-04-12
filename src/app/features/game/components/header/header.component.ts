@@ -7,10 +7,11 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { UserStatusService } from '../../../../core/services/user-status.service';
 import { UserInfoService } from '../../../../core/services/user-info.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { SupportChatComponent } from '../../../wallet/support-chat.component';
 
 @Component({
   selector: 'app-header',
-  imports: [PerHourEarningsComponent, NgOptimizedImage, LevelMenuComponent, SettingsComponent],
+  imports: [PerHourEarningsComponent, NgOptimizedImage, LevelMenuComponent, SettingsComponent, SupportChatComponent],
   template: `
     <header class="w-full h-fit flex flex-col justify-center items-center bg-transparent relative z-20 pt-safe-top px-4 pb-2 animate-slide-down">
       <div class="w-full mt-1.5 mb-1 liquid-glass-card bg-white/[0.03] border-white/5 rounded-[36px] flex flex-row justify-between items-center p-2 min-h-[60px]">
@@ -62,8 +63,13 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
       <app-level-menu [isOpen]="showLevelMenu()" class="block w-full" [levelInfo]="levelInfo()" [isAuthenticated]="authService.isAuthenticated()"
         [username]="authService.getUsername()" (close)="closeLevelMenu()" />
       <app-settings [isOpen]="showSettings()" class="block w-full" [vibrationEnabled]="vibrationEnabled()"
-        [language]="language()" (close)="closeSettings()" (vibrationChange)="onVibrationChange()" (languageChange)="onLanguageChange($event)" />
+        [language]="language()" (close)="closeSettings()" (vibrationChange)="onVibrationChange()" (languageChange)="onLanguageChange($event)"
+        (supportClick)="openSupportChat()" />
     </div>
+
+    @if (showSupportChat()) {
+      <app-support-chat class="fixed inset-0 z-[300]" (closeChat)="closeSupportChat()" />
+    }
   `,
   styles: [`
     :host { display: block; width: 100%; }
@@ -82,6 +88,7 @@ export class HeaderComponent {
 
   showLevelMenu = signal(false);
   showSettings = signal(false);
+  showSupportChat = signal(false);
   vibrationEnabled = computed(() => this.userStatusService.settings()?.vibration ?? true);
   language = computed(() => this.userStatusService.settings()?.language ?? 'es');
 
@@ -92,6 +99,8 @@ export class HeaderComponent {
   closeLevelMenu() { this.showLevelMenu.set(false); }
   toggleSettings() { this.showSettings.update(v => !v); }
   closeSettings() { this.showSettings.set(false); }
+  openSupportChat() { this.showSupportChat.set(true); }
+  closeSupportChat() { this.showSupportChat.set(false); }
 
   async onVibrationChange() {
     const current = this.userStatusService.settings();

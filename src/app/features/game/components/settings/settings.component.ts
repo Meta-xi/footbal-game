@@ -70,7 +70,7 @@ import { OnboardingService } from '../../../../core/services/onboarding.service'
           </button>
 
           <!-- 4. Soporte -->
-          <button class="flex items-center gap-4 p-3 liquid-glass-card bg-white/[0.03] border-white/5 hover:bg-white/[0.06] active:scale-[0.98] transition-all w-full text-left rounded-2xl">
+          <button (click)="openSupport()" class="flex items-center gap-4 p-3 liquid-glass-card bg-white/[0.03] border-white/5 hover:bg-white/[0.06] active:scale-[0.98] transition-all w-full text-left rounded-2xl">
             <div class="w-10 h-10 rounded-[14px] flex items-center justify-center bg-emerald-900/40 text-emerald-300 shadow-inner">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             </div>
@@ -101,6 +101,7 @@ export class SettingsComponent {
   close = output<void>();
   vibrationChange = output<boolean>();
   languageChange = output<string>();
+  supportClick = output<void>();
 
   private onboarding = inject(OnboardingService);
 
@@ -115,5 +116,10 @@ export class SettingsComponent {
     this.onClose();
     this.onboarding.resetOnboarding();
     this.onboarding.startOnboarding();
+  }
+
+  openSupport(): void {
+    this.onClose();
+    this.supportClick.emit();
   }
 }
