@@ -103,7 +103,8 @@ export class TapAreaComponent {
 
   readonly coins = this.tapSvc.coins;
   readonly level = this.tapSvc.level;
-  readonly tapValue = this.userStatusService.tapValue;
+  // Tap value desde el backend (skillId 3 = tap_power)
+  readonly tapValue = this.energySvc.tapPower;
 
   readonly ballImageSrc = computed(() => `game/balls/ball-lv${this.level()}.webp`);
 

@@ -21,10 +21,16 @@ export class EnergyService {
   private _maxEnergy = signal<number>(500);
   readonly maxEnergy = computed(() => this._maxEnergy());
 
-  // Flag para evitar llamadas concurrentes
+  // TapPower valor por cada desde el backend (skillId: 3 = tap_power)
+  private _tapPower = signal<number>(1);
+  readonly tapPower = computed(() => this._tapPower());
+
+  // Flags para evitar llamadas concurrentes
   private _isLoadingMaxEnergy = false;
+  private _isLoadingTapPower = false;
   // Trackear el último nivel cargado para evitar recargas innecesarias
-  private _lastLoadedLevel = 0;
+  private _lastLoadedMaxEnergyLevel = 0;
+  private _lastLoadedTapPowerLevel = 0;
 
   // La energía viene del UserStatusService (API)
 
@@ -38,8 +44,18 @@ export class EnergyService {
       const level = skills?.maxEnergyLVL ?? 0;
       
       // Solo ejecutar si: hay datos, el nivel es válido (>0), y es UN NIVEL NUEVO
-      if (level > 0 && level !== this._lastLoadedLevel) {
+      if (level > 0 && level !== this._lastLoadedMaxEnergyLevel) {
         this.loadMaxEnergy();
+      }
+    }, { allowSignalWrites: true });
+
+    // Effect para tapPower
+    effect(() => {
+      const skills = this.userStatusService.skillsLevelReport();
+      const level = skills?.tapPowerLVL ?? 0;
+      
+      if (level > 0 && level !== this._lastLoadedTapPowerLevel) {
+        this.loadTapPower();
       }
     }, { allowSignalWrites: true });
   }
@@ -52,7 +68,7 @@ export class EnergyService {
     const skills = this.userStatusService.skillsLevelReport();
     const currentLevel = skills?.maxEnergyLVL ?? 1;
     
-    if (currentLevel <= 0 || currentLevel === this._lastLoadedLevel) {
+    if (currentLevel <= 0 || currentLevel === this._lastLoadedMaxEnergyLevel) {
       return;
     }
 
@@ -64,7 +80,7 @@ export class EnergyService {
         const levelData = result.data[currentLevel.toString()];
         if (levelData?.maxEnergy) {
           this._maxEnergy.set(levelData.maxEnergy);
-          this._lastLoadedLevel = currentLevel; // Actualizar el nivel cargado
+          this._lastLoadedMaxEnergyLevel = currentLevel; // Actualizar el nivel cargado
         }
       }
     } catch (error) {
@@ -72,6 +88,36 @@ export class EnergyService {
       this._maxEnergy.set(500);
     } finally {
       this._isLoadingMaxEnergy = false;
+    }
+  }
+
+  // Cargar tapPower desde el backend
+  async loadTapPower(): Promise<void> {
+    if (this._isLoadingTapPower) return;
+    
+    const skills = this.userStatusService.skillsLevelReport();
+    const currentLevel = skills?.tapPowerLVL ?? 1;
+    
+    if (currentLevel <= 0 || currentLevel === this._lastLoadedTapPowerLevel) {
+      return;
+    }
+
+    this._isLoadingTapPower = true;
+    
+    try {
+      const result = await this.userInfo.getSkillInfo(3); // skillId 3 = tap_power
+      if (result.success && result.data) {
+        const levelData = result.data[currentLevel.toString()];
+        if (levelData?.tooks) {
+          this._tapPower.set(levelData.tooks);
+          this._lastLoadedTapPowerLevel = currentLevel;
+        }
+      }
+    } catch (error) {
+      console.error('EnergyService: Failed to load tapPower', error);
+      this._tapPower.set(1);
+    } finally {
+      this._isLoadingTapPower = false;
     }
   }
 
@@ -86,6 +132,18 @@ export class EnergyService {
 
   getMaxEnergy(): number {
     return this._maxEnergy();
+  }
+
+  getTapPower(): number {
+    return this._tapPower();
+  }
+
+  // Cargar todos los skills al inicio (llamado desde game-layout)
+  async loadAllSkills(): Promise<void> {
+    await Promise.all([
+      this.loadMaxEnergy(),
+      this.loadTapPower(),
+    ]);
   }
 
   async purchaseBoost(boostId: number): Promise<{ success: boolean; message: string }> {

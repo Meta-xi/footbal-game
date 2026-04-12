@@ -9,6 +9,7 @@ import { OnboardingService } from '../../core/services/onboarding.service';
 import { SpotlightTutorialComponent } from '../../shared/components/spotlight-tutorial/spotlight-tutorial.component';
 import { BonusClaimComponent } from '../../shared/components/bonus-claim/bonus-claim.component';
 import { UserStatusService } from '../../core/services/user-status.service';
+import { EnergyService } from '../../core/services/energy.service';
 
 @Component({
   selector: 'app-game-layout',
@@ -59,13 +60,15 @@ import { UserStatusService } from '../../core/services/user-status.service';
 export class GameLayoutComponent {
   userStatusService = inject(UserStatusService);
   onboarding = inject(OnboardingService);
+  private energyService = inject(EnergyService);
 
   constructor() {
     effect(() => {
       const userStatus = this.userStatusService.userStatus();
       if (userStatus) {
         this.onboarding.startOnboardingIfNeeded();
-        // maxEnergy se carga en BoostComponent después de loadUserStatus()
+        // Cargar maxEnergy y tapPower desde el backend
+        this.energyService.loadAllSkills();
       }
     });
   }
