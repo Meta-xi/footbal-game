@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, computed } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 
 @Component({
@@ -19,12 +19,12 @@ import { NgOptimizedImage } from '@angular/common';
         <div class="flex justify-between gap-1">
           <h3 class="text-[10px] font-black text-white tracking-tight truncate">{{ player.name }}</h3>
           
-          <!-- Earnings -->
+          <!-- Earnings por hora -->
           <div class="flex items-center gap-1 mt-0.5">
             <div class="w-3.5 h-3.5 rounded-full bg-amber-500/20 flex items-center justify-center">
                <img ngSrc="shared/balance/coin.webp" alt="coin" width="10" height="10" class="object-contain">
             </div>
-            <span class="text-[8px] font-bold text-white/80 text-glow-amber">+{{ player.interest || 0 }}</span>
+            <span class="text-[8px] font-bold text-white/80 text-glow-amber">+{{ hourlyEarnings() | number:'1.0-0' }}</span>
             <span class="text-[6px] text-white/40 font-medium">/hora</span>
           </div>
         </div>
@@ -48,6 +48,12 @@ export class ProductCardComponent {
   buy = output<any>();
   product = input<any>();
   isBought = input<boolean>(false);
+
+  hourlyEarnings = computed(() => {
+    const p = this.product();
+    if (!p) return 0;
+    return (p.interest / 100) * p.price / 24;
+  });
 
   onBuy(event: Event) {
     event.stopPropagation();
