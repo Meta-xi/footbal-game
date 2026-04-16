@@ -109,6 +109,7 @@ import { ErrorHandlerService } from '../../core/services/error-handler.service';
           <app-player-details 
             [player]="selectedPlayer()!" 
             [loading]="isPurchasing()"
+            [isBought]="activeTab() === 'comprados'"
             (confirm)="confirmPurchase($event)" 
             (close)="closeDetailsModal()" 
           />

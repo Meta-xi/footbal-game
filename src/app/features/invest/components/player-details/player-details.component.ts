@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, HostListener, input, output, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type { InvestApiPlayer } from '../../../../models/invest.model';
+import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/invest.model';
 
 @Component({
   selector: 'app-player-details',
@@ -141,32 +141,40 @@ import type { InvestApiPlayer } from '../../../../models/invest.model';
 
           <!-- CTA -->
           <div class="flex gap-2">
-            <button (click)="onClose()"
-              [disabled]="loading()"
-              class="flex-1 py-3 text-sm font-bold rounded-2xl active:scale-[0.97] transition-all duration-150 cursor-pointer"
-              style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.4);"
-              [class.opacity-50]="loading()"
-              [class.pointer-events-none]="loading()">
-              Cancelar
-            </button>
-            <button (click)="onConfirm()"
-              [disabled]="loading()"
-              class="flex-1 py-3 text-sm font-bold text-white rounded-2xl active:scale-[0.97] transition-all duration-150 cursor-pointer relative"
-              style="background: linear-gradient(135deg, #06b6d4, #10b981); box-shadow: 0 4px 20px rgba(6,182,212,0.35), 0 0 40px rgba(16,185,129,0.15);"
-              [class.opacity-70]="loading()"
-              [class.pointer-events-none]="loading()">
-              @if (loading()) {
-                <span class="flex items-center justify-center gap-2">
-                  <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                  </svg>
-                  Procesando...
-                </span>
-              } @else {
-                Confirmar Fichaje
-              }
-            </button>
+            @if (isBought()) {
+              <button (click)="onClose()"
+                class="flex-1 py-3 text-sm font-bold text-white rounded-2xl active:scale-[0.97] transition-all duration-150 cursor-pointer"
+                style="background: linear-gradient(135deg, #06b6d4, #10b981); box-shadow: 0 4px 20px rgba(6,182,212,0.35), 0 0 40px rgba(16,185,129,0.15);">
+                Ok
+              </button>
+            } @else {
+              <button (click)="onClose()"
+                [disabled]="loading()"
+                class="flex-1 py-3 text-sm font-bold rounded-2xl active:scale-[0.97] transition-all duration-150 cursor-pointer"
+                style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.4);"
+                [class.opacity-50]="loading()"
+                [class.pointer-events-none]="loading()">
+                Cancelar
+              </button>
+              <button (click)="onConfirm()"
+                [disabled]="loading()"
+                class="flex-1 py-3 text-sm font-bold text-white rounded-2xl active:scale-[0.97] transition-all duration-150 cursor-pointer relative"
+                style="background: linear-gradient(135deg, #06b6d4, #10b981); box-shadow: 0 4px 20px rgba(6,182,212,0.35), 0 0 40px rgba(16,185,129,0.15);"
+                [class.opacity-70]="loading()"
+                [class.pointer-events-none]="loading()">
+                @if (loading()) {
+                  <span class="flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    Procesando...
+                  </span>
+                } @else {
+                  Confirmar Fichaje
+                }
+              </button>
+            }
           </div>
         </div>
       </div>
@@ -202,6 +210,7 @@ export class PlayerDetailsComponent implements AfterViewInit {
   confirm = output<InvestApiPlayer>();
   close = output<void>();
   loading = input(false);
+  isBought = input(false);
 
   @ViewChild('modalWrapper') modalWrapper!: ElementRef;
   @ViewChild('closeBtn') closeBtn!: ElementRef;

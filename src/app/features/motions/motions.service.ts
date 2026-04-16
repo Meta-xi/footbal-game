@@ -51,12 +51,13 @@ export interface MissionHistoryItem {
 
 
 
-interface DailyReward {
-  day: number;
-  state: 'claimed' | 'available' | 'upcoming';
+// Bono Diario — single daily reward
+export interface BonoDiario {
+  state: 'claimed' | 'available';
   icon: string;
   reward: number;
   title: string;
+  claimedAt?: Date | null;
 }
 
 @Injectable({
@@ -70,29 +71,13 @@ export class MotionsService {
   private readonly completedMissionRecords = signal<CompletedMission[]>([]);
   private readonly loadingCompletedMissions = signal<boolean>(false);
 
-  // Daily reward states (mutable)
-  private readonly dailyRewardStates = signal<('claimed' | 'available' | 'upcoming')[]>([
-    'claimed', 'claimed', 'available', 'upcoming', 'upcoming', 'upcoming', 'upcoming',
-  ]);
-
-  // Daily reward amount from backend (Category 4)
-  private readonly dailyRewardAmount = signal<number>(0);
-  private readonly dailyRewardTitle = signal<string>('Premio diario');
-
-  // Daily rewards — combines mutable states with backend reward data
-  private readonly dailyRewards = computed<DailyReward[]>(() => {
-    const states = this.dailyRewardStates();
-    const reward = this.dailyRewardAmount();
-    const title = this.dailyRewardTitle();
-    return states.map((state, i) => ({
-      day: i + 1,
-      state,
-      icon: state === 'claimed' ? 'motions/daily/reclamed.webp'
-        : state === 'available' ? 'motions/daily/current.webp'
-        : 'motions/daily/comingsoon.webp',
-      reward,
-      title,
-    }));
+  // Bono Diario — single state (no more 7-day grid)
+  private readonly bonoDiario = signal<BonoDiario>({
+    state: 'available',
+    icon: 'motions/daily/current.webp',
+    reward: 0,
+    title: 'Bono Diario',
+    claimedAt: null,
   });
 
   // UI state (matching API categories: 0-whatsapp, 1-facebook, 2-tiktok, 3-youtube, 4-daily, 5-referral)
@@ -197,7 +182,7 @@ export class MotionsService {
       }
     }
   });
-   readonly dailyRewards$ = this.dailyRewards;
+   readonly dailyRewards$ = this.bonoDiario.asReadonly();
    readonly activeTab$ = this.activeTab.asReadonly();
    readonly selectedMission$ = this.selectedMission.asReadonly();
    readonly showHistoryModal$ = this.showHistoryModal.asReadonly();
@@ -211,27 +196,33 @@ export class MotionsService {
   async fetchMissions(categoryId?: number | null): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
+    console.log('[MotionsService] fetchMissions called with categoryId:', categoryId);
     try {
       let params = new HttpParams();
       if (categoryId !== null && categoryId !== undefined && categoryId !== 6) {
         params = params.set('Category', categoryId.toString());
       }
+      console.log('[MotionsService] Calling API with params:', params.toString());
       const response = await firstValueFrom(
         this.httpClient.get<BackendMission[]>(
           `${environment.apiBaseUrl}Misions/GetMisionsInfo`,
           { params }
         )
       );
+      console.log('[MotionsService] API Response:', response);
       if (!Array.isArray(response)) {
         throw new Error('Invalid response format');
       }
       const missions = response.map(b => this.mapBackendMissionToMission(b));
       this.missions.set(missions);
 
-      // If fetching daily missions (category 4), update daily reward config
+      // If fetching daily missions (category 4), update bonoDiario config
       if (categoryId === 4 && missions.length > 0) {
-        this.dailyRewardAmount.set(missions[0].reward);
-        this.dailyRewardTitle.set(missions[0].title);
+        this.bonoDiario.update(b => ({
+          ...b,
+          reward: missions[0].reward,
+          title: missions[0].title,
+        }));
       }
     } catch (err) {
       console.error('Failed to fetch missions:', err);
@@ -421,12 +412,7 @@ export class MotionsService {
     return icons[tab] || '';
   }
 
-  async claimDailyReward(reward: DailyReward): Promise<void> {
-    if (reward.state === 'upcoming') {
-      this.emitEvent({ type: 'missionFailed', error: 'Reward not available yet' });
-      this.errorHandler.showToast('¡Aún no! Esta recompensa estará disponible pronto.', 'error');
-      return;
-    }
+  async claimDailyReward(reward: BonoDiario): Promise<void> {
     if (reward.state === 'claimed') {
       this.emitEvent({ type: 'missionFailed', error: 'Reward already claimed' });
       this.errorHandler.showToast('¡Ya reclamaste este premio! Vuelve mañana.', 'error');
@@ -453,13 +439,15 @@ export class MotionsService {
 
       // Update local state on success
       this.emitEvent({ type: 'dailyRewardCollected', amount: reward.reward });
-      this.dailyRewardStates.update(states =>
-        states.map((s, i) => i === reward.day - 1 ? 'claimed' : s)
-      );
-      this.errorHandler.showToast(`¡Genial! Has reclamado tu recompensa del Día ${reward.day}: +${reward.reward} COP`, 'success');
+      this.bonoDiario.update(b => ({
+        ...b,
+        state: 'claimed',
+        claimedAt: new Date(),
+      }));
+      this.errorHandler.showToast(`¡Genial! Has reclamado tu Bono Diario: +${reward.reward} COP`, 'success');
     } catch (err) {
       console.error('Failed to claim daily reward:', err);
-      this.errorHandler.showToast('Error al reclamar la recompensa diaria. Intenta de nuevo.', 'error');
+      this.errorHandler.showToast('Error al reclamar el Bono Diario. Intenta de nuevo.', 'error');
     }
   }
 

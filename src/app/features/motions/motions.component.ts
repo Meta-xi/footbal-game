@@ -1,24 +1,16 @@
 import { ChangeDetectionStrategy, Component, Signal, signal, effect, ElementRef, QueryList, AfterViewInit, OnDestroy, Renderer2, inject, viewChild, viewChildren } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { NgOptimizedImage, DecimalPipe } from '@angular/common';
+import { NgOptimizedImage, DecimalPipe, DatePipe } from '@angular/common';
 import { GlassModalComponent, GlassTabBarComponent, GlassTab } from '../../shared/ui';
-import { MotionsService, MissionHistoryItem, CompletedMission } from './motions.service';
+import { MotionsService, MissionHistoryItem, CompletedMission, BonoDiario } from './motions.service';
 import { AudioService } from '../../services/audio.service';
 import { ConfettiService } from '../../services/confetti.service';
 import { ErrorHandlerService } from '../../core/services/error-handler.service';
 import { Mission } from '../../models/mision.model';
 
-interface DailyReward {
-  day: number;
-  state: 'claimed' | 'available' | 'upcoming';
-  icon: string;
-  reward: number;
-  title: string;
-}
-
 @Component({
   selector: 'app-motions',
-  imports: [NgOptimizedImage, DecimalPipe, GlassModalComponent, GlassTabBarComponent],
+  imports: [NgOptimizedImage, DecimalPipe, DatePipe, GlassModalComponent, GlassTabBarComponent],
   template: `
     <section class="h-dvh flex flex-col relative w-full overflow-hidden bg-transparent">
       
@@ -84,53 +76,78 @@ interface DailyReward {
           <div class="bg-white/5 border border-white/5 rounded-[32px] p-1 overflow-hidden backdrop-blur-sm">
             @switch (activeTab()) {
               @case ('Daily') {
-                <div class="flex flex-col gap-4 p-4">
-                  <div class="grid grid-cols-4 gap-2 md:gap-4">
-                    @for (reward of dailyRewards(); track reward.day; let i = $index) {
-                      <div (click)="claimDailyReward(reward)" 
-                        [style.animation-delay.ms]="i * 75"
-                        class="animate-pop-in group relative flex flex-col items-center justify-center p-2 sm:p-4 aspect-square rounded-2xl sm:rounded-[32px] border transition-all duration-500 cursor-pointer active:scale-95"
-                        [class]="reward.state === 'available' 
-                          ? 'bg-gradient-to-b from-white/10 to-white/5 border-emerald-500/40 shadow-[0_10px_30px_rgba(16,185,129,0.2)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.3)] -translate-y-1 hover:-translate-y-2' 
-                          : reward.state === 'claimed' 
-                            ? 'bg-white/5 border-white/10 opacity-90' 
-                            : 'bg-white/[0.02] border-white/5 opacity-40 hover:opacity-60'">
-                        
-                        @if (reward.state === 'available') {
-                          <!-- Pulse Glow for Available Item -->
-                          <div class="absolute inset-0 bg-emerald-500/10 rounded-2xl sm:rounded-[32px] blur-xl animate-pulse-fast pointer-events-none"></div>
-                          
-                          <!-- Sparkles for Available Item -->
-                          <div class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-emerald-400 rounded-full blur-md opacity-60 animate-bounce" style="animation-duration: 2s;"></div>
-                          <div class="absolute -bottom-1 -left-1 w-3 h-3 bg-yellow-400 rounded-full blur-md opacity-60 animate-bounce" style="animation-duration: 3s; animation-delay: 0.5s;"></div>
-                        }
+                <div class="flex flex-col p-3">
+                  @if (dailyRewards(); as bono) {
+                    <!-- Bono Diario Card -->
+                    <div (click)="claimDailyReward(bono)" 
+                      class="group relative overflow-hidden p-4 rounded-[28px] border transition-all duration-500 cursor-pointer active:scale-[0.98]"
+                      [class]="bono.state === 'available' 
+                        ? 'bg-gradient-to-b from-white/10 to-white/5 border-emerald-500/40 shadow-[0_10px_30px_rgba(16,185,129,0.2)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.3)] hover:-translate-y-1' 
+                        : 'bg-white/5 border-white/10 opacity-80'">
+                      
+                      @if (bono.state === 'available') {
+                        <!-- Glow Effect -->
+                        <div class="absolute -inset-2 bg-emerald-500/20 blur-xl opacity-40 pointer-events-none"></div>
+                        <!-- Sparkles -->
+                        <div class="absolute top-1 right-6 w-3 h-3 bg-emerald-400 rounded-full blur-md opacity-60 animate-bounce" style="animation-duration: 2s;"></div>
+                        <div class="absolute bottom-2 left-1 w-2 h-2 bg-yellow-400 rounded-full blur-md opacity-60 animate-bounce" style="animation-duration: 3s; animation-delay: 0.5s;"></div>
+                      }
 
-                        <!-- Header: Día Label -->
-                        <span class="relative z-10 text-[10px] md:text-[13px] font-extrabold text-white mb-1 sm:mb-2 tracking-wide drop-shadow-md whitespace-nowrap transition-colors duration-300"
-                              [class.text-emerald-300]="reward.state === 'available'">
-                          Día {{ reward.day }}
-                        </span>
-
-                        <!-- Main Icon Area -->
-                        <div class="relative w-full flex-1 flex items-center justify-center p-1 sm:p-2">
-                          <img [ngSrc]="reward.icon" [alt]="reward.state" width="100" height="100" 
-                            class="relative z-10 w-full h-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] transition-transform duration-500"
-                            [class.animate-float]="reward.state === 'available'"
-                            [class.group-hover:scale-110]="reward.state !== 'upcoming'"
-                            [class.opacity-70]="reward.state === 'upcoming'">
-                        </div>
-
-                        <!-- Checkmark Overlay for Claimed -->
-                        @if (reward.state === 'claimed') {
-                          <div class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl sm:rounded-[32px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]">
-                            <svg class="w-8 h-8 text-emerald-400 drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                        }
+                      <!-- Icon -->
+                      <div class="relative w-24 h-24 mx-auto mb-2 flex items-center justify-center">
+                        <img [ngSrc]="bono.icon" [alt]="bono.title" width="96" height="96" 
+                          class="relative z-10 w-full h-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] transition-transform duration-500"
+                          [class.animate-float]="bono.state === 'available'"
+                          [class.group-hover:scale-105]="bono.state === 'available'">
                       </div>
-                    }
-                  </div>
+
+                      <!-- Title -->
+                      <div class="text-center mb-1">
+                        <span class="text-[9px] font-bold text-emerald-400/60 uppercase tracking-widest">Premio Diario</span>
+                        <h3 class="text-sm font-black text-white tracking-tight">{{ bono.title }}</h3>
+                      </div>
+
+                      <!-- Reward Amount -->
+                      <div class="text-center mb-2">
+                        <span class="text-xl font-black text-emerald-400 tracking-tight text-glow-emerald">
+                          +{{ bono.reward | number }} <span class="text-[10px] text-emerald-500/60">COP</span>
+                        </span>
+                      </div>
+
+                      <!-- Status Badge / Button -->
+                      <div>
+                        <button class="w-full py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300"
+                          [class]="bono.state === 'available' 
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30' 
+                            : 'bg-white/5 text-white/40 border border-white/10'">
+                          @if (bono.state === 'available') {
+                            <span class="flex items-center justify-center gap-1.5">
+                              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              ¡Reclamar!
+                            </span>
+                          } @else {
+                            <span class="flex items-center justify-center gap-1.5">
+                              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                              Reclamado
+                            </span>
+                          }
+                        </button>
+                      </div>
+
+                      <!-- Claimed Timestamp -->
+                      @if (bono.state === 'claimed' && bono.claimedAt) {
+                        <div class="text-center mt-1.5">
+                          <span class="text-[9px] text-white/30">
+                            {{ bono.claimedAt | date:'short' }}
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  }
                 </div>
               }
               @case ('Whatsapp') {
@@ -404,7 +421,7 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
   readonly activeHistoryTab!: Signal<string>;
   readonly historyTabs!: GlassTab[];
    readonly filteredHistory!: Signal<MissionHistoryItem[]>;
-   readonly dailyRewards!: Signal<DailyReward[]>;
+   readonly dailyRewards!: Signal<BonoDiario>;
    readonly loading!: Signal<boolean>;
   readonly error!: Signal<string | null>;
   readonly imageError = signal(false);
@@ -596,8 +613,8 @@ export class MotionsComponent implements AfterViewInit, OnDestroy {
     return this.motionsService.getTabIcon(tab);
   }
 
-  async claimDailyReward(reward: DailyReward) {
-    await this.motionsService.claimDailyReward(reward);
+  async claimDailyReward(bono: BonoDiario) {
+    await this.motionsService.claimDailyReward(bono);
   }
 
   trackByMissionId(index: number, mission: Mission): string {
