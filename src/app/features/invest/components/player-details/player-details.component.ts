@@ -105,22 +105,22 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
                 <svg class="w-3.5 h-3.5" style="color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                 </svg>
-                <span class="text-[10px] font-bold uppercase tracking-wider" style="color: rgba(16,185,129,0.6);">Retorno</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider" style="color: rgba(16,185,129,0.6);">Ganancia</span>
               </div>
               <span class="text-xs font-black tabular-nums" style="color: #10b981;">+{{ roiPercent() }}%</span>
             </div>
             <div class="grid grid-cols-3 gap-2">
               <div class="text-center py-1.5 rounded-xl" style="background: rgba(255,255,255,0.03);">
                 <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(255,255,255,0.25);">Hora</p>
-                <p class="text-sm font-black text-white tabular-nums">+{{ player().interest | number }}</p>
+                <p class="text-sm font-black text-white tabular-nums">+{{ hourlyEarnings() | number:'1.0-0' }}</p>
               </div>
               <div class="text-center py-1.5 rounded-xl" style="background: rgba(255,255,255,0.03);">
                 <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(255,255,255,0.25);">D&iacute;a</p>
-                <p class="text-sm font-black text-white tabular-nums">+{{ dailyEarnings() | number }}</p>
+                <p class="text-sm font-black text-white tabular-nums">+{{ dailyEarnings() | number:'1.0-0' }}</p>
               </div>
               <div class="text-center py-1.5 rounded-xl" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.12);">
                 <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(16,185,129,0.5);">Total</p>
-                <p class="text-sm font-black tabular-nums" style="color: #34d399;">+{{ totalEarnings() | number }}</p>
+                <p class="text-sm font-black tabular-nums" style="color: #34d399;">+{{ totalEarnings() | number:'1.0-0' }}</p>
               </div>
             </div>
           </div>
@@ -216,12 +216,29 @@ export class PlayerDetailsComponent {
   closeBtn = viewChild.required<ElementRef>('closeBtn');
 
   age = computed(() => this.player().age);
-  dailyEarnings = computed(() => this.player().interest * 24);
-  totalEarnings = computed(() => this.player().interest * 24 * this.player().days);
+  
+  // Ganancias por hora: (interest/100 * price) / 24
+  hourlyEarnings = computed(() => {
+    const p = this.player();
+    return (p.interest / 100) * p.price / 24;
+  });
+  
+  // Ganancias diarias: interest/100 * price
+  dailyEarnings = computed(() => {
+    const p = this.player();
+    return (p.interest / 100) * p.price;
+  });
+  
+  // Ganancias totales: (interest/100 * price) * days
+  totalEarnings = computed(() => {
+    const p = this.player();
+    return (p.interest / 100) * p.price * p.days;
+  });
+  
   roiPercent = computed(() => {
     const p = this.player();
     if (p.price === 0) return 0;
-    return Math.round((this.totalEarnings() / p.price) * 100);
+    return Math.round(((p.interest / 100) * p.price * p.days / p.price) * 100);
   });
 
   ngAfterViewInit() {
