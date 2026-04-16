@@ -1,9 +1,16 @@
-export interface BackendMission {
+// Nuevo formato de respuesta del backend
+export interface MisionInfoObject {
   id: number;
-  category: string | number | null;
+  category: number;
   misionInfo: string;
   misionReward: number;
   created: string;
+}
+
+export interface BackendMission {
+  state: MisionState | null;
+  misionInfo: MisionInfoObject | string;
+  misionReportDetails: unknown | null;
 }
 
 export interface Mission {

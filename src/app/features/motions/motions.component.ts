@@ -151,31 +151,50 @@ import { Mission } from '../../models/mision.model';
                 </div>
               }
               @case ('Whatsapp') {
-                <div class="flex flex-col gap-2 p-2">
+                <div class="flex flex-col gap-3 p-3">
                   @for (mission of whatsappMissions(); track mission.id) {
                     <article (click)="openMission(mission)"
-                      class="bg-white/5 p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer rounded-2xl border border-transparent hover:border-white/10"
-                      [class.opacity-40]="mission.completed">
+                      class="lg-module-card group cursor-pointer !p-4 !border-white/10 hover:!border-cyan-500/30 active:scale-[0.98] transition-all duration-300"
+                      [class.opacity-50]="mission.completed">
                       <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-black/20 border border-white/10 flex items-center justify-center group-hover:border-white/20 transition-colors">
-                          <img [ngSrc]="mission.icon" [alt]="mission.title" width="28" height="28" class="object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all">
+                        <!-- Icon -->
+                        <div class="relative flex-shrink-0 w-12 h-12">
+                          <div class="absolute inset-0 bg-green-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div class="relative z-10 w-full h-full lg-bubble flex items-center justify-center p-2.5 backdrop-blur-2xl bg-white/[0.05] border border-white/10 group-hover:border-green-500/30 transition-colors">
+                            <img [ngSrc]="mission.icon" [alt]="mission.title" width="24" height="24" class="object-contain">
+                          </div>
                         </div>
-                         <div class="flex flex-col">
-                          <h3 class="text-sm font-bold text-white tracking-tight">{{ mission.title }}</h3>
-                          <span class="text-xs font-bold text-emerald-400 mt-1 text-glow-emerald">+{{ mission.reward | number }} <span class="text-[10px] text-emerald-500/60">COP</span></span>
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                          <h3 class="text-sm font-bold text-white tracking-tight truncate">{{ mission.title }}</h3>
+                          <div class="flex items-center gap-1.5 mt-1">
+                            <span class="text-xs font-black text-green-400 tracking-tight text-glow-emerald">+{{ mission.reward | number }}</span>
+                            <span class="text-[9px] font-bold text-green-500/40 uppercase tracking-wider">COP</span>
+                          </div>
                         </div>
-                      </div>
-                      <div class="w-8 h-8 flex items-center justify-center text-white/40 group-hover:text-white transition-colors">
-                        @if (mission.completed) {
-                          <span class="text-emerald-400">✓</span>
-                        } @else {
-                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M14 5l7 7-7 7" /></svg>
-                        }
+                        <!-- Indicator -->
+                        <div class="flex-shrink-0">
+                          @if (mission.completed) {
+                            <div class="lg-status-badge !py-1 !px-2 !text-[8px] border-green-500/30 accent-emerald">
+                              <span class="lg-dot lg-dot-active"></span>
+                              Listo
+                            </div>
+                          } @else {
+                            <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/30 group-hover:text-white group-hover:bg-green-500/20 group-hover:border-green-500/30 transition-all">
+                              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M14 5l7 7-7 7" /></svg>
+                            </div>
+                          }
+                        </div>
                       </div>
                     </article>
                   } @empty {
-                    <div class="flex flex-col items-center justify-center py-8 text-center">
-                      <p class="text-sm font-medium text-white/50">No hay misiones disponibles</p>
+                    <div class="flex flex-col items-center justify-center py-12 text-center">
+                      <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                        <svg class="w-8 h-8 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                      </div>
+                      <p class="text-sm font-medium text-white/40">No hay misiones disponibles</p>
                     </div>
                   }
                 </div>
@@ -220,31 +239,50 @@ import { Mission } from '../../models/mision.model';
                 </div>
               }
               @default {
-                <div class="flex flex-col gap-2 p-2">
+                <div class="flex flex-col gap-3 p-3">
                   @for (mission of missions(); track mission.id) {
                     <article (click)="openMission(mission)"
-                      class="bg-white/5 p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer rounded-2xl border border-transparent hover:border-white/10"
-                      [class.opacity-40]="mission.completed">
+                      class="lg-module-card group cursor-pointer !p-4 !border-white/10 hover:!border-cyan-500/30 active:scale-[0.98] transition-all duration-300"
+                      [class.opacity-50]="mission.completed">
                       <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-black/20 border border-white/10 flex items-center justify-center group-hover:border-white/20 transition-colors">
-                          <img [ngSrc]="mission.icon" [alt]="mission.title" width="28" height="28" class="object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all">
+                        <!-- Icon -->
+                        <div class="relative flex-shrink-0 w-12 h-12">
+                          <div class="absolute inset-0 bg-cyan-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div class="relative z-10 w-full h-full lg-bubble flex items-center justify-center p-2.5 backdrop-blur-2xl bg-white/[0.05] border border-white/10 group-hover:border-cyan-500/30 transition-colors">
+                            <img [ngSrc]="mission.icon" [alt]="mission.title" width="24" height="24" class="object-contain">
+                          </div>
                         </div>
-                        <div class="flex flex-col">
-                          <h3 class="text-sm font-bold text-white tracking-tight">{{ mission.title }}</h3>
-                          <span class="text-xs font-bold text-emerald-400 mt-1 text-glow-emerald">+{{ mission.reward | number }} <span class="text-[10px] text-emerald-500/60">COP</span></span>
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                          <h3 class="text-sm font-bold text-white tracking-tight truncate">{{ mission.title }}</h3>
+                          <div class="flex items-center gap-1.5 mt-1">
+                            <span class="text-xs font-black text-cyan-400 tracking-tight text-glow-emerald">+{{ mission.reward | number }}</span>
+                            <span class="text-[9px] font-bold text-cyan-500/40 uppercase tracking-wider">COP</span>
+                          </div>
                         </div>
-                      </div>
-                      <div class="w-8 h-8 flex items-center justify-center text-white/40 group-hover:text-white transition-colors">
-                        @if (mission.completed) {
-                          <span class="text-emerald-400">✓</span>
-                        } @else {
-                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M14 5l7 7-7 7" /></svg>
-                        }
+                        <!-- Indicator -->
+                        <div class="flex-shrink-0">
+                          @if (mission.completed) {
+                            <div class="lg-status-badge !py-1 !px-2 !text-[8px] border-green-500/30 accent-emerald">
+                              <span class="lg-dot lg-dot-active"></span>
+                              Listo
+                            </div>
+                          } @else {
+                            <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/30 group-hover:text-white group-hover:bg-cyan-500/20 group-hover:border-cyan-500/30 transition-all">
+                              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M14 5l7 7-7 7" /></svg>
+                            </div>
+                          }
+                        </div>
                       </div>
                     </article>
                   } @empty {
-                    <div class="flex flex-col items-center justify-center py-8 text-center">
-                      <p class="text-sm font-medium text-white/50">No hay misiones disponibles</p>
+                    <div class="flex flex-col items-center justify-center py-12 text-center">
+                      <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                        <svg class="w-8 h-8 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                      </div>
+                      <p class="text-sm font-medium text-white/40">No hay misiones disponibles</p>
                     </div>
                   }
                 </div>

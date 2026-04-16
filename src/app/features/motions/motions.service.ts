@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, effect, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { BackendMission, MisionReport, MisionState, VISIBLE_MISSION_STATES, Mission } from '../../models/mision.model';
+import { BackendMission, MisionReport, MisionState, VISIBLE_MISSION_STATES, Mission, MisionInfoObject } from '../../models/mision.model';
 import { GlassTab } from '../../shared/ui'; // Added this import
 import { environment } from '../../../environments/environment';
 import { MotionEvent } from './types/motion-event';
@@ -280,14 +280,34 @@ export class MotionsService {
   }
 
   private mapBackendMissionToMission(b: BackendMission): Mission {
-    const categoryStr = this.mapCategoryToString(b.category);
+    // El backend ahora responde con { state, misionInfo: { ... }, missionReportDetails }
+    // donde misionInfo puede ser objeto o string (legacy)
+    let missionData: MisionInfoObject;
+
+    if (typeof b.misionInfo === 'object') {
+      missionData = b.misionInfo as MisionInfoObject;
+    } else {
+      // Fallback para formato legacy (string)
+      return {
+        id: String(b.state ?? 0),
+        title: b.misionInfo as string,
+        description: b.misionInfo as string,
+        reward: 0,
+        currency: 'COP',
+        icon: 'social/icons/Whatsapp_37229.png',
+        completed: false,
+        category: null
+      };
+    }
+
+    const categoryStr = this.mapCategoryToString(missionData.category);
     return {
-      id: String(b.id),
-      title: b.misionInfo,
-      description: b.misionInfo,
-      reward: b.misionReward,
+      id: String(missionData.id),
+      title: missionData.misionInfo,
+      description: missionData.misionInfo,
+      reward: missionData.misionReward,
       currency: 'COP',
-      icon: this.getIconForCategory(b.category),
+      icon: this.getIconForCategory(missionData.category),
       completed: false,
       category: categoryStr
     };

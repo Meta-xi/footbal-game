@@ -214,7 +214,7 @@ export class SocialComponent implements OnInit {
 
   activeTab = signal<string>('misReferidos');
 
-  private readonly baseUrl = 'https://footbal-game-six.vercel.app/welcome?referrealId=';
+  private readonly baseUrl = 'https://fifa-empire.com/welcome?referrealId=';
 
   async ngOnInit(): Promise<void> {
     await this.loadReferInfo();
