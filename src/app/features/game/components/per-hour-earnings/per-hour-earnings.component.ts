@@ -27,8 +27,14 @@ export class PerHourEarningsComponent {
 
   readonly formattedEarning = computed(() => {
     const value = this.hourlyEarning();
-    if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
-    if (value >= 1000) return (value / 1000).toFixed(1) + 'K';
-    return value.toString();
+    if (value >= 1000000) {
+      const formatted = value / 1000000;
+      return formatted % 1 === 0 ? formatted.toFixed(0) + 'M' : formatted.toFixed(2) + 'M';
+    }
+    if (value >= 1000) {
+      const formatted = value / 1000;
+      return formatted % 1 === 0 ? formatted.toFixed(0) + 'K' : formatted.toFixed(2) + 'K';
+    }
+    return value % 1 === 0 ? value.toFixed(0) : value.toFixed(2);
   });
 }
