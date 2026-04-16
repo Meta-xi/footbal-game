@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { InvestApiPlayer } from '../../models/invest.model';
+import { InvestApiPlayer, InvestBoughtPlayer, InvestBoughtPlayerResponse } from '../../models/invest.model';
 import { withRetry } from '../utils/retry.util';
 
 interface ApiMessageResponse {
@@ -17,16 +17,23 @@ export class InvestService {
   // ============== Players State ==============
   private _availablePlayers = signal<InvestApiPlayer[]>([]);
   private _vipPlayers = signal<InvestApiPlayer[]>([]);
-  private _boughtPlayers = signal<InvestApiPlayer[]>([]);
+  private _boughtPlayers = signal<InvestBoughtPlayer[]>([]);
 
   readonly availablePlayers = computed(() => this._availablePlayers());
   readonly vipPlayers = computed(() => this._vipPlayers());
   readonly boughtPlayers = computed(() => this._boughtPlayers());
 
   constructor() {
-    this.loadAvailablePlayers();
-    this.loadVipPlayers();
-    this.loadBoughtPlayers();
+    // Players se cargan desde el componente, no en el constructor
+    // esto permite recargar cada vez que el usuario entra a /mining
+  }
+
+  // Método público para recargar players cada vez que se entra a la ruta
+  async loadAllPlayers(): Promise<void> {
+    console.log('[InvestService] loadAllPlayers - fetching fresh data...');
+    await this.loadAvailablePlayers();
+    await this.loadVipPlayers();
+    await this.loadBoughtPlayers();
   }
 
   // ============== Players Methods ==============
@@ -38,9 +45,13 @@ export class InvestService {
   }
 
   async loadAvailablePlayers(): Promise<void> {
+    console.log('[InvestService] loadAvailablePlayers called');
     const result = await this.getPlayers({ isBuyed: false, isVIP: false });
     if (result.success && result.players) {
       this._availablePlayers.set(this.addImageUrl(result.players));
+      console.log('[InvestService] Available players loaded:', result.players.length);
+    } else {
+      console.warn('[InvestService] Failed to load available players:', result.error);
     }
   }
 
@@ -52,9 +63,9 @@ export class InvestService {
   }
 
   async loadBoughtPlayers(): Promise<void> {
-    const result = await this.getPlayers({ isBuyed: true });
+    const result = await this.getBoughtPlayers();
     if (result.success && result.players) {
-      this._boughtPlayers.set(this.addImageUrl(result.players));
+      this._boughtPlayers.set(result.players);
     }
   }
 
@@ -97,6 +108,7 @@ export class InvestService {
 
     const queryString = params.toString();
     const url = `${this.getBaseUrl()}Invest/GetPlayers${queryString ? '?' + queryString : ''}`;
+    console.log('[InvestService] Fetching players:', url);
 
     const promise = withRetry(
       () => this.http.get<InvestApiPlayer[]>(url).toPromise(),
@@ -118,6 +130,40 @@ export class InvestService {
 
     this.pendingGetPlayers.set(cacheKey, promise);
     return promise;
+  }
+
+  /**
+   * Get bought players with purchase info
+   */
+  async getBoughtPlayers(): Promise<{ success: boolean; error?: string; players?: InvestBoughtPlayer[] }> {
+    const url = `${this.getBaseUrl()}Invest/GetPlayers?isBuyed=true`;
+    console.log('[InvestService] Fetching bought players:', url);
+
+    try {
+      const response = await withRetry(
+        () => this.http.get<InvestBoughtPlayerResponse[]>(url).toPromise(),
+        { maxAttempts: 3, baseDelayMs: 500 }
+      );
+
+      if (!response) {
+        return { success: false, error: 'Empty response from server' };
+      }
+
+      const players: InvestBoughtPlayer[] = response.map(item => ({
+        ...item.p,
+        imagen: `${this.getBaseUrl()}images/players/${item.p.id}.webp`,
+        purchaseId: item.pi.id,
+        purchaseDate: item.pi.created,
+      }));
+
+      return { success: true, players };
+    } catch (error: unknown) {
+      const httpError = error as HttpErrorResponse;
+      if (httpError?.status === 401) {
+        return { success: false, error: 'Unauthorized' };
+      }
+      return { success: false, error: 'Failed to get bought players' };
+    }
   }
 
   async buyPlayer(articleId: number, timestamp: number, token: string, uid: number): Promise<{ success: boolean; error?: string; message?: string }> {

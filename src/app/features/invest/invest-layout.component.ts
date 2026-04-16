@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, ViewChild, ElementRef, effect } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { BalanceComponent } from '../../shared/components/balance/balance.component';
 import { ProductCardComponent } from './components/product/product-card.component';
@@ -6,7 +6,7 @@ import { ProductCardVerticalComponent } from './components/product-vertical/prod
 import { PlayerDetailsComponent } from './components/player-details/player-details.component';
 import { PerHourEarningsComponent } from '../game/components/per-hour-earnings/per-hour-earnings.component';
 import { RouterLink } from '@angular/router';
-import type { InvestApiPlayer } from '../../models/invest.model';
+import type { InvestApiPlayer, InvestBoughtPlayer } from '../../models/invest.model';
 import { GlassTabBarComponent, GlassTab } from '../../shared/ui';
 import { InvestService } from '../../core/services/invest.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -83,7 +83,7 @@ import { ErrorHandlerService } from '../../core/services/error-handler.service';
                   @if (boughtPlayers().length > 0) {
                     <div class="grid grid-cols-2 gap-4">
                         @for (boughtPlayer of boughtPlayers(); track boughtPlayer.id) {
-                          <app-product-card [product]="boughtPlayer" (buy)="openPlayerDetails($event)" class="animate-fade-up" />
+                          <app-product-card [product]="boughtPlayer" [isBought]="true" (buy)="openPlayerDetails($event)" class="animate-fade-up" />
                         }
                     </div>
                   } @else {
@@ -132,7 +132,37 @@ export class InvestLayoutComponent {
   private errorHandler = inject(ErrorHandlerService);
 
   constructor() {
-    // Los players se cargan automáticamente en el constructor del servicio
+    // Recargar datos según la pestaña activa
+    effect(() => {
+      const tab = this.activeTabStr();
+      // Ignorar la primera ejecución (inicialización)
+      if (this.initialized()) {
+        this.loadPlayersForTab(tab);
+      }
+    });
+  }
+
+  private initialized = signal(false);
+
+  ngOnInit() {
+    // Carga inicial - cargar todos
+    this.investService.loadAllPlayers().finally(() => {
+      this.initialized.set(true);
+    });
+  }
+
+  private async loadPlayersForTab(tab: string) {
+    switch (tab) {
+      case 'jugadores':
+        await this.investService.loadAvailablePlayers();
+        break;
+      case 'vip':
+        await this.investService.loadVipPlayers();
+        break;
+      case 'comprados':
+        await this.investService.loadBoughtPlayers();
+        break;
+    }
   }
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;

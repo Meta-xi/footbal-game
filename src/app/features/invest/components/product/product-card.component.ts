@@ -31,8 +31,10 @@ import { NgOptimizedImage } from '@angular/common';
 
         <!-- Botón -->
         <button (click)="onBuy($event)" 
-                class="w-full py-1.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-[8px] font-black text-teal-400 text-glow-cyan uppercase tracking-wider active:scale-95 transition-all">
-          Fichar
+                [class]="isBought() 
+                  ? 'w-full py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-[8px] font-black text-amber-400 text-glow-amber uppercase tracking-wider active:scale-95 transition-all'
+                  : 'w-full py-1.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-[8px] font-black text-teal-400 text-glow-cyan uppercase tracking-wider active:scale-95 transition-all'">
+          {{ isBought() ? 'Ver detalles' : 'Fichar' }}
         </button>
       </article>
     }
@@ -45,6 +47,7 @@ import { NgOptimizedImage } from '@angular/common';
 export class ProductCardComponent {
   buy = output<any>();
   product = input<any>();
+  isBought = input<boolean>(false);
 
   onBuy(event: Event) {
     event.stopPropagation();
