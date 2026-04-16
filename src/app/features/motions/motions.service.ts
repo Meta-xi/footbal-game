@@ -296,11 +296,21 @@ export class MotionsService {
         currency: 'COP',
         icon: 'social/icons/Whatsapp_37229.png',
         completed: false,
+        status: 'inactive',
         category: null
       };
     }
 
     const categoryStr = this.mapCategoryToString(missionData.category);
+    // state: 0 = activa, 1 = completada, null = inactiva
+    // IMPORTANTE: si existe missionReportDetails, la misión ya fue reclamada aunque state sea 0
+    const hasReport = b.misionReportDetails !== null;
+    const status: 'active' | 'completed' | 'inactive' = 
+      b.state === 1 ? 'completed' : 
+      b.state === 0 && hasReport ? 'completed' :  // tiene reporte = ya reclamada
+      b.state === 0 ? 'active' : 
+      'inactive';
+
     return {
       id: String(missionData.id),
       title: missionData.misionInfo,
@@ -308,7 +318,8 @@ export class MotionsService {
       reward: missionData.misionReward,
       currency: 'COP',
       icon: this.getIconForCategory(missionData.category),
-      completed: false,
+      completed: status === 'completed',
+      status: status,
       category: categoryStr
     };
   }
@@ -408,7 +419,7 @@ export class MotionsService {
     const m = this.selectedMission();
     if (m) {
       this.closeModal();
-      await this.claimMission(Number(m.id));
+      await this.activateMission(Number(m.id));
     }
   }
 
@@ -471,7 +482,42 @@ export class MotionsService {
     }
   }
 
-  // Claim a mission via backend
+  // Activate a mission via backend (no confetti, no sound, simple toast)
+  async activateMission(missionId: number): Promise<void> {
+    const missions = this.missions();
+    const mission = missions.find(m => m.id === String(missionId));
+    if (!mission) {
+      this.errorHandler.showToast('Misión no encontrada.', 'error');
+      return;
+    }
+
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      this.errorHandler.showToast('No autorizado. Inicia sesión nuevamente.', 'error');
+      return;
+    }
+
+    try {
+      await firstValueFrom(
+        this.httpClient.post(
+          `${environment.apiBaseUrl}Misions/ActivateMision`,
+          {
+            misionId: missionId,
+            timestamp: Date.now(),
+            token,
+          }
+        )
+      );
+
+      // Show simple activation message - NO confetti, NO sound
+      this.errorHandler.showToast('Misión activada correctamente', 'success');
+    } catch (err) {
+      console.error('Failed to activate mission:', err);
+      this.errorHandler.showToast('Error al activar la misión. Intenta de nuevo.', 'error');
+    }
+  }
+
+  // Claim a mission via backend (legacy - kept for reference)
   async claimMission(missionId: number): Promise<void> {
     const missions = this.missions();
     const mission = missions.find(m => m.id === String(missionId));

@@ -21,6 +21,7 @@ export interface Mission {
   currency: string;
   icon: string;
   completed: boolean;
+  status: 'active' | 'completed' | 'inactive';
   category?: string | null;
 }
 

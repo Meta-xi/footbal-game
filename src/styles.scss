@@ -642,6 +642,20 @@
     color: white;
   }
 
+  /* Disabled button */
+  .lg-btn-disabled {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 9999px;
+    box-shadow: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    transition: all var(--lg-duration-base) ease;
+  }
+
   /* Icon button */
   .lg-icon-btn {
     background: var(--lg-glass-fill);

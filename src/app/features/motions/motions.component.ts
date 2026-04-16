@@ -150,39 +150,60 @@ import { Mission } from '../../models/mision.model';
                   }
                 </div>
               }
-              @case ('Whatsapp') {
-                <div class="flex flex-col gap-3 p-3">
+@case ('Whatsapp') {
+                <div class="flex flex-col gap-2 p-2">
                   @for (mission of whatsappMissions(); track mission.id) {
                     <article (click)="openMission(mission)"
-                      class="lg-module-card group cursor-pointer !p-4 !border-white/10 hover:!border-cyan-500/30 active:scale-[0.98] transition-all duration-300"
-                      [class.opacity-50]="mission.completed">
-                      <div class="flex items-center gap-4">
+                      class="lg-module-card group cursor-pointer !p-3 !border-white/10 hover:!border-green-500/30 active:scale-[0.98] transition-all duration-300">
+                      <div class="flex items-center gap-3">
                         <!-- Icon -->
-                        <div class="relative flex-shrink-0 w-12 h-12">
-                          <div class="absolute inset-0 bg-green-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div class="relative z-10 w-full h-full lg-bubble flex items-center justify-center p-2.5 backdrop-blur-2xl bg-white/[0.05] border border-white/10 group-hover:border-green-500/30 transition-colors">
-                            <img [ngSrc]="mission.icon" [alt]="mission.title" width="24" height="24" class="object-contain">
+                        <div class="relative flex-shrink-0 w-10 h-10">
+                          <div class="absolute inset-0 bg-green-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            [class.bg-emerald-500/10]="mission.status === 'completed'"
+                            [class.bg-white/5]="mission.status === 'inactive'"></div>
+                          <div class="relative z-10 w-full h-full lg-bubble flex items-center justify-center p-2 backdrop-blur-2xl bg-white/[0.05] border border-white/10 group-hover:border-green-500/30 transition-colors"
+                            [class.border-emerald-500/30]="mission.status === 'completed'"
+                            [class.border-white/5]="mission.status === 'inactive'">
+                            <img [ngSrc]="mission.icon" [alt]="mission.title" width="20" height="20" class="object-contain">
                           </div>
                         </div>
                         <!-- Content -->
                         <div class="flex-1 min-w-0">
-                          <h3 class="text-sm font-bold text-white tracking-tight truncate">{{ mission.title }}</h3>
-                          <div class="flex items-center gap-1.5 mt-1">
-                            <span class="text-xs font-black text-green-400 tracking-tight text-glow-emerald">+{{ mission.reward | number }}</span>
-                            <span class="text-[9px] font-bold text-green-500/40 uppercase tracking-wider">COP</span>
+                          <h3 class="text-xs font-bold text-white tracking-tight truncate">{{ mission.title }}</h3>
+                          <div class="flex items-center gap-1 mt-0.5">
+                            <span class="text-xs font-black tracking-tight"
+                              [class.text-green-400]="mission.status === 'active'"
+                              [class.text-emerald-400]="mission.status === 'completed'"
+                              [class.text-white/40]="mission.status === 'inactive'"
+                              [class.text-glow-emerald]="mission.status === 'completed'">
+                              +{{ mission.reward | number }}</span>
+                            <span class="text-[8px] font-bold uppercase tracking-wider"
+                              [class.text-green-500/40]="mission.status === 'active'"
+                              [class.text-emerald-500/40]="mission.status === 'completed'"
+                              [class.text-white/30]="mission.status === 'inactive'">COP</span>
                           </div>
                         </div>
-                        <!-- Indicator -->
+                        <!-- Status Indicator -->
                         <div class="flex-shrink-0">
-                          @if (mission.completed) {
-                            <div class="lg-status-badge !py-1 !px-2 !text-[8px] border-green-500/30 accent-emerald">
-                              <span class="lg-dot lg-dot-active"></span>
-                              Listo
-                            </div>
-                          } @else {
-                            <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/30 group-hover:text-white group-hover:bg-green-500/20 group-hover:border-green-500/30 transition-all">
-                              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M14 5l7 7-7 7" /></svg>
-                            </div>
+                          @switch (mission.status) {
+                            @case ('active') {
+                              <div class="text-[9px] font-bold px-2 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-1">
+                                <span class="w-1 h-1 rounded-full bg-green-400 animate-pulse"></span>
+                                Activa
+                              </div>
+                            }
+                            @case ('completed') {
+                              <div class="text-[9px] font-bold px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                                <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                Completada
+                              </div>
+                            }
+                            @case ('inactive') {
+                              <div class="text-[9px] font-bold px-2 py-1 rounded-full bg-white/5 text-white/40 border border-white/10 flex items-center gap-1">
+                                <span class="w-1 h-1 rounded-full bg-white/20"></span>
+                                Pendiente
+                              </div>
+                            }
                           }
                         </div>
                       </div>
@@ -238,39 +259,60 @@ import { Mission } from '../../models/mision.model';
                   </button>
                 </div>
               }
-              @default {
-                <div class="flex flex-col gap-3 p-3">
+@default {
+                <div class="flex flex-col gap-2 p-2">
                   @for (mission of missions(); track mission.id) {
                     <article (click)="openMission(mission)"
-                      class="lg-module-card group cursor-pointer !p-4 !border-white/10 hover:!border-cyan-500/30 active:scale-[0.98] transition-all duration-300"
-                      [class.opacity-50]="mission.completed">
-                      <div class="flex items-center gap-4">
+                      class="lg-module-card group cursor-pointer !p-3 !border-white/10 hover:!border-cyan-500/30 active:scale-[0.98] transition-all duration-300">
+                      <div class="flex items-center gap-3">
                         <!-- Icon -->
-                        <div class="relative flex-shrink-0 w-12 h-12">
-                          <div class="absolute inset-0 bg-cyan-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div class="relative z-10 w-full h-full lg-bubble flex items-center justify-center p-2.5 backdrop-blur-2xl bg-white/[0.05] border border-white/10 group-hover:border-cyan-500/30 transition-colors">
-                            <img [ngSrc]="mission.icon" [alt]="mission.title" width="24" height="24" class="object-contain">
+                        <div class="relative flex-shrink-0 w-10 h-10">
+                          <div class="absolute inset-0 bg-cyan-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            [class.bg-emerald-500/10]="mission.status === 'completed'"
+                            [class.bg-white/5]="mission.status === 'inactive'"></div>
+                          <div class="relative z-10 w-full h-full lg-bubble flex items-center justify-center p-2 backdrop-blur-2xl bg-white/[0.05] border border-white/10 group-hover:border-cyan-500/30 transition-colors"
+                            [class.border-emerald-500/30]="mission.status === 'completed'"
+                            [class.border-white/5]="mission.status === 'inactive'">
+                            <img [ngSrc]="mission.icon" [alt]="mission.title" width="20" height="20" class="object-contain">
                           </div>
                         </div>
                         <!-- Content -->
                         <div class="flex-1 min-w-0">
-                          <h3 class="text-sm font-bold text-white tracking-tight truncate">{{ mission.title }}</h3>
-                          <div class="flex items-center gap-1.5 mt-1">
-                            <span class="text-xs font-black text-cyan-400 tracking-tight text-glow-emerald">+{{ mission.reward | number }}</span>
-                            <span class="text-[9px] font-bold text-cyan-500/40 uppercase tracking-wider">COP</span>
+                          <h3 class="text-xs font-bold text-white tracking-tight truncate">{{ mission.title }}</h3>
+                          <div class="flex items-center gap-1 mt-0.5">
+                            <span class="text-xs font-black tracking-tight"
+                              [class.text-cyan-400]="mission.status === 'active'"
+                              [class.text-emerald-400]="mission.status === 'completed'"
+                              [class.text-white/40]="mission.status === 'inactive'"
+                              [class.text-glow-emerald]="mission.status === 'completed'">
+                              +{{ mission.reward | number }}</span>
+                            <span class="text-[8px] font-bold uppercase tracking-wider"
+                              [class.text-cyan-500/40]="mission.status === 'active'"
+                              [class.text-emerald-500/40]="mission.status === 'completed'"
+                              [class.text-white/30]="mission.status === 'inactive'">COP</span>
                           </div>
                         </div>
-                        <!-- Indicator -->
+                        <!-- Status Indicator -->
                         <div class="flex-shrink-0">
-                          @if (mission.completed) {
-                            <div class="lg-status-badge !py-1 !px-2 !text-[8px] border-green-500/30 accent-emerald">
-                              <span class="lg-dot lg-dot-active"></span>
-                              Listo
-                            </div>
-                          } @else {
-                            <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/30 group-hover:text-white group-hover:bg-cyan-500/20 group-hover:border-cyan-500/30 transition-all">
-                              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M14 5l7 7-7 7" /></svg>
-                            </div>
+                          @switch (mission.status) {
+                            @case ('active') {
+                              <div class="text-[9px] font-bold px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center gap-1">
+                                <span class="w-1 h-1 rounded-full bg-cyan-400 animate-pulse"></span>
+                                Activa
+                              </div>
+                            }
+                            @case ('completed') {
+                              <div class="text-[9px] font-bold px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                                <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                Completada
+                              </div>
+                            }
+                            @case ('inactive') {
+                              <div class="text-[9px] font-bold px-2 py-1 rounded-full bg-white/5 text-white/40 border border-white/10 flex items-center gap-1">
+                                <span class="w-1 h-1 rounded-full bg-white/20"></span>
+                                Pendiente
+                              </div>
+                            }
                           }
                         </div>
                       </div>
@@ -305,40 +347,74 @@ import { Mission } from '../../models/mision.model';
             <!-- Horizontal Content Row -->
             <div class="flex items-center gap-4 mb-4 z-10">
               <!-- Icon: Official lg-bubble -->
-              <div class="relative flex-shrink-0 w-14 h-14">
-                 <div class="absolute inset-0 bg-blue-500/10 blur-xl rounded-full"></div>
-                 <div class="relative z-10 w-full h-full lg-bubble flex items-center justify-center p-2.5 backdrop-blur-3xl bg-white/[0.03]">
-                   <img [ngSrc]="mission.icon" [alt]="mission.title" width="32" height="32" class="object-contain drop-shadow-lg">
+              <div class="relative flex-shrink-0 w-12 h-12">
+                 <div class="absolute inset-0 bg-blue-500/10 blur-xl rounded-full"
+                   [class.bg-emerald-500/10]="mission.status === 'completed'"
+                   [class.bg-white/5]="mission.status === 'inactive'"></div>
+                 <div class="relative z-10 w-full h-full lg-bubble flex items-center justify-center p-2 backdrop-blur-3xl bg-white/[0.03]"
+                   [class.border-emerald-500/30]="mission.status === 'completed'">
+                   <img [ngSrc]="mission.icon" [alt]="mission.title" width="24" height="24" class="object-contain drop-shadow-lg">
                  </div>
               </div>
 
               <!-- Title Column -->
               <div class="flex flex-col flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  @switch (mission.status) {
+                    @case ('active') {
+                      <span class="text-[8px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">ACTIVA</span>
+                    }
+                    @case ('completed') {
+                      <span class="text-[8px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">COMPLETADA</span>
+                    }
+                    @case ('inactive') {
+                      <span class="text-[8px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-white/40 border border-white/10">PENDIENTE</span>
+                    }
+                  }
+                </div>
                 <h3 class="text-sm font-bold text-white tracking-tight leading-tight">{{ mission.title }}</h3>
-                <p class="text-[10px] text-white/40 leading-snug line-clamp-2 mt-0.5">{{ mission.description }}</p>
+                <p class="text-[9px] text-white/40 leading-snug line-clamp-2 mt-0.5">{{ mission.description }}</p>
               </div>
 
               <!-- Close Button -->
               <button (click)="closeModal()" aria-label="Cerrar misión"
-                class="lg-icon-btn w-7 h-7 text-white/40 hover:text-white transition-all active:scale-90 flex-shrink-0 border-white/10">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                class="lg-icon-btn w-6 h-6 text-white/40 hover:text-white transition-all active:scale-90 flex-shrink-0 border-white/10">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
             
             <!-- Bottom Action Row (Stacked) -->
-            <div class="flex flex-col gap-2.5 z-10 w-full mt-1">
+            <div class="flex flex-col gap-2 z-10 w-full mt-1">
               <!-- Reward Tag (Full Width) -->
-              <div class="lg-card-card py-2.5 px-4 flex items-center justify-center gap-2 border-emerald-500/10 bg-emerald-500/5 backdrop-blur-2xl w-full">
-                 <span class="text-[9px] font-bold text-emerald-400/40 uppercase tracking-widest">RECOMPENSA</span>
-                 <span class="text-lg font-black text-emerald-400 tracking-tight">+{{ mission.reward | number }}</span>
-                 <span class="text-[10px] font-bold text-emerald-500/30">COP</span>
+              <div class="lg-card-card py-2 px-3 flex items-center justify-center gap-2 border-emerald-500/10 bg-emerald-500/5 backdrop-blur-2xl w-full">
+                 <span class="text-[8px] font-bold text-emerald-400/40 uppercase tracking-widest">RECOMPENSA</span>
+                 <span class="text-base font-black tracking-tight"
+                   [class.text-emerald-400]="mission.status !== 'inactive'"
+                   [class.text-white/40]="mission.status === 'inactive'">+{{ mission.reward | number }}</span>
+                 <span class="text-[9px] font-bold text-emerald-500/30">COP</span>
               </div>
 
               <!-- Action Button (Full Width) -->
-              <button (click)="goToMission()" class="w-full py-3 lg-btn-primary text-[12px] font-bold tracking-[0.2em] active:scale-[0.97] transition-all flex items-center justify-center gap-3 border-white/10 uppercase">
-                <span>Ir Ahora</span>
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path d="M14 5l7 7-7 7" /></svg>
-              </button>
+              @switch (mission.status) {
+                @case ('active') {
+                  <button disabled class="w-full py-2.5 lg-btn-disabled text-[11px] font-bold tracking-[0.2em] active:scale-[0.97] transition-all flex items-center justify-center gap-2 border-white/10 uppercase opacity-60 cursor-not-allowed">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    <span>En Progreso</span>
+                  </button>
+                }
+                @case ('completed') {
+                  <button disabled class="w-full py-2.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold tracking-[0.2em] active:scale-[0.97] transition-all flex items-center justify-center gap-2 uppercase opacity-80 cursor-not-allowed">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    <span>Completada</span>
+                  </button>
+                }
+                @case ('inactive') {
+                  <button (click)="goToMission()" class="w-full py-2.5 lg-btn-primary text-[11px] font-bold tracking-[0.2em] active:scale-[0.97] transition-all flex items-center justify-center gap-2 border-white/10 uppercase">
+                    <span>Ir Ahora</span>
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path d="M14 5l7 7-7 7" /></svg>
+                  </button>
+                }
+              }
             </div>
           </div>
         }
