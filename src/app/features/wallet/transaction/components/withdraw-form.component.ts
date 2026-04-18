@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, input, viewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { UserStatusService } from '../../../../core/services/user-status.service';
 import { WalletService } from '../../../../core/services/wallet.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -18,11 +19,7 @@ import { BalanceComponent } from '../../../../shared/components/balance/balance.
         />
       }
 
-      @if (transactionMessage() && !showSuccess() && !isProcessing()) {
-        <div class="fixed top-20 left-1/2 -translate-x-1/2 z-[200] lg-module-card px-5 py-3 border-red-500/20 bg-red-500/[0.025] text-red-400 text-[10px] font-black uppercase tracking-widest animate-shake text-center whitespace-nowrap">
-          {{ transactionMessage() }}
-        </div>
-      }
+      <!-- Custom toast removed, replaced by ErrorHandlerService -->
 
       <header class="w-full relative z-10 pt-safe-top px-5 h-14 flex items-center justify-between">
         <button (click)="goBack()" class="w-10 h-10 lg-icon-btn active:scale-90 transition-transform">
@@ -130,8 +127,7 @@ import { BalanceComponent } from '../../../../shared/components/balance/balance.
     .pt-safe-top { padding-top: env(safe-area-inset-top, 1rem); }
     .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.2, 1, 0.3, 1) forwards; }
     @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
-    @keyframes shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-4px); } 40%, 60% { transform: translateX(4px); } }
+    /* .animate-shake removed as it was only used by the custom toast */
     .text-glow-amber { text-shadow: 0 0 15px rgba(251, 191, 36, 0.4); }
     input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   `],
@@ -142,6 +138,7 @@ export class WithdrawFormComponent {
   private userStatusService = inject(UserStatusService);
   private walletService = inject(WalletService);
   private authService = inject(AuthService);
+  private errorHandler = inject(ErrorHandlerService);
 
   amountInputField = viewChild<ElementRef<HTMLInputElement>>('amountInputField');
 
@@ -150,7 +147,7 @@ export class WithdrawFormComponent {
 
   isProcessing = signal(false);
   showSuccess = signal(false);
-  transactionMessage = signal('');
+  // transactionMessage signal removed, replaced by ErrorHandlerService
   amount = signal(0);
   selectedAccount = signal('');
   readonly balance = computed(() => this.userStatusService.wallet()?.principalBalance ?? 0);
@@ -197,11 +194,9 @@ export class WithdrawFormComponent {
       const text = await navigator.clipboard.readText();
       this.selectedAccount.set(text);
       input.value = text;
-      this.transactionMessage.set('Dirección pegada');
-      setTimeout(() => this.transactionMessage.set(''), 2000);
+      this.errorHandler.showSuccessToast('Dirección pegada');
     } catch {
-      this.transactionMessage.set('Error al pegar');
-      setTimeout(() => this.transactionMessage.set(''), 2000);
+      this.errorHandler.showErrorToast('Error al pegar');
     }
   }
 
@@ -210,26 +205,22 @@ export class WithdrawFormComponent {
   async processWithdraw() {
     const amount = this.amount();
     if (amount <= 0) {
-      this.transactionMessage.set('Monto inválido');
-      setTimeout(() => this.transactionMessage.set(''), 3000);
+      this.errorHandler.showErrorToast('Monto inválido');
       return;
     }
     if (this.balance() < amount) {
-      this.transactionMessage.set('Saldo insuficiente');
-      setTimeout(() => this.transactionMessage.set(''), 3000);
+      this.errorHandler.showErrorToast('Saldo insuficiente');
       return;
     }
     if (!this.selectedAccount()) {
-      this.transactionMessage.set('Especifica destino');
-      setTimeout(() => this.transactionMessage.set(''), 3000);
+      this.errorHandler.showErrorToast('Especifica destino');
       return;
     }
 
     const user = this.authService.user();
     const token = this.authService.authToken();
     if (!user?.id || !token) {
-      this.transactionMessage.set('Sesión expirada');
-      setTimeout(() => this.transactionMessage.set(''), 3000);
+      this.errorHandler.showErrorToast('Sesión expirada');
       return;
     }
 
@@ -246,8 +237,7 @@ export class WithdrawFormComponent {
     this.isProcessing.set(false);
 
     if (!result.success) {
-      this.transactionMessage.set(result.error ?? 'Error al procesar el retiro');
-      setTimeout(() => this.transactionMessage.set(''), 3000);
+      this.errorHandler.showErrorToast(result.error ?? 'Error al procesar el retiro');
       return;
     }
 
