@@ -34,7 +34,8 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
             <!-- Player image -->
             <div class="relative w-20 h-20 flex-shrink-0">
               <div class="w-full h-full rounded-2xl overflow-hidden relative"
-                   style="background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(255,208,96,0.1)); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                   [style.background]="player().isVIP ? 'linear-gradient(135deg, rgba(255,208,96,0.25), rgba(245,158,11,0.2))' : 'linear-gradient(135deg, rgba(0,212,255,0.15), rgba(255,208,96,0.1))'"
+                   style="border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
                 <img [src]="player().imagen" [alt]="player().name"
                      class="w-full h-full object-contain p-1"
                      width="80" height="80">
@@ -49,7 +50,8 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
 
             <!-- Info -->
             <div class="flex-1 min-w-0">
-              <h2 id="player-title" class="text-lg font-black text-white tracking-tight leading-tight truncate">
+              <h2 id="player-title" class="text-lg font-black text-white tracking-tight leading-tight truncate"
+                  [style.textShadow]="player().isVIP ? '0 0 8px rgba(255,208,96,0.6)' : 'none'">
                 {{ player().name }}
               </h2>
               <p class="text-white/35 text-xs font-medium mt-0.5">
@@ -103,7 +105,7 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
                style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" style="color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <svg class="w-3.5 h-3.5" [style.color]="player().isVIP ? '#ffd060' : '#10b981'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                 </svg>
                 <span class="text-[10px] font-bold uppercase tracking-wider" style="color: rgba(16,185,129,0.6);">Ganancia</span>
