@@ -241,8 +241,8 @@ export class SocialComponent implements OnInit {
     }
 
     const shareData: ShareData = {
-      title: 'Football Game',
-      text: '¡Únete a Football Game y gana premios!',
+      title: "FIFA' Empire 🤑",
+      text: `⚽️ Juega, invirte, mejora, contrata Jugadores, compite, toca y gana $COP\n\n🎁 Recibe gratis 500 $COP💰 y 5 Tickets 🎫 si comienzas hoy mismo!\n\n${url}`,
       url,
     };
 
@@ -261,7 +261,8 @@ export class SocialComponent implements OnInit {
     // Fallback en WebView/restricciones: compartir por Telegram dentro del Mini App
     const tg = (window as any).Telegram?.WebApp;
     if (tg?.openTelegramLink) {
-      const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareData.text ?? '')}`;
+      const text = `⚽️ Juega, invirte, mejora, contrata Jugadores, compite, toca y gana $COP\n\n🎁 Recibe gratis 500 $COP💰 y 5 Tickets 🎫 si comienzas hoy mismo!`;
+      const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
       tg.openTelegramLink(telegramShareUrl);
       return;
     }
@@ -279,9 +280,14 @@ export class SocialComponent implements OnInit {
     await this.copyToClipboard(url);
   }
 
+  private getShareMessage(url: string): string {
+    return `FIFA' Empire 🤑\n⚽️ Juega, invirte, mejora, contrata Jugadores, compite, toca y gana $COP\n\n🎁 Recibe gratis 500 $COP💰 y 5 Tickets 🎫 si comienzas hoy mismo!\n\n${url}`;
+  }
+
   private async copyToClipboard(text: string): Promise<void> {
     try {
-      await navigator.clipboard.writeText(text);
+      const message = this.getShareMessage(text);
+      await navigator.clipboard.writeText(message);
       this.errorHandler.showToast('Enlace copiado', 'success');
     } catch {
       this.errorHandler.showToast('Error al copiar enlace', 'error');
