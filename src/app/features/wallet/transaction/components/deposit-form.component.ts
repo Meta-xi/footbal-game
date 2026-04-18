@@ -73,15 +73,27 @@ import { PaymentScreenComponent } from '../payment-screen.component';
 
             <!-- Invoice URL -->
             @if (pendingDepositInvoiceUrl()) {
-              <div class="w-full flex flex-col gap-3 mb-6">
-                <div class="flex flex-col gap-1 p-3 bg-white/[0.02] rounded-xl border border-white/5">
-                  <span class="text-[8px] font-black text-white/20 uppercase tracking-[0.2em]">Enlace de Factura</span>
-                  <div class="flex items-center gap-2">
-                    <span class="text-[9px] font-bold text-cyan-400 uppercase tracking-wider truncate flex-1">{{ pendingDepositInvoiceUrl() }}</span>
-                    <button (click)="copyPendingInvoiceUrl()" class="flex-shrink-0 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/[0.08] text-white/70 active:scale-95 transition-all">
-                      <span class="text-[8px] font-black uppercase tracking-widest">Copiar</span>
-                    </button>
+              <div class="w-full flex flex-col gap-2 mb-6">
+                <span class="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] px-2">Enlace de Factura</span>
+                <div class="relative w-full">
+                  <div class="w-full h-14 pl-5 pr-16 rounded-2xl flex items-center bg-white/[0.03] border border-white/10 shadow-inner-sm">
+                    <span class="font-mono text-xs text-cyan-300/80 truncate">
+                      {{ pendingDepositInvoiceUrl() }}
+                    </span>
                   </div>
+                  <button (click)="copyPendingInvoiceUrl()" 
+                    class="absolute top-1/2 right-3 -translate-y-1/2 w-10 h-10 rounded-lg flex items-center justify-center transition-all active:scale-90"
+                    [ngClass]="justCopied() ? 'bg-teal-500/20' : 'bg-white/5 hover:bg-white/10'">
+                    @if (justCopied()) {
+                      <svg class="w-5 h-5 text-teal-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    } @else {
+                      <svg class="w-5 h-5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    }
+                  </button>
                 </div>
               </div>
             }
@@ -347,6 +359,7 @@ export class DepositFormComponent {
   showPendingDeposit = signal(false);
   pendingDepositInvoiceUrl = signal('');
   pendingDepositMessage = signal('');
+  justCopied = signal(false);
 
   // Deposit response modal signals
   showDepositResponse = signal(false);
@@ -499,33 +512,28 @@ export class DepositFormComponent {
       token: token,
       uid: user.id,
       transactionId: null as any
-    }).then((result) => {
+    }).then(result => {
       this.isSubmitting.set(false);
-      
-      if (result.success) {
-        // Show deposit response modal with backend data
-        this.depositResponseMessage.set(result.message || 'Tu depósito está siendo procesado');
-        this.depositTxnId.set(result.txnId || '');
-        this.depositOrderNumber.set(result.orderNumber || '');
-        this.depositInvoiceUrl.set(result.invoiceUrl || '');
-        
-        // Open invoiceUrl in new tab if available (crypto deposits)
-        if (result.invoiceUrl) {
-          window.open(result.invoiceUrl, '_blank');
-        }
-        
+      if (result.success && result.invoiceUrl) {
+        // Successful creation, show the response modal
+        this.depositResponseMessage.set(result.message ?? 'Depósito iniciado');
+        this.depositTxnId.set(result.txnId ?? '');
+        this.depositOrderNumber.set(result.orderNumber ?? '');
+        this.depositInvoiceUrl.set(result.invoiceUrl ?? '');
         this.showDepositResponse.set(true);
+      } else if (!result.success && result.invoiceUrl) {
+        // Pending deposit case (404)
+        this.pendingDepositMessage.set(result.message ?? 'Ya existe un depósito pendiente.');
+        this.pendingDepositInvoiceUrl.set(result.invoiceUrl);
+        this.showPendingDeposit.set(true);
       } else {
-        // Handle pending deposit error (404)
-        if (result.message && result.message.includes('pendiente')) {
-          this.errorHandler.showErrorToast(result.message);
-        } else {
-          this.errorHandler.showErrorToast(result.error || 'Error al procesar el depósito');
-        }
+        // Generic error case
+        this.errorHandler.showErrorToast(result.error ?? 'Ocurrió un error desconocido.');
       }
     }).catch((err) => {
       this.isSubmitting.set(false);
-      this.errorHandler.showErrorToast('Error de conexión. Intenta de nuevo.');
+      const errorString = err instanceof Error ? err.message : JSON.stringify(err);
+      this.errorHandler.showErrorToast('DEBUG .CATCH: ' + errorString);
     });
   }
 
@@ -580,56 +588,31 @@ export class DepositFormComponent {
       token: token,
       uid: user.id,
       transactionId: null as any  // null for crypto - pending blockchain confirmation
-    }).then((result) => {
+    }).then(result => {
       this.isSubmitting.set(false);
-      
-      if (result.success) {
-        // Show deposit response modal with backend data
+      if (result.success && result.invoiceUrl) {
+        // Success, close this modal and show the response modal
         this.showCryptoModal.set(false);
-        this.depositResponseMessage.set(result.message || 'Tu depósito está siendo procesado');
-        this.depositTxnId.set(result.txnId || '');
-        this.depositOrderNumber.set(result.orderNumber || '');
-        this.depositInvoiceUrl.set(result.invoiceUrl || '');
-        
-        // Open invoiceUrl in new tab if available (crypto deposits)
-        if (result.invoiceUrl) {
-          window.open(result.invoiceUrl, '_blank');
-        }
-        
+        this.depositResponseMessage.set(result.message ?? 'Depósito iniciado');
+        this.depositTxnId.set(result.txnId ?? '');
+        this.depositOrderNumber.set(result.orderNumber ?? '');
+        this.depositInvoiceUrl.set(result.invoiceUrl ?? '');
         this.showDepositResponse.set(true);
+      } else if (!result.success && result.invoiceUrl) {
+        // Pending deposit case (404)
+        this.showCryptoModal.set(false); // Close current modal
+        this.pendingDepositMessage.set(result.message ?? 'Ya existe un depósito pendiente.');
+        this.pendingDepositInvoiceUrl.set(result.invoiceUrl);
+        this.showPendingDeposit.set(true);
       } else {
-        // Check if it's a pending deposit (has invoiceUrl in error response)
-        if (result.invoiceUrl) {
-          this.showCryptoModal.set(false);
-          this.pendingDepositMessage.set(result.message || 'Ya existe un depósito pendiente');
-          this.pendingDepositInvoiceUrl.set(result.invoiceUrl);
-          this.showPendingDeposit.set(true);
-        } else {
-          // Phase 3.5: Error - keep modal open, show error message
-          this.modalErrorMessage.set(result.error || 'Error al procesar el depósito');
-        }
+        // Generic error inside the modal
+        this.modalErrorMessage.set(result.error ?? 'Ocurrió un error desconocido.');
       }
     }).catch((err: unknown) => {
       this.isSubmitting.set(false);
-      
-      // Handle HTTP errors with server message
-      const httpErr = err as { status?: number; error?: { message?: string; invoiceUrl?: string } };
-      if (httpErr?.status === 404 && httpErr?.error?.message) {
-        // Check if there's an invoiceUrl in the error
-        const invoiceUrl = httpErr?.error?.invoiceUrl;
-        if (invoiceUrl) {
-          this.showCryptoModal.set(false);
-          this.pendingDepositMessage.set(httpErr.error.message);
-          this.pendingDepositInvoiceUrl.set(invoiceUrl);
-          this.showPendingDeposit.set(true);
-        } else {
-          this.modalErrorMessage.set(httpErr.error.message);
-        }
-      } else if (httpErr?.error?.message) {
-        this.modalErrorMessage.set(httpErr.error.message);
-      } else {
-        this.modalErrorMessage.set('Error de conexión. Intenta de nuevo.');
-      }
+      // Try to stringify the error object, which might have more details
+      const errorString = err instanceof Error ? err.message : JSON.stringify(err);
+      this.modalErrorMessage.set('DEBUG .CATCH: ' + errorString);
     });
   }
 
@@ -658,8 +641,11 @@ export class DepositFormComponent {
   }
 
   async copyPendingInvoiceUrl() {
+    if (this.justCopied()) return;
     await navigator.clipboard.writeText(this.pendingDepositInvoiceUrl());
     this.errorHandler.showSuccessToast('URL copiada');
+    this.justCopied.set(true);
+    setTimeout(() => this.justCopied.set(false), 2000);
   }
 
 }

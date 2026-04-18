@@ -157,23 +157,27 @@ async addWithdrawal(params: {
         ? (httpError.error as ApiMessageResponse).message
         : null;
 
+      // Handle pending deposit which can come as a 400 or 404
+      if (httpError?.status === 400 || httpError?.status === 404) {
+        const invoiceUrl = httpError?.error && typeof httpError.error === 'object' && 'invoiceUrl' in httpError.error
+          ? (httpError.error as { invoiceUrl?: string }).invoiceUrl
+          : undefined;
+        
+        if (invoiceUrl) {
+          return { 
+            success: false, 
+            error: serverMessage ?? 'Ya existe un depósito pendiente', 
+            message: serverMessage ?? 'Ya existe un depósito pendiente. Por favor, espera a que se procese antes de crear uno nuevo.',
+            invoiceUrl: invoiceUrl
+          };
+        }
+      }
+
       if (httpError?.status === 400) {
         return { success: false, error: serverMessage ?? 'Solicitud no válida' };
       }
       if (httpError?.status === 401) {
         return { success: false, error: 'Sesión expirada. Inicia sesión nuevamente.' };
-      }
-      if (httpError?.status === 404) {
-        // Deposit already pending - return the message and invoiceUrl from backend
-        const invoiceUrl = httpError?.error && typeof httpError.error === 'object' && 'invoiceUrl' in httpError.error
-          ? (httpError.error as { invoiceUrl?: string }).invoiceUrl
-          : undefined;
-        return { 
-          success: false, 
-          error: serverMessage ?? 'Ya existe un depósito pendiente', 
-          message: serverMessage ?? 'Ya existe un depósito pendiente. Por favor, espera a que se procese antes de crear uno nuevo.',
-          invoiceUrl: invoiceUrl
-        };
       }
       return { success: false, error: serverMessage ?? 'No se pudo procesar el depósito. Intenta de nuevo.' };
     }
