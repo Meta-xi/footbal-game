@@ -11,8 +11,9 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
 
     <!-- Bottom sheet -->
     <div class="fixed inset-0 z-[160] flex items-end justify-center" role="dialog" aria-modal="true" aria-labelledby="player-title" [attr.tabindex]="-1" #modalWrapper>
-      <div class="w-full max-w-lg relative overflow-hidden max-h-[88vh] rounded-t-[28px] animate-sheet-up"
-           style="background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 50%, #0a0a12 100%); border-top: 1px solid rgba(255,255,255,0.08); box-shadow: 0 -24px 80px rgba(0,0,0,0.8), 0 0 120px rgba(0,212,255,0.03);">
+       <div class="w-full max-w-lg relative overflow-hidden max-h-[88vh] rounded-t-[28px] animate-sheet-up"
+           style="background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 50%, #0a0a12 100%); border-top: 1px solid rgba(255,255,255,0.08);"
+           [style.boxShadow]="player().isVIP ? '0 -24px 80px rgba(0,0,0,0.8), 0 0 120px rgba(255,208,96,0.08)' : '0 -24px 80px rgba(0,0,0,0.8), 0 0 120px rgba(0,212,255,0.03)'">
 
         <!-- Top accent line -->
         <div class="absolute top-0 left-0 right-0 h-[2px]"
@@ -111,31 +112,31 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
             </div>
             <div class="grid grid-cols-2 gap-2">
               <!-- Fila 1: Hora + Día -->
-              <div class="text-center py-1.5 rounded-xl" style="background: rgba(255,255,255,0.03);">
+              <div class="text-center py-1.5 rounded-xl" style="background: rgba(255,255,255,0.03); box-shadow: inset 3px 0 4px 0 rgba(255,208,96,0.9);">
                 <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(255,255,255,0.25);">Hora</p>
                 <div class="flex items-center justify-center gap-1">
-                  <img src="shared/balance/coin.webp" alt="" width="12" height="12" class="object-contain" aria-hidden="true">
-                  <p class="text-sm font-black text-white tabular-nums">+{{ hourlyEarnings() | number:'1.0-0' }}</p>
+                  <p class="text-base font-black text-white tabular-nums">+{{ hourlyEarnings() | number:'1.0-0' }}</p>
+                  <img src="shared/balance/coin.webp" alt="" width="20" height="20" class="object-contain" aria-hidden="true">
                 </div>
               </div>
-              <div class="text-center py-1.5 rounded-xl" style="background: rgba(255,255,255,0.03);">
+              <div class="text-center py-1.5 rounded-xl" style="background: rgba(255,255,255,0.03); box-shadow: inset 3px 0 4px 0 rgba(255,208,96,0.9);">
                 <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(255,255,255,0.25);">D&iacute;a</p>
                 <div class="flex items-center justify-center gap-1">
-                  <img src="shared/balance/coin.webp" alt="" width="12" height="12" class="object-contain" aria-hidden="true">
-                  <p class="text-sm font-black text-white tabular-nums">+{{ dailyEarnings() | number:'1.0-0' }}</p>
+                  <p class="text-base font-black text-white tabular-nums">+{{ dailyEarnings() | number:'1.0-0' }}</p>
+                  <img src="shared/balance/coin.webp" alt="" width="20" height="20" class="object-contain" aria-hidden="true">
                 </div>
               </div>
               <!-- Fila 2: Total + ROI -->
-              <div class="text-center py-1.5 rounded-xl" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.12);">
+              <div class="text-center py-1.5 rounded-xl" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.12); box-shadow: inset 3px 0 4px 0 rgba(255,208,96,0.9);">
                 <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(16,185,129,0.5);">Total</p>
                 <div class="flex items-center justify-center gap-1">
-                  <img src="shared/balance/coin.webp" alt="" width="12" height="12" class="object-contain" aria-hidden="true">
-                  <p class="text-sm font-black tabular-nums" style="color: #34d399;">+{{ totalEarnings() | number:'1.0-0' }}</p>
+                  <p class="text-base font-black tabular-nums" style="color: #34d399;">+{{ totalEarnings() | number:'1.0-0' }}</p>
+                  <img src="shared/balance/coin.webp" alt="" width="20" height="20" class="object-contain" aria-hidden="true">
                 </div>
               </div>
-              <div class="text-center py-1.5 rounded-xl" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.12);">
+              <div class="text-center py-1.5 rounded-xl" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.12); box-shadow: inset 3px 0 4px 0 rgba(255,208,96,0.9);">
                 <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(16,185,129,0.5);">ROI</p>
-                <p class="text-sm font-black tabular-nums" style="color: #34d399;">+{{ roiPercent() }}%</p>
+                <p class="text-base font-black tabular-nums" style="color: #34d399;">+{{ roiPercent() }}%</p>
               </div>
             </div>
           </div>
@@ -145,7 +146,8 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
             @if (isBought()) {
               <button (click)="onClose()"
                 class="flex-1 py-3 text-sm font-bold text-white rounded-2xl active:scale-[0.97] transition-all duration-150 cursor-pointer"
-                style="background: linear-gradient(135deg, #06b6d4, #10b981); box-shadow: 0 4px 20px rgba(6,182,212,0.35), 0 0 40px rgba(16,185,129,0.15);">
+                [style.background]="player().isVIP ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #06b6d4, #10b981)'"
+                [style.boxShadow]="player().isVIP ? '0 4px 20px rgba(251,191,36,0.35), 0 0 40px rgba(245,158,11,0.15)' : '0 4px 20px rgba(6,182,212,0.35), 0 0 40px rgba(16,185,129,0.15)'">
                 Ok
               </button>
             } @else {
@@ -160,7 +162,8 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
               <button (click)="onConfirm()"
                 [disabled]="loading()"
                 class="flex-1 py-3 text-sm font-bold text-white rounded-2xl active:scale-[0.97] transition-all duration-150 cursor-pointer relative"
-                style="background: linear-gradient(135deg, #06b6d4, #10b981); box-shadow: 0 4px 20px rgba(6,182,212,0.35), 0 0 40px rgba(16,185,129,0.15);"
+                [style.background]="player().isVIP ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #06b6d4, #10b981)'"
+                [style.boxShadow]="player().isVIP ? '0 4px 20px rgba(251,191,36,0.35), 0 0 40px rgba(245,158,11,0.15)' : '0 4px 20px rgba(6,182,212,0.35), 0 0 40px rgba(16,185,129,0.15)'"
                 [class.opacity-70]="loading()"
                 [class.pointer-events-none]="loading()">
                 @if (loading()) {
