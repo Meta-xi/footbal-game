@@ -52,7 +52,7 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
                 {{ player().name }}
               </h2>
               <p class="text-white/35 text-xs font-medium mt-0.5">
-                {{ age() }} a&ntilde;os &middot; {{ player().goals }} goles
+                {{ age() }} a&ntilde;os &middot; {{ player().goals }} goles &middot; {{ player().days }} d&iacute;as
               </p>
               @if (player().lesions > 0) {
                 <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full"
@@ -109,7 +109,8 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
               </div>
               <span class="text-xs font-black tabular-nums" style="color: #10b981;">+{{ roiPercent() }}%</span>
             </div>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-2 gap-2">
+              <!-- Fila 1: Hora + Día -->
               <div class="text-center py-1.5 rounded-xl" style="background: rgba(255,255,255,0.03);">
                 <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(255,255,255,0.25);">Hora</p>
                 <p class="text-sm font-black text-white tabular-nums">+{{ hourlyEarnings() | number:'1.0-0' }}</p>
@@ -118,24 +119,15 @@ import type { InvestApiPlayer, InvestBoughtPlayer } from '../../../../models/inv
                 <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(255,255,255,0.25);">D&iacute;a</p>
                 <p class="text-sm font-black text-white tabular-nums">+{{ dailyEarnings() | number:'1.0-0' }}</p>
               </div>
+              <!-- Fila 2: Total + ROI -->
               <div class="text-center py-1.5 rounded-xl" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.12);">
                 <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(16,185,129,0.5);">Total</p>
                 <p class="text-sm font-black tabular-nums" style="color: #34d399;">+{{ totalEarnings() | number:'1.0-0' }}</p>
               </div>
-            </div>
-          </div>
-
-          <!-- Contract + Goals -->
-          <div class="grid grid-cols-2 gap-2 mb-4">
-            <div class="rounded-2xl p-3 text-center"
-                 style="background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.12);">
-              <p class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color: rgba(0,212,255,0.5);">Contrato</p>
-              <p class="text-lg font-black text-white tabular-nums">{{ player().days }} <span class="text-[10px] font-semibold" style="color: rgba(0,212,255,0.35);">d&iacute;as</span></p>
-            </div>
-            <div class="rounded-2xl p-3 text-center"
-                 style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.12);">
-              <p class="text-[9px] font-bold uppercase tracking-wider mb-1" style="color: rgba(16,185,129,0.5);">Goles</p>
-              <p class="text-lg font-black text-white tabular-nums">{{ player().goals }}</p>
+              <div class="text-center py-1.5 rounded-xl" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.12);">
+                <p class="text-[9px] font-semibold uppercase tracking-wider mb-0.5" style="color: rgba(16,185,129,0.5);">ROI</p>
+                <p class="text-sm font-black tabular-nums" style="color: #34d399;">+{{ roiPercent() }}%</p>
+              </div>
             </div>
           </div>
 
