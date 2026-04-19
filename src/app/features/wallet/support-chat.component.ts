@@ -65,7 +65,7 @@ import { ErrorHandlerService } from '../../core/services/error-handler.service';
             />
           </div>
           <button type="submit" 
-            class="w-12 h-12 flex-shrink-0 rounded-full bg-white/90 text-[#0e0228] flex items-center justify-center active:scale-90 transition-all disabled:opacity-20 disabled:scale-100" 
+            class="w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center transition-all duration-300 ease-out transform-gpu bg-cyan-400/10 border border-cyan-400/20 text-cyan-300 hover:bg-cyan-400/20 hover:text-cyan-200 hover:border-cyan-400/30 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:bg-white/5 disabled:border-white/10 disabled:text-white/20" 
             [disabled]="!newMessage().trim()">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
