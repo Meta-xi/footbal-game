@@ -190,7 +190,7 @@ interface Deposit {
                       </div>
                       <div>
                         <h3 class="text-[12px] font-black text-white tracking-widest uppercase mb-1">Nequi</h3>
-                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Recarga con Nequi desde 3000</p>
+                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Recarga con Nequi desde 30000</p>
                       </div>
                     </div>
                     <div class="w-6 h-6 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity">
@@ -209,7 +209,7 @@ interface Deposit {
                       </div>
                       <div>
                         <h3 class="text-[12px] font-black text-white tracking-widest uppercase mb-1">Daviplata</h3>
-                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Recarga con Daviplata desde 3000</p>
+                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Recarga con Daviplata desde 30000</p>
                       </div>
                     </div>
                     <div class="w-6 h-6 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity">
@@ -229,7 +229,7 @@ interface Deposit {
                       </div>
                       <div>
                         <h3 class="text-[12px] font-black text-white tracking-widest uppercase mb-1">BRE-B</h3>
-                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Recarga con BRE-B desde 3000</p>
+                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Recarga con BRE-B desde 30000</p>
                       </div>
                     </div>
                     <div class="w-6 h-6 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity">
