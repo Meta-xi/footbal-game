@@ -27,6 +27,7 @@ export enum FinanceMethod {
   NEQUI_3 = 3,
   DAVIPLATA = 4,
   PAYPAL = 5,
+  BRE_B = 6,
 }
 
 export const FinanceMethodLabels: Record<number, string> = {
@@ -36,6 +37,7 @@ export const FinanceMethodLabels: Record<number, string> = {
   3: 'Nequi 3',
   4: 'Daviplata',
   5: 'PayPal',
+  6: 'BRE-B',
 };
 
 export enum FincanceNetworks {

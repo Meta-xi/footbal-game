@@ -403,22 +403,25 @@ export class DepositFormComponent {
   selectedMethod = computed(() => this.currency() || 'NEQUI');
   isNequi = computed(() => this.selectedMethod() === 'Nequi');
   isDaviplata = computed(() => this.selectedMethod() === 'Daviplata');
+  isBREB = computed(() => this.selectedMethod() === 'BRE-B');
   isUSDT = computed(() => this.selectedMethod() === 'USDT');
   isCrypto = computed(() => ['USDT', 'BTC', 'TRX', 'BNB'].includes(this.selectedMethod()));
 
-   resolvedQrImage = computed(() => {
-     if (this.isDaviplata()) return 'wallet/qr/deviplata.jpg';
-     if (this.selectedMethod() === 'Paypal') return 'wallet/qr/paypal.jpg';
-     const channel = this.selectedChannel();
-     const qrMap: Record<string, string> = {
-       'Nequi-1': 'wallet/qr/nequi1.jpg',
-       'Nequi-2': 'wallet/qr/nequi2.jpg',
-       'Nequi-3': 'wallet/qr/nequi3.jpg',
-     };
-     return qrMap[channel] ?? 'wallet/qr/nequi1.jpg';
-   });
+resolvedQrImage = computed(() => {
+      if (this.isDaviplata()) return 'wallet/qr/deviplata.jpg';
+      if (this.selectedMethod() === 'Paypal') return 'wallet/qr/paypal.jpg';
+      if (this.selectedMethod() === 'BRE-B') return 'wallet/qr/bre-b.jpg';
+      const channel = this.selectedChannel();
+      const qrMap: Record<string, string> = {
+        'Nequi-1': 'wallet/qr/nequi1.jpg',
+        'Nequi-2': 'wallet/qr/nequi2.jpg',
+        'Nequi-3': 'wallet/qr/nequi3.jpg',
+      };
+      return qrMap[channel] ?? 'wallet/qr/nequi1.jpg';
+    });
 
   resolveOrderNumber(): string {
+    if (this.isBREB()) return '0035095215';
     if (!this.isNequi()) return '';
     const phones: Record<string, string> = {
       'Nequi-1': '3229681972',
@@ -428,16 +431,17 @@ export class DepositFormComponent {
     return phones[this.selectedChannel()] ?? phones['Nequi-1'];
   }
 
-   methodLogo = computed(() => {
-     const logoMap: Record<string, string> = {
-       'Nequi': 'wallet/colombia/nequi.png', 'Daviplata': 'wallet/colombia/daviplata.png',
-       'Plin': 'wallet/peru/plin.png', 'Yape': 'wallet/peru/yape.png',
-       'Paypal': 'wallet/main/paypal.webp',
-       'USDT': 'wallet/crypto/usdt.png', 'TRX': 'wallet/crypto/trx.png',
-       'BNB': 'wallet/crypto/bnb.png', 'BTC': 'wallet/crypto/btc.png',
-     };
-     return logoMap[this.selectedMethod()] || null;
-   });
+methodLogo = computed(() => {
+      const logoMap: Record<string, string> = {
+        'Nequi': 'wallet/colombia/nequi.png', 'Daviplata': 'wallet/colombia/daviplata.png',
+        'BRE-B': 'wallet/colombia/bre-b.webp',
+        'Plin': 'wallet/peru/plin.png', 'Yape': 'wallet/peru/yape.png',
+        'Paypal': 'wallet/main/paypal.webp',
+        'USDT': 'wallet/crypto/usdt.png', 'TRX': 'wallet/crypto/trx.png',
+        'BNB': 'wallet/crypto/bnb.png', 'BTC': 'wallet/crypto/btc.png',
+      };
+      return logoMap[this.selectedMethod()] || null;
+    });
 
   onAmountChange(event: Event) { this.amount.set(Number((event.target as HTMLInputElement).value)); }
   setAmount(val: number) { this.amount.set(val); }
@@ -499,6 +503,8 @@ export class DepositFormComponent {
       financeMethod = 4;
     } else if (this.selectedMethod() === 'Paypal') {
       financeMethod = 5;
+    } else if (this.selectedMethod() === 'BRE-B') {
+      financeMethod = 6;
     } else {
       financeMethod = 0; // Default to Crypto
     }

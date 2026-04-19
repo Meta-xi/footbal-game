@@ -189,6 +189,27 @@ interface Deposit {
                       </svg>
                     </div>
                   </article>
+
+                  @if (activeTab() === 'depositar') {
+                  <article (click)="onSheetItemClick({title: 'BRE-B', desc: '', icon: ''})"
+                    class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl rounded-2xl"
+                    style="background: linear-gradient(to right, rgba(234,179,8,0.20) 0%, rgba(234,179,8,0.18) 25%, rgba(234,179,8,0.08) 55%, transparent 75%); border-color: rgba(234,179,8,0.30);">
+                    <div class="flex items-center gap-4">
+                      <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
+                        <img ngSrc="wallet/colombia/bre-b.webp" alt="BRE-B" width="32" height="32" class="w-8 h-8 object-contain drop-shadow-lg group-hover:scale-110 transition-transform">
+                      </div>
+                      <div>
+                        <h3 class="text-[12px] font-black text-white tracking-widest uppercase mb-1">BRE-B</h3>
+                        <p class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Recarga con BRE-B desde 2500</p>
+                      </div>
+                    </div>
+                    <div class="w-6 h-6 flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity">
+                      <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </article>
+                  }
                 </div>
               </div>
             }
