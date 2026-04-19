@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ApiMessageResponse } from '../../models/user.model';
-import { generateSignedToken } from './encryption.service';
+import { generateSignedToken, EncryptionService } from './encryption.service';
 
 export interface ReferInfoResponse {
   earnLastMonth: number;
@@ -67,8 +67,6 @@ export interface UserStatusResponse {
 })
 export class UserInfoService {
   private http = inject(HttpClient);
-  private encryptionService = inject(EncryptionService);
-  // private userStatusService = inject(UserStatusService); // Removed
 
   private getBaseUrl(): string {
     return environment.apiBaseUrl;
