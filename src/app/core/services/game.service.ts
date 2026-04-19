@@ -4,7 +4,7 @@ import { environment } from '../../../environments/environment';
 import { ApiMessageResponse } from '../../models/user.model';
 import { UserStatusService } from './user-status.service';
 import { AuthService } from './auth.service';
-import { EncryptionService } from './encryption.service';
+import { generateSignedToken } from './encryption.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,8 +13,6 @@ export class GameService {
   private http = inject(HttpClient);
   private userStatusService = inject(UserStatusService);
   private authService = inject(AuthService);
-  private encryptionService = inject(EncryptionService);
-  // SECURITY FIX: Removed secretKey from client - server validates via session
 
   private getBaseUrl(): string {
     return environment.apiBaseUrl;
@@ -41,8 +39,7 @@ export class GameService {
       
 const timestamp = Math.floor(Date.now() / 1000);
       const finalUserId = userId || (this.authService.user()?.id || this.authService.user()?.Id);
-      // SECURITY FIX: Remove secret from client
-      const token = ''; // Server validates via session
+      const token = await generateSignedToken(finalUserId!, timestamp);
       
       const response = await this.http.post<ApiMessageResponse>(url, {
         earn: 0, 
@@ -92,7 +89,7 @@ const timestamp = Math.floor(Date.now() / 1000);
       
       const timestamp = Math.floor(Date.now() / 1000);
       const finalUserId = userId || (this.authService.user()?.id || this.authService.user()?.Id);
-      const token = ''; // Server validates via session
+      const token = await generateSignedToken(finalUserId!, timestamp);
       
       const response = await this.http.post<ApiMessageResponse>(url, { 
         earn, 
@@ -176,7 +173,7 @@ const timestamp = Math.floor(Date.now() / 1000);
       
       const timestamp = Math.floor(Date.now() / 1000);
       const finalUserId = userId || (this.authService.user()?.id || this.authService.user()?.Id);
-      const token = ''; // Server validates via session
+      const token = await generateSignedToken(finalUserId!, timestamp);
       
       const response = await this.http.post<ApiMessageResponse>(url, { energy, token, timestamp }).toPromise();
 

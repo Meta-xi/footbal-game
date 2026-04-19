@@ -22,7 +22,6 @@ export interface JournalEntry {
   updatedAt: number;
   status: JournalStatus;
   retryCount: number;
-  correlationId: string;
   // FIX: Store baseline serverTotalTooks at entry creation for robust deduplication
   // This enables detecting duplicates when server already processed our batch
   baselineServerTotalTooks: number;
@@ -109,7 +108,6 @@ export class TransactionJournalService {
       updatedAt: now,
       status: 'queued',
       retryCount: 0,
-      correlationId: `corr-${now}`,
       // FIX: Store baseline for robust deduplication
       // This captures server state at entry creation time
       baselineServerTotalTooks: baselineServerTotalTooks,

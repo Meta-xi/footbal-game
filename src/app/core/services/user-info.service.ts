@@ -2,8 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ApiMessageResponse } from '../../models/user.model';
-import { EncryptionService } from './encryption.service';
-// import { UserStatusService } from './user-status.service'; // Removed
+import { generateSignedToken } from './encryption.service';
 
 export interface ReferInfoResponse {
   earnLastMonth: number;
@@ -186,7 +185,7 @@ export class UserInfoService {
 
     try {
       const timestamp = Math.floor(Date.now() / 1000);
-      const token = ''; // Server validates via session
+      const token = await generateSignedToken(userId, timestamp);
 
       const url = `${this.getBaseUrl()}Game/upgradeSkills`;
       const body = { skillId, timestamp, token };

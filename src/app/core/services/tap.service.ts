@@ -2,7 +2,7 @@ import { Injectable, inject, computed, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
-import { EncryptionService } from './encryption.service';
+import { generateSignedToken } from './encryption.service';
 import { UserStatusService } from '../../core/services/user-status.service';
 import { TransactionJournalService } from './transaction-journal.service';
 import { SyncCoordinatorService } from './sync-coordinator.service';
@@ -16,7 +16,6 @@ export class TapService {
   private userStatusService = inject(UserStatusService);
   private http = inject(HttpClient);
   private authService = inject(AuthService);
-  private encryptionService = inject(EncryptionService);
   private journalService = inject(TransactionJournalService);
   private syncCoordinator = inject(SyncCoordinatorService, { optional: true });
   private errorHandler = inject(ErrorHandlerService, { optional: true });
@@ -213,9 +212,6 @@ async flushPendingTaps(): Promise<void> {
 
     try {
       const timestamp = Math.floor(Date.now() / 1000);
-      // SECURITY FIX: Remove secret key from client. Use userId+timestamp only.
-      // Server should validate via session/token, not client-held secrets.
-      const payload = `${userId}:${timestamp}`;
 
       console.log(`[AUDIT] addTooks:`, { userId, amount: pendingCount, timestamp, journalId: journalEntry.id });
 
@@ -229,20 +225,20 @@ async flushPendingTaps(): Promise<void> {
 
       // ATOMICIDAD: Solo procesar si hay suficiente energía. O ambas o ninguna.
       if (energyAfterTaps >= 0) {
-        // 1. Enviar Taps (token optional for server-side validation)
-        const tooksToken = await this.encryptionService.sha256(payload);
+        const tooksToken = await generateSignedToken(userId, timestamp);
+        const energyToken = await generateSignedToken(userId, timestamp + 1);
+
+        // 1. Enviar Taps
         const tooksUrl = `${this.baseUrl}Game/addTooks`;
-        const tooksResponse = await firstValueFrom(
-          this.http.post<{ ok?: boolean; balance?: number; totalTooks?: number }>(tooksUrl, { amount: pendingCount, token: tooksToken, timestamp, correlationId: journalEntry.id })
+        const tooksResponse: any = await firstValueFrom(
+          this.http.post(tooksUrl, { amount: pendingCount, token: tooksToken, timestamp })
         );
         console.log(`Sent ${pendingCount} taps to API, response:`, tooksResponse);
 
         // 2. Enviar actualización de Energía
-        const energyPayload = `${userId}:${timestamp + 1}`;
-        const energyToken = await this.encryptionService.sha256(energyPayload);
         const energyUrl = `${this.baseUrl}Game/updateEnergyState`;
-        const energyResponse = await firstValueFrom(
-          this.http.post<{ ok?: boolean; energy?: number }>(energyUrl, { energy: energyAfterTaps, token: energyToken, timestamp: timestamp + 1, correlationId: journalEntry.id })
+        const energyResponse: any = await firstValueFrom(
+          this.http.post(energyUrl, { energy: energyAfterTaps, token: energyToken, timestamp: timestamp + 1 })
         );
         console.log(`Sent final energy state ${energyAfterTaps} to API, response:`, energyResponse);
 

@@ -1,7 +1,8 @@
 export const environment = {
   production: false,
-   apiBaseUrl: 'https://fifabanket.shop/',
+  apiBaseUrl: 'https://fifabanket.shop/',
   apiTimeout: 30000,
   cryptoDepositAddress: '',
   supportChatPollingInterval: 3000,
+  gameSecretKey: 'MiClaveSecreta123!',
 };
