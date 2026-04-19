@@ -74,17 +74,25 @@ export class WalletService {
 
   private mapStatus(status: number): 'completed' | 'pending' | 'failed' {
     switch (status) {
-      case 0: return 'completed';
-      case 1: return 'pending';
+      case 0: return 'pending';
+      case 1: return 'completed';
       case 2: return 'failed';
       default: return 'pending';
     }
   }
 
   private mapMethod(method: number): string {
-    // This is a guess, based on the data. You might need to adjust this.
     const methods = [
-      'Crypto', 'Nequi', 'Daviplata', 'BRE-B', 'Paypal', 'Manual'
+      'Nequi',      // 0
+      'Nequi',      // 1
+      'Nequi',      // 2
+      'Daviplata',  // 3
+      'Paypal',     // 4
+      'USDT TRC20', // 5
+      'USDT BEP20', // 6
+      'TRX',        // 7
+      'BNB',        // 8
+      'BTC'         // 9
     ];
     return methods[method] || 'Unknown';
   }
