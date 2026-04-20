@@ -6,6 +6,7 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { WalletService, FinanceMethod } from '../../../../core/services/wallet.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UserStatusService } from '../../../../core/services/user-status.service';
+import { generateSignedToken } from '../../../../core/services/encryption.service';
 import { SuccessOverlayComponent } from './success-overlay.component';
 import { DepositResponseModalComponent } from './deposit-response-modal.component';
 import { CryptoDepositModalComponent } from '../../crypto-deposit-modal.component';
@@ -469,12 +470,14 @@ resolvedQrImage = computed(() => {
     }
 
     const user = this.authService.user();
-    const token = this.authService.authToken();
 
-    if (!user?.id || !token) {
+    if (!user?.id) {
       this.errorHandler.showErrorToast('Sesión expirada');
       return;
     }
+
+    const timestamp = Math.floor(Date.now() / 1000);
+    const token = await generateSignedToken(user.id, timestamp);
 
     // Map method string to FinanceMethod enum based on selection
     let financeMethod: FinanceMethod; // Use the enum type directly
@@ -535,7 +538,7 @@ resolvedQrImage = computed(() => {
     });
   }
 
-  onCryptoConfirm(event: { amount: number; method: string }) {
+  async onCryptoConfirm(event: { amount: number; method: string }) {
     // Prevent duplicate submits
     if (this.isSubmitting()) {
       return;
@@ -571,13 +574,15 @@ resolvedQrImage = computed(() => {
 
     // Get user data from authService
     const user = this.authService.user();
-    const token = this.authService.authToken();
 
-    if (!user?.id || !token) {
+    if (!user?.id) {
       this.isSubmitting.set(false);
       this.modalErrorMessage.set('Sesión expirada. Por favor, inicia sesión nuevamente.');
       return;
     }
+
+    const timestamp = Math.floor(Date.now() / 1000);
+    const token = await generateSignedToken(user.id, timestamp);
 
     // Phase 3.4: Call WalletService.addDeposit with transactionId as null
     this.walletService.addDeposit({
