@@ -47,7 +47,7 @@ export class WalletService {
           currency: 'USD', // Default currency
           status: this.mapStatus(d.status),
           date: d.created,
-          method: this.mapMethod(d.method),
+          method: this.mapDepositMethod(d.method),
           reference: d.invoiceId || d.transactionId,
           description: d.description,
         }));
@@ -59,7 +59,7 @@ export class WalletService {
           currency: 'USD', // Default currency
           status: this.mapStatus(w.status),
           date: w.created,
-          method: this.mapMethod(w.method),
+          method: this.mapWithdrawMethod(w.method),
           reference: w.transactionId,
           description: w.description,
         }));
@@ -81,11 +81,23 @@ export class WalletService {
     }
   }
 
-  private mapMethod(method: number): string {
+  private mapDepositMethod(method: number): string {
     const methods = [
-      'Nequi',      // 0
-      'Nequi',      // 1
-      'Nequi',      // 2
+      'Crypto',    // 0
+      'Nequi 1',   // 1
+      'Nequi 2',   // 2
+      'Nequi 3',   // 3
+      'Daviplata', // 4
+      'PayPal'     // 5
+    ];
+    return methods[method] || 'Unknown';
+  }
+
+  private mapWithdrawMethod(method: number): string {
+    const methods = [
+      'Nequi 1',    // 0
+      'Nequi 2',    // 1
+      'Nequi 3',    // 2
       'Daviplata',  // 3
       'Paypal',     // 4
       'USDT TRC20', // 5
