@@ -268,6 +268,12 @@ export class LoginComponent {
       return;
     }
 
+    // Validate password minimum length
+    if (this.pass.length < 8) {
+      this.errorHandler.showToast('La contraseña debe tener al menos 8 caracteres', 'error');
+      return;
+    }
+
     // Validate passwords match
     if (this.pass !== this.confirmPass) {
       this.errorHandler.showToast('Las contraseñas no coinciden', 'error');
