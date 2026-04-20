@@ -29,7 +29,7 @@ interface FloatingNumber {
 
       <!-- Main Ball Tap Area -->
       <div data-tutorial-id="tap-area" class="relative tap-area-container group mt-4 w-[320px] h-[320px] md:w-[460px] md:h-[460px]" 
-           style="perspective: 1000px;" 
+           style="perspective: 1000px; touch-action: manipulation;" 
            (pointerdown)="tap($event)"
            (mouseenter)="activateAnimations()"
            (mousemove)="activateAnimations()"
@@ -133,7 +133,7 @@ export class TapAreaComponent {
     this.tapSvc.addTap(1);
     // Energy se resta automáticamente: projectedEnergy = serverEnergy - pendingTaps
 
-    // Ball interaction (fluid 3D spring effect)
+    // Ball interaction - rotation only without scale/zoom effect
     if (this.ballImage) {
       const rect = this.ballImage.nativeElement.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -142,20 +142,20 @@ export class TapAreaComponent {
       // Calculate rotation based on tap position relative to center
       const x = event.clientX - centerX;
       const y = event.clientY - centerY;
-      const rotateX = -(y / (rect.height / 2)) * 18; // Tilt up to 18 degrees
-      const rotateY = (x / (rect.width / 2)) * 18;
+      const rotateX = -(y / (rect.height / 2)) * 12; // Tilt up to 12 degrees
+      const rotateY = (x / (rect.width / 2)) * 12;
 
       const el = this.ballImage.nativeElement;
 
-      // Initial squish phase (fast)
-      el.style.transition = 'transform 0.08s cubic-bezier(0.2, 0, 0.2, 1)';
-      el.style.transform = `scale(0.90) translateZ(-30px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      // Light rotation response (no scale, no zoom)
+      el.style.transition = 'transform 0.15s ease-out';
+      el.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
-      // Spring back phase
+      // Return to center
       setTimeout(() => {
-        el.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)'; // Bouncy spring
-        el.style.transform = 'scale(1) translateZ(0) rotateX(0deg) rotateY(0deg)';
-      }, 80);
+        el.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        el.style.transform = 'rotateX(0deg) rotateY(0deg)';
+      }, 150);
     }
 
     const MAX_FLOATING = 5;

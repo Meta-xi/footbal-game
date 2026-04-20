@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
-import { UserStatusService } from '../../../core/services/user-status.service';
+import { ProjectedStateService } from '../../../core/services/projected-state.service';
 
 @Component({
   selector: 'app-balance-wallet',
@@ -36,9 +36,10 @@ import { UserStatusService } from '../../../core/services/user-status.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BalanceWalletComponent {
-  private userStatusService = inject(UserStatusService);
+  private projectedState = inject(ProjectedStateService);
 
-  protected readonly copBalance = computed(() => this.userStatusService.wallet()?.principalBalance ?? 0);
+  // Same optimistic balance as balance/ component
+  protected readonly copBalance = this.projectedState.projectedBalance;
   protected readonly usdtBalance = computed(() => Math.floor(this.copBalance() / 4000));
 
   protected readonly formattedCop = computed(() => this.copBalance().toLocaleString('es-CO'));
