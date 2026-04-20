@@ -191,11 +191,26 @@ async onCopy() {
 
     async onPaste() {
       try {
-        const text = await navigator.clipboard.readText();
-        if (text) {
-          this.reference.set(text);
+        const win = window as any;
+        // Primero intentar con la API de Telegram (si estamos en Telegram Mini App)
+        if (typeof win.Telegram !== 'undefined' && win.Telegram?.WebApp) {
+          win.Telegram.WebApp.readTextFromClipboard((text: string | null) => {
+            if (text) {
+              this.reference.set(text);
+              this.errorHandler.showSuccessToast('Referencia pegada');
+            } else {
+              this.errorHandler.showToast('No hay texto para pegar.', 'info');
+            }
+          });
         } else {
-          this.errorHandler.showToast('No hay texto para pegar.', 'info');
+          // Fallback para navegadores normales
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            this.reference.set(text);
+            this.errorHandler.showSuccessToast('Referencia pegada');
+          } else {
+            this.errorHandler.showToast('No hay texto para pegar.', 'info');
+          }
         }
       } catch (err) {
         console.error('Error al leer el portapapeles:', err);

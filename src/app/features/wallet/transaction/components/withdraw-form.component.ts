@@ -191,12 +191,28 @@ export class WithdrawFormComponent {
 
   async pasteAddress(input: HTMLInputElement) {
     try {
-      const text = await navigator.clipboard.readText();
-      this.selectedAccount.set(text);
-      input.value = text;
-      this.errorHandler.showSuccessToast('Dirección pegada');
-    } catch {
-      this.errorHandler.showErrorToast('Error al pegar');
+      const win = window as any;
+      // Primero intentar con la API de Telegram (si estamos en Telegram Mini App)
+      if (typeof win.Telegram !== 'undefined' && win.Telegram?.WebApp) {
+        win.Telegram.WebApp.readTextFromClipboard((text: string | null) => {
+          if (text) {
+            this.selectedAccount.set(text);
+            input.value = text;
+            this.errorHandler.showSuccessToast('Dirección pegada');
+          } else {
+            this.errorHandler.showToast('No hay texto para pegar.', 'info');
+          }
+        });
+      } else {
+        // Fallback para navegadores normales
+        const text = await navigator.clipboard.readText();
+        this.selectedAccount.set(text);
+        input.value = text;
+        this.errorHandler.showSuccessToast('Dirección pegada');
+      }
+    } catch (err) {
+      console.error('Error al leer el portapapeles:', err);
+      this.errorHandler.showErrorToast('No se pudo pegar. Revisa los permisos.');
     }
   }
 
