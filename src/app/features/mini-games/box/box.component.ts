@@ -144,7 +144,7 @@ export class BoxComponent {
       this.prizeWon.set(box.prizeValue);
       
       // Llamar al backend para registrar la ganancia (ticket ya fue deducido en startGame)
-      this.gameService.casinoPlay(box.prizeValue, 0).then(result => {
+      this.gameService.casinoPlay(box.prizeValue, 1).then(result => {
         if (result.success) {
           // Solo actualizar balance después de confirmación del backend
           this.balance.update(v => v + box.prizeValue);

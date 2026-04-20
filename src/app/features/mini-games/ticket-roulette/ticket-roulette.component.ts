@@ -398,7 +398,7 @@ export class TicketRouletteComponent {
     // Parsear el valor del premio (ej: "500 USD" -> 500, "5 Energía" -> 5)
     const prizeValue = this.parsePrizeValue(winner.value);
     
-    this.gameService.casinoPlay(prizeValue, 0).then(result => {
+    this.gameService.casinoPlay(prizeValue, 1).then(result => {
       if (result.success) {
         // userStatusService.loadUserStatus() ya se llama en casinoPlay
         this.errorHandler.showSuccessToast(`¡Ganaste ${winner.value}!`);

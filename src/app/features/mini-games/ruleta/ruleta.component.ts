@@ -460,7 +460,7 @@ export class RuletaComponent implements OnDestroy {
         
         // Llamar al backend para registrar la ganancia (ticket ya fue deducido)
         const prizeValue = this.parsePrizeValue(this.prizes[winningIndex].amount);
-        this.gameService.casinoPlay(prizeValue, 0).then(result => {
+        this.gameService.casinoPlay(prizeValue, 1).then(result => {
           if (result.success) {
             // userStatusService.loadUserStatus() ya se llama en casinoPlay
             this.errorHandler.showSuccessToast(`¡Ganaste ${this.prizes[winningIndex].amount}!`);
