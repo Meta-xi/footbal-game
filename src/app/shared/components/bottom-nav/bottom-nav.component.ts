@@ -3,6 +3,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { NavigationEnd, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, filter } from 'rxjs';
+import { SupportService } from '../../../services/support.service';
 
 @Component({
   selector: 'app-bottom-nav',
@@ -67,6 +68,7 @@ import { map, filter } from 'rxjs';
 })
 export class BottomNavComponent {
   private router = inject(Router);
+  private supportService = inject(SupportService);
 
   navItems = [
     { id: 'Amigos', route: '/social', icon: 'shared/navigation/friends.webp', tutorialId: 'nav-social' },
@@ -89,6 +91,11 @@ export class BottomNavComponent {
 
   isHidden = computed(() => {
     const url = this.currentUrl();
-    return url.startsWith('/transaccion')|| url.startsWith('/main/ruleta') || url.startsWith('/main/box') || url.startsWith('/main/ticket');
+    // Ocultar en rutas específicas O cuando el chat de soporte está abierto
+    return url.startsWith('/transaccion') || 
+           url.startsWith('/main/ruleta') || 
+           url.startsWith('/main/box') || 
+           url.startsWith('/main/ticket') ||
+           this.supportService.isChatOpen();
   });
 }

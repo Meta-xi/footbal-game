@@ -19,6 +19,7 @@ export class SupportService {
   isPolling = signal(false);
   sendError = signal<string | null>(null);
   hasPending = signal(false);
+  isChatOpen = signal(false);
   
   // Computed values - track if we have any messages
   hasMessages = computed(() => this.messages().length > 0);

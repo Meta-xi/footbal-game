@@ -492,8 +492,14 @@ export class WalletComponent implements OnInit {
     });
   }
 
-  navigateToSupport() { this.showSupportChat.set(true); }
-  onCloseChat() { this.showSupportChat.set(false); }
+  navigateToSupport() { 
+    this.showSupportChat.set(true);
+    this.supportService.isChatOpen.set(true);
+  }
+  onCloseChat() { 
+    this.showSupportChat.set(false);
+    this.supportService.isChatOpen.set(false);
+  }
 
   setTab(tab: 'historial' | 'depositar' | 'retirar') {
     if (tab !== 'depositar' && tab !== 'retirar' && this.isSheetOpen()) {

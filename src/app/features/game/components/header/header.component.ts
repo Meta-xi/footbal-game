@@ -10,6 +10,7 @@ import { UserInfoService } from '../../../../core/services/user-info.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ProjectedStateService } from '../../../../core/services/projected-state.service';
 import { SupportChatComponent } from '../../../wallet/support-chat.component';
+import { SupportService } from '../../../../services/support.service';
 
 @Component({
   selector: 'app-header',
@@ -89,6 +90,7 @@ export class HeaderComponent {
   private userInfo = inject(UserInfoService);
   private errorHandler = inject(ErrorHandlerService);
   private projectedState = inject(ProjectedStateService);
+  private supportService = inject(SupportService);
 
   showLevelMenu = signal(false);
   showSettings = signal(false);
@@ -104,8 +106,14 @@ export class HeaderComponent {
   closeLevelMenu() { this.showLevelMenu.set(false); }
   toggleSettings() { this.showSettings.update(v => !v); }
   closeSettings() { this.showSettings.set(false); }
-  openSupportChat() { this.showSupportChat.set(true); }
-  closeSupportChat() { this.showSupportChat.set(false); }
+  openSupportChat() { 
+    this.showSupportChat.set(true);
+    this.supportService.isChatOpen.set(true);
+  }
+  closeSupportChat() { 
+    this.showSupportChat.set(false);
+    this.supportService.isChatOpen.set(false);
+  }
 
   async onVibrationChange() {
     const current = this.userStatusService.settings();
