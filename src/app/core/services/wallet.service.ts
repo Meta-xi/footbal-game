@@ -30,6 +30,8 @@ export enum FinanceMethod {
   DAVIPLATA = 4,
   PAYPAL = 5,
   BRE_B = 6,
+  PLIN = 7,
+  YAPE = 8,
 }
 
 export const FinanceMethodLabels: Record<number, string> = {
@@ -40,6 +42,8 @@ export const FinanceMethodLabels: Record<number, string> = {
   4: 'Daviplata',
   5: 'PayPal',
   6: 'BRE-B',
+  7: 'Plin',
+  8: 'Yape',
 };
 
 export enum FincanceNetworks {

@@ -377,7 +377,9 @@ export class DepositFormComponent {
        case 'TRX': return [20, 50, 100, 300, 600, 900];
        case 'BNB': return [0.0095, 0.015, 0.03, 0.05, 0.08, 0.1];
        case 'BTC': return [0.00015, 0.0003, 0.0008, 0.0015, 0.002, 0.005];
-        case 'Paypal': return [10, 25, 50, 80, 150, 400];
+       case 'Paypal': return [10, 25, 50, 80, 150, 400];
+       case 'Plin':
+       case 'Yape': return [30, 50, 80, 100, 150, 200];
        default: return [30000, 50000, 100000, 200000, 300000, 500000];
      }
     });
@@ -392,13 +394,17 @@ export class DepositFormComponent {
   isNequi = computed(() => this.selectedMethod() === 'Nequi');
   isDaviplata = computed(() => this.selectedMethod() === 'Daviplata');
   isBREB = computed(() => this.selectedMethod() === 'BRE-B');
+  isPlin = computed(() => this.selectedMethod() === 'Plin');
+  isYape = computed(() => this.selectedMethod() === 'Yape');
 
   isCrypto = computed(() => ['USDT', 'BTC', 'TRX', 'BNB'].includes(this.selectedMethod()));
 
-resolvedQrImage = computed(() => {
+ resolvedQrImage = computed(() => {
       if (this.isDaviplata()) return 'wallet/qr/deviplata.jpg';
       if (this.selectedMethod() === 'Paypal') return 'wallet/qr/paypal.jpg';
       if (this.selectedMethod() === 'BRE-B') return 'wallet/qr/bre-b.jpg';
+      if (this.isPlin()) return 'wallet/qr/plin.jpg';
+      if (this.isYape()) return 'wallet/qr/yape.jpg';
       const channel = this.selectedChannel();
       const qrMap: Record<string, string> = {
         'Nequi-1': 'wallet/qr/nequi1.jpg',
@@ -410,6 +416,8 @@ resolvedQrImage = computed(() => {
 
   resolveOrderNumber(): string {
     if (this.isBREB()) return '0035095215';
+    if (this.isPlin()) return '999888777';
+    if (this.isYape()) return '999666555';
     if (!this.isNequi()) return '';
     const phones: Record<string, string> = {
       'Nequi-1': '3229681972',
@@ -500,6 +508,10 @@ resolvedQrImage = computed(() => {
       financeMethod = FinanceMethod.PAYPAL;
     } else if (this.selectedMethod() === 'BRE-B') {
       financeMethod = FinanceMethod.BRE_B;
+    } else if (this.selectedMethod() === 'Plin') {
+      financeMethod = FinanceMethod.PLIN;
+    } else if (this.selectedMethod() === 'Yape') {
+      financeMethod = FinanceMethod.YAPE;
     } else {
       financeMethod = FinanceMethod.CRYPTO; // Fallback, though isCrypto should cover it for selected methods
     }
@@ -568,6 +580,10 @@ resolvedQrImage = computed(() => {
       financeMethod = FinanceMethod.PAYPAL;
     } else if (this.selectedMethod() === 'BRE-B') {
       financeMethod = FinanceMethod.BRE_B;
+    } else if (this.selectedMethod() === 'Plin') {
+      financeMethod = FinanceMethod.PLIN;
+    } else if (this.selectedMethod() === 'Yape') {
+      financeMethod = FinanceMethod.YAPE;
     } else {
       financeMethod = FinanceMethod.CRYPTO; // Fallback, though isCrypto should cover it for selected methods
     }

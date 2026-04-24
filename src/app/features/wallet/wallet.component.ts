@@ -380,6 +380,7 @@ export class WalletComponent implements OnInit {
 
   readonly depositMethods: Deposit[] = [
     { title: 'Colombia', desc: 'Depósitos instantáneos', icon: 'wallet/main/col.webp' },
+    { title: 'Peru', desc: 'Depósitos instantáneos', icon: 'wallet/main/peru.png' },
     { title: 'Paypal', desc: 'Depósitos instantáneos', icon: 'wallet/main/paypal.webp' },
     { title: 'Cryptos', desc: 'Depósitos vía criptomonedas', icon: 'wallet/main/bynance.png' },
   ];
@@ -389,6 +390,7 @@ export class WalletComponent implements OnInit {
   getDepositIcon(title: string): string {
     const icons: Record<string, string> = {
       'Colombia': 'wallet/main/col.webp',
+      'Peru': 'wallet/main/peru.png',
       'Cryptos': 'wallet/main/bynance.png',
       'Paypal': 'wallet/main/paypal.webp',
     };
@@ -398,6 +400,7 @@ export class WalletComponent implements OnInit {
   getDepositGradient(title: string): string {
     const gradients: Record<string, string> = {
       'Colombia': 'linear-gradient(to right, rgba(20,184,166,0.20) 0%, rgba(20,184,166,0.18) 25%, rgba(20,184,166,0.08) 55%, transparent 75%)',
+      'Peru': 'linear-gradient(to right, rgba(168,85,247,0.20) 0%, rgba(168,85,247,0.18) 25%, rgba(168,85,247,0.08) 55%, transparent 75%)',
       'Cryptos': 'linear-gradient(to right, rgba(245,158,11,0.20) 0%, rgba(245,158,11,0.18) 25%, rgba(245,158,11,0.08) 55%, transparent 75%)',
       'Paypal': 'linear-gradient(to right, rgba(239,68,68,0.20) 0%, rgba(239,68,68,0.18) 25%, rgba(239,68,68,0.08) 55%, transparent 75%)',
     };
@@ -407,6 +410,7 @@ export class WalletComponent implements OnInit {
   getDepositBorderColor(title: string): string {
     const colors: Record<string, string> = {
       'Colombia': 'rgba(20,184,166,0.30)',
+      'Peru': 'rgba(168,85,247,0.30)',
       'Cryptos': 'rgba(245,158,11,0.30)',
       'Paypal': 'rgba(239,68,68,0.30)',
     };
@@ -521,13 +525,14 @@ export class WalletComponent implements OnInit {
     if (!this.isSheetOpen()) {
       this.selectedDeposit.set(item);
       if (item.title === 'Colombia') this.sheetContent.set('colombia');
-        else if (item.title === 'Cryptos') {
-          if (tab === 'depositar') {
-            this.navigateToTransaction('USDT', tab);
-          } else {
-            this.sheetContent.set(tab === 'retirar' ? 'cryptos-withdraw' : 'cryptos'); // Keep crypto selection for withdrawals for now
-          }
+      else if (item.title === 'Peru') this.sheetContent.set('peru');
+      else if (item.title === 'Cryptos') {
+        if (tab === 'depositar') {
+          this.navigateToTransaction('USDT', tab);
+        } else {
+          this.sheetContent.set(tab === 'retirar' ? 'cryptos-withdraw' : 'cryptos');
         }
+      }
       else this.sheetContent.set('default');
       this.isSheetOpen.set(true);
     } else {

@@ -223,6 +223,7 @@ export class WithdrawFormComponent {
   // Withdrawal method IDs for https://fifabanket.shop/Wallet/addWithdrawl
   // 0: Nequi 1, 1: Nequi 2, 2: Nequi 3, 3: Daviplata, 4: PayPal
   // 5: USDT TRC20, 6: USDT BEP20, 7: TRX, 8: BNB, 9: BTC
+  // 10: Plin, 11: Yape
   private methodMap: Record<string, number> = {
     'Nequi': 0,
     'Daviplata': 3,
@@ -231,6 +232,8 @@ export class WithdrawFormComponent {
     'TRX': 7,
     'BNB': 8,
     'BTC': 9,
+    'Plin': 10,
+    'Yape': 11,
   };
 
   private logoMap: Record<string, string> = {
@@ -305,8 +308,17 @@ export class WithdrawFormComponent {
     const timestamp = Math.floor(Date.now() / 1000);
     const token = await generateSignedToken(user.id, timestamp);
 
+    // Convert non-COP currencies to COP
+    const currency = this.currency();
+    let amountCOP = amount;
+    if (currency === 'Paypal' || currency === 'USDT') {
+      amountCOP = amount * 3600;
+    } else if (currency === 'Plin' || currency === 'Yape') {
+      amountCOP = amount * 1030;
+    }
+
     const result = await this.walletService.addWithdrawal({
-      amountCOP: amount,
+      amountCOP: amountCOP,
       methodId: this.getMethodId(),
       token,
       uid: user.id,

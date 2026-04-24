@@ -170,12 +170,15 @@ export class PaymentScreenComponent {
   currencyLabel = computed(() => this.currency() === 'Paypal' ? 'USD' : 'COP');
 
   isColombianMethod = computed(() => ['Nequi', 'Daviplata', 'BRE-B'].includes(this.currency()));
+  isPeruvianMethod = computed(() => ['Plin', 'Yape'].includes(this.currency()));
 
-private methodMap: Record<string, number> = {
+  private methodMap: Record<string, number> = {
     'Crypto': 0,
     'Nequi': 1,
     'Daviplata': 4,
     'Paypal': 5,
+    'Plin': 7,
+    'Yape': 8,
   };
 
   onReferenceChange(event: Event) {
@@ -238,21 +241,17 @@ async onConfirm() {
       }
 
       this.isProcessing.set(true);
-      
-      // --- INICIO DE LA MODIFICACIÓN ---
-      console.log('[PaymentScreen] INICIANDO onConfirm');
-      console.log('[PaymentScreen] Moneda:', this.currency());
-      console.log('[PaymentScreen] Es Colombiano?:', this.isColombianMethod());
-      
-      const originalAmount = this.amount();
-      const payloadAmount = this.isColombianMethod() ? originalAmount / 3600 : originalAmount;
-
-      console.log('[PaymentScreen] Monto Original:', originalAmount);
-      console.log('[PaymentScreen] Monto para Payload:', payloadAmount);
 
       const timestamp = Math.floor(Date.now() / 1000);
       const token = await generateSignedToken(user.id, timestamp);
-      
+
+      let payloadAmount = this.amount();
+      if (this.isPeruvianMethod()) {
+        payloadAmount = payloadAmount * 1030;
+      } else if (!this.isColombianMethod()) {
+        payloadAmount = payloadAmount * 3600;
+      }
+
       const payload = {
         amountUSD: payloadAmount,
         method: this.methodMap[this.currency()] ?? 0,
@@ -260,9 +259,6 @@ async onConfirm() {
         uid: user.id,
         transactionId: this.reference(),
       };
-
-      console.log('[PaymentScreen] Payload a Enviar:', payload);
-      // --- FIN DE LA MODIFICACIÓN ---
       
       const result = await this.walletService.addDeposit(payload);
 
