@@ -382,7 +382,8 @@ export class WalletComponent implements OnInit {
     { title: 'Colombia', desc: 'Depósitos instantáneos', icon: 'wallet/main/col.webp' },
     { title: 'Peru', desc: 'Depósitos instantáneos', icon: 'wallet/main/peru.png' },
     { title: 'Paypal', desc: 'Depósitos instantáneos', icon: 'wallet/main/paypal.webp' },
-    { title: 'Cryptos', desc: 'Depósitos vía criptomonedas', icon: 'wallet/main/bynance.png' },
+    // TODO: Re-habilitar cuando se confirme la conversión de crypto
+    // { title: 'Cryptos', desc: 'Depósitos vía criptomonedas', icon: 'wallet/main/bynance.png' },
   ];
 
   deposits = computed(() => this.depositMethods);
