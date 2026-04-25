@@ -65,8 +65,8 @@ export class WalletService {
         currency: 'COP', // Default currency is COP
         status: this.mapStatus(w.status),
         date: w.created,
-        method: this.mapWithdrawMethod(w.method),
-        methodId: w.method, // Store numeric method ID for conversion
+        method: this.mapWithdrawMethod(w.methodId), // w.method is an object, w.methodId has the number
+        methodId: w.methodId,
         reference: w.transactionId,
         description: w.description,
         conversionToCOP: w.conversionToCOP,
@@ -96,24 +96,28 @@ export class WalletService {
       'Nequi 2',   // 2
       'Nequi 3',   // 3
       'Daviplata', // 4
-      'PayPal',     // 5
-      'Bre-B'       // 6
+      'PayPal',    // 5
+      'Bre-B',     // 6
+      'Plin',      // 7
+      'Yape',      // 8
     ];
     return methods[method] || 'Unknown';
   }
 
   private mapWithdrawMethod(method: number): string {
     const methods = [
-      'Nequi 1',    // 0
-      'Nequi 2',    // 1
-      'Nequi 3',    // 2
-      'Daviplata',  // 3
-      'Paypal',     // 4
-      'USDT TRC20', // 5
-      'USDT BEP20', // 6
-      'TRX',        // 7
-      'BNB',        // 8
-      'BTC'         // 9
+      'Nequi 1',   // 0
+      'Nequi 2',   // 1
+      'Nequi 3',   // 2
+      'Daviplata', // 3
+      'PayPal',    // 4
+      'USDT TRC20',// 5
+      'USDT BEP20',// 6
+      'TRX',       // 7
+      'BNB',       // 8
+      'BTC',       // 9
+      'Plin',      // 10
+      'Yape',      // 11
     ];
     return methods[method] || 'Unknown';
   }
