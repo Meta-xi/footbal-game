@@ -153,6 +153,7 @@ export class PaymentScreenComponent {
   amount = input.required<number>();
   orderNumber = input.required<string>();
   qrImage = input.required<string>();
+  methodId = input<number | null>(null); // Override for channel-specific methods (Nequi 1/2/3)
   goBack = output<void>();
   
   // Success/error outputs to emit results back to parent
@@ -169,11 +170,14 @@ export class PaymentScreenComponent {
 
   currencyLabel = computed(() => this.currency() === 'Paypal' ? 'USD' : 'COP');
 
-  isColombianMethod = computed(() => ['Nequi', 'Daviplata', 'BRE-B'].includes(this.currency()));
+  // Nequi variants (from deposit-form channels) share the same conversion
+  isColombianMethod = computed(() => {
+    const c = this.currency();
+    return c === 'Nequi' || c === 'Daviplata' || c === 'BRE-B';
+  });
   isPeruvianMethod = computed(() => ['Plin', 'Yape'].includes(this.currency()));
 
   private methodMap: Record<string, number> = {
-    'Crypto': 0,
     'Nequi': 1,
     'Daviplata': 4,
     'Paypal': 5,
@@ -254,9 +258,11 @@ async onConfirm() {
         payloadAmount = payloadAmount * rates.usdToCOP;
       }
 
+      const method = this.methodId() ?? this.methodMap[this.currency()] ?? 0;
+
       const payload = {
         amountUSD: payloadAmount,
-        method: this.methodMap[this.currency()] ?? 0,
+        method,
         token,
         uid: user.id,
         transactionId: this.reference(),

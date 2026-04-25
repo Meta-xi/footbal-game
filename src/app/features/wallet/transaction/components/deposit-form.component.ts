@@ -37,6 +37,7 @@ import { PaymentScreenComponent } from '../payment-screen.component';
           [amount]="amount()"
           [orderNumber]="orderNumber()"
           [qrImage]="qrImage()"
+          [methodId]="resolvedMethodId()"
           (goBack)="showPaymentScreen.set(false)"
           (depositSuccess)="onPaymentSuccess($event)"
           (depositError)="onPaymentError($event)"
@@ -426,6 +427,21 @@ export class DepositFormComponent {
     };
     return phones[this.selectedChannel()] ?? phones['Nequi-1'];
   }
+
+  resolvedMethodId = computed(() => {
+    const method = this.selectedMethod();
+    // Alias: Nequi maps via channel, others fixed
+    if (method === 'Nequi') {
+      const channel = this.selectedChannel();
+      if (channel === 'Nequi-2') return 2;
+      if (channel === 'Nequi-3') return 3;
+      return 1; // Nequi-1 default
+    }
+    const idMap: Record<string, number> = {
+      'Daviplata': 4, 'Paypal': 5, 'BRE-B': 6, 'Plin': 7, 'Yape': 8,
+    };
+    return idMap[method] ?? 0;
+  });
 
   isCryptoMethod = computed(() => ['USDT', 'BTC', 'TRX', 'BNB'].includes(this.selectedMethod()));
 

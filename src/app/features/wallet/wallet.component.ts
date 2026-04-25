@@ -288,11 +288,11 @@ interface Deposit {
                 </div>
               </div>
             }
-            @case ('cryptos') {
+             @case ('cryptos') {
               <div class="flex flex-col gap-4">
                 <p class="text-[10px] text-white/50 font-black uppercase tracking-widest px-2 mb-1">Selecciona la moneda</p>
                 <div class="grid grid-cols-1 gap-3">
-                  @for (coin of ['USDT']; track coin) {
+                  @for (coin of ['USDT', 'TRX', 'BNB', 'BTC']; track coin) {
                     <article (click)="onSheetItemClick({title: coin, desc: '', icon: ''})"
                       class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl rounded-2xl"
                       style="background: linear-gradient(to right, rgba(245,158,11,0.20) 0%, rgba(245,158,11,0.18) 25%, rgba(245,158,11,0.08) 55%, transparent 75%); border-color: rgba(245,158,11,0.30);">
@@ -319,7 +319,7 @@ interface Deposit {
               <div class="flex flex-col gap-4">
                 <p class="text-[10px] text-white/50 font-black uppercase tracking-widest px-2 mb-1">Selecciona la moneda a retirar</p>
                 <div class="grid grid-cols-1 gap-3">
-                  @for (coin of ['USDT']; track coin) {
+                  @for (coin of ['USDT', 'TRX', 'BNB', 'BTC']; track coin) {
                     <article (click)="onSheetItemClick({title: coin, desc: '', icon: ''})"
                       class="lg-module-card p-4 flex items-center justify-between group active:scale-[0.98] transition-all cursor-pointer backdrop-blur-2xl rounded-2xl"
                       style="background: linear-gradient(to right, rgba(245,158,11,0.20) 0%, rgba(245,158,11,0.18) 25%, rgba(245,158,11,0.08) 55%, transparent 75%); border-color: rgba(245,158,11,0.30);">
