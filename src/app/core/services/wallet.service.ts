@@ -77,7 +77,8 @@ export interface DepositRequest {
   timestamp: number;
   token: string;
   uid: number;
-  transactionId: string | null; 
+  transactionId: string | null;
+  proofPayment: File | null;
 }
 
 @Injectable({
@@ -160,6 +161,7 @@ export class WalletService {
     token: string;
     uid: number;
     transactionId: string | null;
+    proofPayment?: File | null;
   }): Promise<{ success: boolean; error?: string; message?: string; invoiceUrl?: string; txnId?: string; orderNumber?: string }> {
     // SYNC GUARD: Block critical wallet operations if sync is not idle
     if (this.syncCoordinator && !this.syncCoordinator.canProceedStrict()) {
@@ -173,16 +175,22 @@ export class WalletService {
 
     try {
       const url = `${this.getBaseUrl()}Wallet/addDeposit`;
-      const body: DepositRequest = {
-        amountUSD: params.amountUSD,
-        method: params.method,
-        timestamp: Date.now(),
-        token: params.token,
-        uid: params.uid,
-        transactionId: params.transactionId,
-      };
+      
+      const formData = new FormData();
+      formData.append('amountUSD', params.amountUSD.toString());
+      formData.append('method', params.method.toString());
+      formData.append('timestamp', Date.now().toString());
+      formData.append('token', params.token);
+      formData.append('uid', params.uid.toString());
+      formData.append('transactionId', params.transactionId ?? '');
+      
+      if (params.proofPayment) {
+        formData.append('proofPayment', params.proofPayment);
+      } else {
+        formData.append('proofPayment', '');
+      }
 
-      const response = await this.http.post<DepositResponse>(url, body).toPromise();
+      const response = await this.http.post<DepositResponse>(url, formData).toPromise();
 
       if (response) {
         return { 

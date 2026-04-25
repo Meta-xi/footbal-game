@@ -26,9 +26,9 @@ import { generateSignedToken } from '../../../core/services/encryption.service';
       </header>
 
       <!-- Main: single unified card -->
-      <main class="flex-1 w-full relative z-10 flex flex-col items-center overflow-y-auto no-scrollbar pb-28 px-5 animate-slide-up">
+      <main class="flex-1 w-full relative z-10 flex flex-col items-center overflow-y-auto no-scrollbar pb-40 px-5 animate-slide-up">
 
-        <div class="w-full max-w-sm relative overflow-hidden bg-white/[0.025] backdrop-blur-3xl border border-white/[0.06] rounded-[28px] flex flex-col shadow-2xl">
+        <div class="w-full max-w-sm relative overflow-visible bg-white/[0.025] backdrop-blur-3xl border border-white/[0.06] rounded-[28px] flex flex-col shadow-2xl">
 
           <!-- Top highlight -->
           <span class="absolute top-0 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"></span>
@@ -74,7 +74,7 @@ import { generateSignedToken } from '../../../core/services/encryption.service';
           <!-- Divider -->
           <div class="mx-5 h-px bg-white/[0.04]"></div>
 
-          <!-- Section 3: Reference Input -->
+           <!-- Section 3: Reference Input -->
           <div class="px-5 pt-4 pb-5 flex flex-col gap-2">
             <span class="text-[7px] font-black text-white/20 uppercase tracking-[0.25em]">Referencia de Pago</span>
 
@@ -95,10 +95,45 @@ import { generateSignedToken } from '../../../core/services/encryption.service';
               </button>
             </div>
 
-            @if (reference().length > 0 && !isValidReference()) {
+            @if (reference().length > 0 && !isValidForm()) {
               <p class="text-[8px] font-black text-rose-400/60 uppercase tracking-widest">Mínimo 6 caracteres</p>
             }
           </div>
+
+          @if (requiresProofPayment()) {
+            <!-- Divider -->
+            <div class="mx-5 h-px bg-white/[0.04]"></div>
+        
+            <!-- Section: Proof of Payment Upload -->
+            <div class="px-5 pt-4 pb-5 flex flex-col gap-2">
+              <span class="text-[7px] font-black text-white/20 uppercase tracking-[0.25em]">Comprobante de Pago</span>
+              
+              @if (!proofPaymentFile()) {
+                <label class="w-full flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-white/[0.04] border border-dashed border-white/[0.12] cursor-pointer hover:bg-white/[0.06] transition-all active:scale-[0.98]">
+                  <svg class="w-6 h-6 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span class="text-[9px] font-bold text-white/30 uppercase tracking-widest">Subir imagen</span>
+                  <input type="file" accept="image/*" class="hidden" (change)="onProofPaymentSelected($event)" />
+                </label>
+              } @else {
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+                  <div class="w-10 h-10 rounded-lg overflow-hidden bg-white/[0.06] flex-shrink-0">
+                    <img [src]="proofPaymentPreviewUrl()" alt="Comprobante" class="w-full h-full object-cover" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <span class="text-[10px] font-bold text-white/70 truncate block">{{ proofPaymentFile()!.name }}</span>
+                    <span class="text-[8px] text-white/30">{{ proofPaymentFileSize() }}</span>
+                  </div>
+                  <button (click)="removeProofPayment()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-500/10 border border-rose-500/20 active:scale-90 transition-all">
+                    <svg class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              }
+            </div>
+          }
 
         </div>
       </main>
@@ -106,7 +141,7 @@ import { generateSignedToken } from '../../../core/services/encryption.service';
       <!-- Footer Action -->
       <footer class="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-5 z-50 bg-gradient-to-t from-[#010208] via-[#010208]/90 to-transparent">
         <button (click)="onConfirm()"
-          [disabled]="!isValidReference()"
+          [disabled]="!isValidForm()"
           class="relative w-full overflow-hidden flex items-center justify-center gap-2.5 py-4 px-6 rounded-2xl font-black text-[13px] uppercase tracking-widest transition-all duration-300 active:scale-[0.97] text-white disabled:opacity-30 disabled:grayscale btn-glass-confirm">
           <span class="absolute top-0 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"></span>
           <span class="relative z-10">Confirmar Depósito</span>
@@ -163,8 +198,16 @@ export class PaymentScreenComponent {
    reference = signal('');
    copied = signal(false);
    isProcessing = signal(false);
+   proofPaymentFile = signal<File | null>(null);
+   proofPaymentPreviewUrl = signal('');
 
-   isValidReference = computed(() => this.reference().length >= 6);
+   isValidForm = computed(() => {
+    const validRef = this.reference().length >= 6;
+    if (this.requiresProofPayment()) {
+      return validRef && !!this.proofPaymentFile();
+    }
+    return validRef;
+  });
 
   displayAmount = computed(() => this.amount().toLocaleString('es-CO'));
 
@@ -176,6 +219,14 @@ export class PaymentScreenComponent {
     return c === 'Nequi' || c === 'Daviplata' || c === 'BRE-B';
   });
   isPeruvianMethod = computed(() => ['Plin', 'Yape'].includes(this.currency()));
+  requiresProofPayment = computed(() => this.isPeruvianMethod());
+
+  proofPaymentFileSize = computed(() => {
+    const file = this.proofPaymentFile();
+    if (!file) return '';
+    const kb = file.size / 1024;
+    return kb > 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb.toFixed(0)} KB`;
+  });
 
   private methodMap: Record<string, number> = {
     'Nequi': 1,
@@ -184,6 +235,36 @@ export class PaymentScreenComponent {
     'Plin': 7,
     'Yape': 8,
   };
+
+  onProofPaymentSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) {
+      // Validate it's an image and max 5MB
+      if (!file.type.startsWith('image/')) {
+        this.errorHandler.showToast('Solo se permiten imágenes', 'error');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        this.errorHandler.showToast('La imagen no debe superar 5MB', 'error');
+        return;
+      }
+      // Revoke previous URL to avoid memory leak
+      if (this.proofPaymentPreviewUrl()) {
+        URL.revokeObjectURL(this.proofPaymentPreviewUrl());
+      }
+      this.proofPaymentFile.set(file);
+      this.proofPaymentPreviewUrl.set(URL.createObjectURL(file));
+    }
+  }
+
+  removeProofPayment() {
+    if (this.proofPaymentPreviewUrl()) {
+      URL.revokeObjectURL(this.proofPaymentPreviewUrl());
+    }
+    this.proofPaymentFile.set(null);
+    this.proofPaymentPreviewUrl.set('');
+  }
 
   onReferenceChange(event: Event) {
     const value = (event.target as HTMLInputElement).value;
@@ -236,7 +317,7 @@ export class PaymentScreenComponent {
     }
 
 async onConfirm() {
-      if (!this.isValidReference()) return;
+      if (!this.isValidForm()) return;
 
       const user = this.authService.user();
       if (!user?.id) {
@@ -260,16 +341,15 @@ async onConfirm() {
 
       const method = this.methodId() ?? this.methodMap[this.currency()] ?? 0;
 
-      const payload = {
+      const result = await this.walletService.addDeposit({
         amountUSD: payloadAmount,
         method,
         token,
         uid: user.id,
         transactionId: this.reference(),
-      };
+        proofPayment: this.requiresProofPayment() ? this.proofPaymentFile() : null,
+      });
       
-      const result = await this.walletService.addDeposit(payload);
-
       this.isProcessing.set(false);
 
       if (!result.success) {

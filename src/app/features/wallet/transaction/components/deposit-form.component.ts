@@ -676,14 +676,16 @@ export class DepositFormComponent {
     const method = this.selectedMethod();
     const isColombian = ['Nequi', 'Daviplata', 'BRE-B'].includes(method);
     const isPaypal = method === 'Paypal';
+    const isPeruvian = ['Plin', 'Yape'].includes(method);
 
-    // If it's Colombian or Paypal, don't show the response modal, just show success overlay
-    if (isColombian || isPaypal) {
+    // If it's Colombian, Paypal, or Peruvian (Plin/Yape), show simple success overlay
+    // The detailed response modal (with invoice URL) is only for Crypto
+    if (isColombian || isPaypal || isPeruvian) {
       this.showSuccess.set(true);
       setTimeout(() => this.router.navigate(['/wallet']), 1500);
       return;
     }
-    
+
     this.depositResponseMessage.set(event.message);
     this.depositTxnId.set(event.txnId);
     this.depositOrderNumber.set(event.orderNumber);
