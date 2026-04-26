@@ -230,7 +230,15 @@ export class PaymentScreenComponent {
 
   displayAmount = computed(() => this.amount().toLocaleString('es-CO'));
 
-  currencyLabel = computed(() => this.currency() === 'Paypal' ? 'USD' : 'COP');
+  currencyLabel = computed(() => {
+    const c = this.currency();
+    const colombian = ['Nequi', 'Daviplata', 'BRE-B'];
+    const peruvian = ['Plin', 'Yape'];
+    const crypto = ['USDT', 'BTC', 'TRX', 'BNB'];
+    if (colombian.includes(c)) return 'COP';
+    if (peruvian.includes(c)) return 'PEN';
+    return 'USD'; // PayPal & crypto
+  });
 
   // Nequi variants (from deposit-form channels) share the same conversion
   isColombianMethod = computed(() => {

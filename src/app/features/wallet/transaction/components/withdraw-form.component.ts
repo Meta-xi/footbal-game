@@ -71,7 +71,7 @@ import { generateSignedToken } from '../../../../core/services/encryption.servic
           <div class="flex-1 flex flex-col justify-center gap-1.5 py-2">
             <div class="flex items-start gap-1.5">
               <span class="text-[7px] text-white/15 mt-0.5">●</span>
-              <span class="text-[9px] font-bold text-white/30 uppercase tracking-wider">Mínimo de Retiro 15.000 COP</span>
+              <span class="text-[9px] font-bold text-white/30 uppercase tracking-wider">Mínimo de Retiro 15.000 {{ currencyLabel() }}</span>
             </div>
             <div class="flex items-start gap-1.5">
               <span class="text-[7px] text-white/15 mt-0.5">●</span>
@@ -191,6 +191,15 @@ export class WithdrawFormComponent {
   });
 
   isCrypto = computed(() => ['USDT', 'BTC', 'TRX', 'BNB'].includes(this.currency()));
+
+  currencyLabel = computed(() => {
+    const c = this.currency();
+    const colombian = ['Nequi', 'Daviplata', 'BRE-B'];
+    const peruvian = ['Plin', 'Yape'];
+    if (colombian.includes(c)) return 'COP';
+    if (peruvian.includes(c)) return 'PEN';
+    return 'USD'; // PayPal & crypto
+  });
 
   currencyLogo = computed(() => this.logoMap[this.currency()] || null);
 

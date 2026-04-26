@@ -400,6 +400,16 @@ export class DepositFormComponent {
 
   isCrypto = computed(() => ['USDT', 'BTC', 'TRX', 'BNB'].includes(this.selectedMethod()));
 
+  currencyLabel = computed(() => {
+    const c = this.selectedMethod();
+    const colombian = ['Nequi', 'Daviplata', 'BRE-B'];
+    const peruvian = ['Plin', 'Yape'];
+    const crypto = ['USDT', 'BTC', 'TRX', 'BNB'];
+    if (colombian.includes(c)) return 'COP';
+    if (peruvian.includes(c)) return 'PEN';
+    return 'USD';
+  });
+
  resolvedQrImage = computed(() => {
       if (this.isDaviplata()) return 'wallet/qr/deviplata.jpg';
       if (this.selectedMethod() === 'Paypal') return 'wallet/qr/paypal.jpg';
@@ -469,8 +479,9 @@ export class DepositFormComponent {
 
   async onDeposit() {
     if (this.amount() < this.minAmount()) {
-      const amount = this.isCrypto() ? this.minAmount() : this.minAmount().toLocaleString('es-CO', { style: 'currency', currency: 'COP' });
-      this.errorHandler.showToast(`Monto mínimo ${amount} ${this.selectedMethod()}`, 'error');
+      const label = this.currencyLabel();
+      const amount = this.isCrypto() ? `${this.minAmount()} ${label}` : `${this.minAmount().toLocaleString('es-CO')} ${label}`;
+      this.errorHandler.showToast(`Monto mínimo ${amount}`, 'error');
       return;
     }
 
